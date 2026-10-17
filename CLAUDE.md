@@ -90,6 +90,7 @@ Keep it light: no extra agents, no autonomous loops, and at most one review roun
 - **Ranges, not report cards.** Milestones show a typical window, never a deadline or score. Detail screens say "not yet is fine" and point to the consultatiebureau. Ranges can be switched off.
 - Weeks count the trail ("Week 31 of 78"); months describe ranges ("4 to 12 months").
 - **Private by default:** invite only, stored in the EU, never sold, shared or used to train AI. Family can't download photos unless the parent allows it. Deleting a trail is undoable for 30 days.
+- **First names only.** The child's first name may appear anywhere, including on the lock screen in push messages ("Oma Ria stuurde Lotte een knuffel"). We never ask for or actively store surnames. Family members can say how they relate to the child (Oma, Oom, ...) when invited or when they join.
 - Free for founding families. Book from €54,95 (euros with a comma). No other prices yet.
 - Voice (in Dutch): warm, short, a little cheeky, sentence case, no emoji. "Vastgepind in week 31!", not "Item succesvol opgeslagen."
 - Fixed Dutch terms: pad (trail), moment, vastpinnen/vastgepind, knuffel (hug), berichtje (voice note), kaartje (postcard), kring, ouder, familie, jaarboek, sprongetje, mijlpaal, eerste keer. Possessives: "Lottes", but "Noa's", "Timo's", "Max'". Never use the leap books' wording, such as the "huilerig, hangerig, humeurig" trio.
@@ -100,6 +101,9 @@ Paper ground (`paper`), aubergine ink (`ink`) for all text and outlines, **blueb
 
 ## Working agreements
 
-- Tech stack not chosen yet. Propose one (it must cover an iOS/Android app plus the family web view) and wait for an OK before scaffolding.
+- Stack chosen (2026-10-17): **Expo (React Native) for iOS, Android and the family web view, Supabase in Frankfurt, Lettermint for app mail**, push straight to APNs/FCM (not Expo's push service). The build plan still needs the owner's OK before scaffolding.
+- **Keep running costs as low as possible until the idea has traction**: use free tiers where they are safe and move to paid plans only when usage or safety (backups of real photos) needs it.
+- Photos: keep a print-quality version (about 3600px) by default; special moments may be stored larger.
+- All accounts (Apple, Google, Supabase, Vercel, Lettermint, Expo) belong to Haagen Trade, with two-factor sign-in. The owner already has an Apple developer account.
 - Explain changes in plain language; the owner is not a full-time developer.
 - Commit in small steps with clear messages, and ask before pushing to GitHub.
