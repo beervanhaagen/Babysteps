@@ -102,7 +102,7 @@ Paper ground (`paper`), aubergine ink (`ink`) for all text and outlines, **blueb
 ## Working agreements
 
 - Stack chosen (2026-10-17): **Expo (React Native) for iOS, Android and the family web view, Supabase in Frankfurt, Lettermint for app mail**, push straight to APNs/FCM (not Expo's push service). The build plan still needs the owner's OK before scaffolding.
-- **Keep running costs as low as possible until the idea has traction**: use free tiers where they are safe and move to paid plans only when usage or safety (backups of real photos) needs it.
+- **Keep running costs as low as possible until the idea has traction**: use free tiers where they are safe and move to paid plans only when usage or safety (backups of real photos) needs it. Agreed: free tiers during the build and test phase; from the official launch Supabase Pro and Vercel Pro (about €39 a month together) are fine.
 - Photos: keep a print-quality version (about 3600px) by default; special moments may be stored larger.
 - All accounts (Apple, Google, Supabase, Vercel, Lettermint, Expo) belong to Haagen Trade, with two-factor sign-in. The owner already has an Apple developer account.
 - Explain changes in plain language; the owner is not a full-time developer.
