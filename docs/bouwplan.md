@@ -60,6 +60,8 @@ Begrippen. **RLS**: regels in de database die per rij bepalen wie iets mag lezen
 | Familie-API | Vercel stuurt `familie.teddysteps.nl/api/*` door naar een Supabase-functie (in Frankfurt via `forceFunctionRegion`) | Logica op één plek, cookie op het familiedomein, geen extra kosten. **Eerst testen** of `Set-Cookie` door de doorverwijzing komt; reserve: Vercel-functies in Frankfurt. |
 | Foto's verkleinen | Op de telefoon (expo-image-manipulator) | Gratis, GPS verlaat de telefoon nooit, werkt op een trage verbinding. |
 
+**Afwijking na meting in stap 0 (17 oktober 2026):** met Expo Router was de familiepagina al 292 KB (gzip) voor een lege pagina, boven het doel van 200 KB. Zonder Router is hij 107 KB. Daarom is `apps/family` één webpagina zonder Router (`web.output: "single"`, eigen `public/index.html`) met dezelfde React Native-onderdelen uit `packages/ui`. De paar weergaven (uitnodiging, kaartjes, liefde sturen) kiezen we zelf op basis van het adres. De HTML heeft geen inline scripts, dus de CSP is `script-src 'self'`. De ouder-app houdt Expo Router.
+
 **Repo-indeling**
 
 ```

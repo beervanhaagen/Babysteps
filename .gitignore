@@ -1,2 +1,24 @@
 .DS_Store
 .claude/settings.local.json
+
+# dependencies and build output
+node_modules/
+dist/
+.expo/
+*.tsbuildinfo
+
+# secrets: never commit keys or env files
+.env
+.env.*
+!.env.example
+*.p8
+*.p12
+*.pem
+*.key
+
+# Supabase local state
+supabase/.branches
+supabase/.temp
+
+# test-phase backups (stay on the owner's Mac only)
+backups/

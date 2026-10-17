@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "TeddySteps familie",
+    "slug": "teddysteps-familie",
+    "version": "1.0.0",
+    "userInterfaceStyle": "light",
+    "platforms": [
+      "web"
+    ],
+    "web": {
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

@@ -14,7 +14,8 @@ Emotional goal: parents should feel *"I need this, I love this."* The core feeli
 | `design/assets/characters/` | The gang as SVGs (Bo, Tiggy, Bizzy, Puddle, default and happy) and The Hug. |
 | `design/screens/` | All 55 app screens as Claude Design boards (`.dc.html`), plus `App-map.dc.html` and `MVP-scope.dc.html`. All boards are in Dutch and are the copy source. Prices on v1.1 and Later boards other than €54,95 are placeholders. |
 | `design/brand/` | The design-system board, the character sheet, the Dutch landing page, its rationale (`TeddySteps-landing-rationale.dc.html`) and the business-model research (`Business-model.dc.html`). |
-| `docs/` | `analytics.md` (what we measure and how, privacy first) and `family-email.md` (photos in family e-mails, tokens, image pipeline). Follow them; update them before adding events or e-mail features. |
+| `apps/`, `packages/`, `supabase/`, `scripts/` | The code: `apps/mobile` (parent app), `apps/family` (family page), `packages/ui` (design system in React Native, tokens generated from `tokens.json`), `packages/core` (shared logic). How to run and check it: `README.md`. |
+| `docs/` | `bouwplan.md` (the approved build plan, step order and decisions), `analytics.md` (what we measure and how, privacy first) and `family-email.md` (photos in family e-mails, tokens, image pipeline). Follow them; update them before adding events or e-mail features. |
 | `.claude/agents/` | Specialist reviewers: `tech-architect`, `design-reviewer`, `growth-marketer`, `child-development-reviewer`. |
 | `design/canvas.json` | Lists every board with its title. Screen titles end in `· Launch`, `· v1.1` or `· Later`. |
 | `design_brainstorm/` | Earlier explorations (BabySteps prototype, the four identity directions, direction D). **Not used. Don't build from these.** |
@@ -104,6 +105,7 @@ Paper ground (`paper`), aubergine ink (`ink`) for all text and outlines, **blueb
 ## Working agreements
 
 - Stack chosen (2026-10-17): **Expo (React Native) for iOS, Android and the family web view, Supabase in Frankfurt, Lettermint for app mail**, push straight to APNs/FCM (not Expo's push service). The build plan in `docs/bouwplan.md` is approved, including all its advice and the decisions in its §10; build in its step order.
+- Expo changes with every SDK (we're on SDK 58): check the versioned docs at docs.expo.dev instead of memory, add packages with `npx expo install`, and run the checks in `README.md` before calling a step done.
 - **Keep running costs as low as possible until the idea has traction**: use free tiers where they are safe and move to paid plans only when usage or safety (backups of real photos) needs it. Agreed: free tiers during the build and test phase; from the official launch Supabase Pro and Vercel Pro (about €39 a month together) are fine.
 - Photos: keep a print-quality version (about 3600px) by default; special moments may be stored larger.
 - All accounts (Apple, Google, Supabase, Vercel, Lettermint, Expo) belong to Haagen Trade, with two-factor sign-in. The owner already has an Apple developer account.

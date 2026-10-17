@@ -1,0 +1,30 @@
+// https://docs.expo.dev/guides/using-eslint/
+const { defineConfig } = require('eslint/config');
+const expoConfig = require('eslint-config-expo/flat');
+
+// Crash reporting and analytics may only run in the parent app (docs/analytics.md).
+// Shared packages ship to the family page, so they may never import them.
+const appOnlySdks = {
+  'no-restricted-imports': [
+    'error',
+    {
+      patterns: [
+        {
+          group: ['@sentry/*', '@aptabase/*', 'firebase', 'firebase/*', '@react-native-firebase/*'],
+          message: 'Not allowed on the family page or in shared packages. Use it in apps/mobile only.',
+        },
+      ],
+    },
+  ],
+};
+
+module.exports = defineConfig([
+  expoConfig,
+  {
+    ignores: ['**/dist/*', '**/.expo/*', 'design/**', 'design_brainstorm/**', 'supabase/**'],
+  },
+  {
+    files: ['apps/family/**', 'packages/**'],
+    rules: appOnlySdks,
+  },
+]);

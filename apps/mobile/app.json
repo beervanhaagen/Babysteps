@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "TeddySteps",
+    "slug": "teddysteps",
+    "scheme": "teddysteps",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "bundleIdentifier": "nl.teddysteps.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "nl.teddysteps.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#F2ECE1",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

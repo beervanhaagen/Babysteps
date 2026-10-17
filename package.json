@@ -1,0 +1,30 @@
+{
+  "name": "teddysteps",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile": "npm run start -w @teddysteps/mobile",
+    "family": "npm run start -w @teddysteps/family",
+    "tokens": "node scripts/build-tokens.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "test": "npm run test --workspaces --if-present",
+    "family:export": "npm run export -w @teddysteps/family",
+    "check:web-bundle": "node scripts/check-web-bundle.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~58.0.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "~6.0.3"
+  }
+}
