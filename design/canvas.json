@@ -1,0 +1,875 @@
+{
+ "v": 3,
+ "attachments": {},
+ "boards": {
+  "Account-1.dc.html": {
+   "x": 0,
+   "y": 9170,
+   "w": 390,
+   "h": 844,
+   "title": "M1 · Account · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Account-2.dc.html": {
+   "x": 940,
+   "y": 9170,
+   "w": 390,
+   "h": 844,
+   "title": "M3 · Family and roles · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Account-3.dc.html": {
+   "x": 2350,
+   "y": 9170,
+   "w": 390,
+   "h": 844,
+   "title": "M6 · Privacy and data · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Add-1.dc.html": {
+   "x": 470,
+   "y": 5570,
+   "w": 390,
+   "h": 844,
+   "title": "A2 · Photos · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Add-2.dc.html": {
+   "x": 940,
+   "y": 5570,
+   "w": 390,
+   "h": 844,
+   "title": "A3 · Details · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Add-3.dc.html": {
+   "x": 1410,
+   "y": 5570,
+   "w": 390,
+   "h": 844,
+   "title": "A4 · Pinned! · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-1.dc.html": {
+   "x": 0,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B1 · Book home · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-2.dc.html": {
+   "x": 470,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B2 · Cover · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-3.dc.html": {
+   "x": 940,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B3 · Pages · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-4.dc.html": {
+   "x": 1880,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B5 · Review · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-5.dc.html": {
+   "x": 3290,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B8 · Order placed · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book.dc.html": {
+   "expand": "fill",
+   "h": 4500,
+   "is_interactive": true,
+   "page": "brainstorm",
+   "title": "3 · Launch story",
+   "w": 1280,
+   "x": 940,
+   "y": 0
+  },
+  "Characters-A.dc.html": {
+   "h": 2400,
+   "page": "systems",
+   "title": "TeddySteps · meet the gang",
+   "w": 1280,
+   "x": 1360,
+   "y": 0
+  },
+  "Family-1.dc.html": {
+   "x": 470,
+   "y": 7970,
+   "w": 390,
+   "h": 844,
+   "title": "F2 · Invite accepted · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Family-2.dc.html": {
+   "x": 940,
+   "y": 7970,
+   "w": 390,
+   "h": 844,
+   "title": "F3 · Postcards · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Family-3.dc.html": {
+   "x": 1410,
+   "y": 7970,
+   "w": 390,
+   "h": 844,
+   "title": "F4 · Send love · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Identity-A.dc.html": {
+   "h": 1600,
+   "page": "brainstorm",
+   "title": "A · Soft Sunday",
+   "w": 1280,
+   "x": 0,
+   "y": 4900
+  },
+  "Identity-B.dc.html": {
+   "h": 1600,
+   "page": "brainstorm",
+   "title": "B · Petit Atelier",
+   "w": 1280,
+   "x": 1360,
+   "y": 4900
+  },
+  "Identity-C.dc.html": {
+   "h": 1600,
+   "page": "brainstorm",
+   "title": "C · Trail Club",
+   "w": 1280,
+   "x": 2720,
+   "y": 4900
+  },
+  "Identity-D.dc.html": {
+   "h": 1600,
+   "page": "brainstorm",
+   "title": "D · The Blend",
+   "w": 1280,
+   "x": 4080,
+   "y": 4900
+  },
+  "Landing-A.dc.html": {
+   "expand": "fill",
+   "h": 5600,
+   "page": "brainstorm",
+   "title": "Earlier TeddySteps landing page",
+   "w": 1280,
+   "x": 2720,
+   "y": 6900
+  },
+  "Landing-D.dc.html": {
+   "expand": "fill",
+   "h": 4500,
+   "page": "brainstorm",
+   "title": "D · The Blend landing page",
+   "w": 1280,
+   "x": 1360,
+   "y": 6900
+  },
+  "Main.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "brainstorm",
+   "title": "1 · The app (tap through it)",
+   "w": 390,
+   "x": 0,
+   "y": 0
+  },
+  "Moment.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "brainstorm",
+   "title": "2 · Oma's view",
+   "w": 390,
+   "x": 470,
+   "y": 0
+  },
+  "Onboarding-1.dc.html": {
+   "x": 0,
+   "y": 3170,
+   "w": 390,
+   "h": 844,
+   "title": "O1 · Welcome · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Onboarding-2.dc.html": {
+   "x": 470,
+   "y": 3170,
+   "w": 390,
+   "h": 844,
+   "title": "O2 · Your little one · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Onboarding-3.dc.html": {
+   "x": 940,
+   "y": 3170,
+   "w": 390,
+   "h": 844,
+   "title": "O3 · Invite family · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Onboarding-4.dc.html": {
+   "x": 1410,
+   "y": 3170,
+   "w": 390,
+   "h": 844,
+   "title": "O4 · Privacy · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Onboarding-5.dc.html": {
+   "x": 2820,
+   "y": 3170,
+   "w": 390,
+   "h": 844,
+   "title": "O7 · Ready · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "System-A.dc.html": {
+   "h": 3150,
+   "page": "systems",
+   "title": "TeddySteps · design system",
+   "w": 1280,
+   "x": 0,
+   "y": 0
+  },
+  "System-D.dc.html": {
+   "h": 2200,
+   "page": "brainstorm",
+   "title": "D · The Blend design system",
+   "w": 1280,
+   "x": 0,
+   "y": 6900
+  },
+  "Trail-1.dc.html": {
+   "x": 0,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T1 · Trail home · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-2.dc.html": {
+   "x": 470,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T2 · Moment · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-3.dc.html": {
+   "x": 940,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T3 · Milestone map · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "App-map.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 1600,
+   "title": "App map",
+   "page": "journeys"
+  },
+  "Auth-1.dc.html": {
+   "x": 0,
+   "y": 1970,
+   "w": 390,
+   "h": 844,
+   "title": "S1 · Splash · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Auth-2.dc.html": {
+   "x": 470,
+   "y": 1970,
+   "w": 390,
+   "h": 844,
+   "title": "S2 · Create account · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Auth-3.dc.html": {
+   "x": 940,
+   "y": 1970,
+   "w": 390,
+   "h": 844,
+   "title": "S3 · Email code · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Auth-4.dc.html": {
+   "x": 1410,
+   "y": 1970,
+   "w": 390,
+   "h": 844,
+   "title": "S4 · Log in · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Onboarding-6.dc.html": {
+   "x": 1880,
+   "y": 3170,
+   "w": 390,
+   "h": 844,
+   "title": "O5 · Permissions · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Onboarding-7.dc.html": {
+   "x": 2350,
+   "y": 3170,
+   "w": 390,
+   "h": 844,
+   "title": "O6 · Catch up · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-6.dc.html": {
+   "x": 1410,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T4 · Milestone detail · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-7.dc.html": {
+   "x": 1880,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T5 · All weeks · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-4.dc.html": {
+   "x": 2350,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T6 · Activity · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-5.dc.html": {
+   "x": 2820,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T7 · Month recap · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-8.dc.html": {
+   "x": 3290,
+   "y": 4370,
+   "w": 390,
+   "h": 844,
+   "title": "T8 · Moment options · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Add-4.dc.html": {
+   "x": 0,
+   "y": 5570,
+   "w": 390,
+   "h": 844,
+   "title": "A1 · What happened? · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Add-5.dc.html": {
+   "x": 1880,
+   "y": 5570,
+   "w": 390,
+   "h": 844,
+   "title": "A5 · Letter · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Add-6.dc.html": {
+   "x": 2350,
+   "y": 5570,
+   "w": 390,
+   "h": 844,
+   "title": "A6 · Voice memo · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-6.dc.html": {
+   "x": 1410,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B4 · Preview · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-7.dc.html": {
+   "x": 2350,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B6 · Delivery · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-8.dc.html": {
+   "x": 2820,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B7 · iDEAL · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Book-9.dc.html": {
+   "x": 3760,
+   "y": 6770,
+   "w": 390,
+   "h": 844,
+   "title": "B9 · Books and prints · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Family-4.dc.html": {
+   "x": 0,
+   "y": 7970,
+   "w": 390,
+   "h": 844,
+   "title": "F1 · Invite message · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Family-5.dc.html": {
+   "x": 1880,
+   "y": 7970,
+   "w": 390,
+   "h": 844,
+   "title": "F5 · Oma's settings · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Family-6.dc.html": {
+   "x": 2350,
+   "y": 7970,
+   "w": 390,
+   "h": 844,
+   "title": "F6 · Gift a book · v1.1",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Account-4.dc.html": {
+   "x": 470,
+   "y": 9170,
+   "w": 390,
+   "h": 844,
+   "title": "M2 · Little ones · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Account-5.dc.html": {
+   "x": 1410,
+   "y": 9170,
+   "w": 390,
+   "h": 844,
+   "title": "M4 · Free for founders · Later",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Account-6.dc.html": {
+   "x": 1880,
+   "y": 9170,
+   "w": 390,
+   "h": 844,
+   "title": "M5 · Notifications · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Account-7.dc.html": {
+   "x": 2820,
+   "y": 9170,
+   "w": 390,
+   "h": 844,
+   "title": "M7 · Delete · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "State-1.dc.html": {
+   "x": 0,
+   "y": 11570,
+   "w": 390,
+   "h": 844,
+   "title": "X1 · Empty trail · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "State-2.dc.html": {
+   "x": 470,
+   "y": 11570,
+   "w": 390,
+   "h": 844,
+   "title": "X2 · Offline · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "State-3.dc.html": {
+   "x": 940,
+   "y": 11570,
+   "w": 390,
+   "h": 844,
+   "title": "X3 · Month birthday · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Share-1.dc.html": {
+   "w": 390,
+   "h": 844,
+   "page": "journeys",
+   "is_interactive": true,
+   "x": 0,
+   "y": 10370,
+   "title": "SH1 · Invite parent friends · Later"
+  },
+  "Share-2.dc.html": {
+   "w": 390,
+   "h": 844,
+   "page": "journeys",
+   "is_interactive": true,
+   "x": 470,
+   "y": 10370,
+   "title": "SH2 · Share a moment · Launch"
+  },
+  "MVP-scope.dc.html": {
+   "x": -1720,
+   "y": 0,
+   "w": 1600,
+   "h": 1800,
+   "title": "MVP scope: what ships first",
+   "page": "journeys"
+  },
+  "Landing.dc.html": {
+   "x": 2720,
+   "y": 0,
+   "w": 1280,
+   "h": 5780,
+   "title": "TeddySteps · landingspagina (NL)",
+   "page": "systems",
+   "expand": "fill"
+  },
+  "Landing-rationale.dc.html": {
+   "x": 4080,
+   "y": 0,
+   "w": 1280,
+   "h": 1560,
+   "title": "Waarom de landingspagina verkoopt",
+   "page": "systems"
+  },
+  "Business-model.dc.html": {
+   "x": 5440,
+   "y": 0,
+   "w": 1280,
+   "h": 2080,
+   "title": "Verdienmodel en inzichten",
+   "page": "systems"
+  },
+  "State-4.dc.html": {
+   "x": 1410,
+   "y": 11570,
+   "w": 390,
+   "h": 844,
+   "title": "X4 · Upload failed · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Family-7.dc.html": {
+   "x": 3290,
+   "y": 7970,
+   "w": 1280,
+   "h": 800,
+   "title": "F7 · Family page on a laptop · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Family-8.dc.html": {
+   "x": 4640,
+   "y": 7970,
+   "w": 680,
+   "h": 1140,
+   "title": "F8 · Sunday email · Launch",
+   "page": "journeys",
+   "is_interactive": true
+  }
+ },
+ "createdOnFiles": {
+  "at": "2026-10-10T12:00:00Z",
+  "v": 1
+ },
+ "designSystems": [
+  {
+   "title": "TeddySteps",
+   "namespace": "teddysteps",
+   "artifact": "https://claude.ai/artifact/X2KG9anxKRbwDAbipsDhEe",
+   "version": "1792252455-589e",
+   "copiedAt": "2026-10-17T15:57:58Z"
+  }
+ ],
+ "launch": {
+  "view": "canvas",
+  "page": "journeys"
+ },
+ "notes": {
+  "idtitle": {
+   "kind": "title1",
+   "maxW": 5360,
+   "page": "brainstorm",
+   "text": "Four identity directions (we picked A, Soft Sunday)",
+   "w": 240,
+   "x": 0,
+   "y": 4600
+  },
+  "sysA": {
+   "kind": "title1",
+   "maxW": 6720,
+   "page": "systems",
+   "text": "TeddySteps: design system, the gang, landing page, rationale and business model",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "title": {
+   "kind": "title1",
+   "maxW": 2220,
+   "page": "brainstorm",
+   "text": "BabySteps: the first prototype",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "jmap": {
+   "x": 0,
+   "y": -260,
+   "text": "TeddySteps: every flow, end to end",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j0": {
+   "x": 0,
+   "y": 1720,
+   "text": "1 · Sign in · 4 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j1": {
+   "x": 0,
+   "y": 2920,
+   "text": "2 · Onboarding · 7 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j2": {
+   "x": 0,
+   "y": 4120,
+   "text": "3 · The trail · 8 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j3": {
+   "x": 0,
+   "y": 5320,
+   "text": "4 · Adding a moment · 6 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j4": {
+   "x": 0,
+   "y": 6520,
+   "text": "5 · The year book · 9 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j5": {
+   "x": 0,
+   "y": 7720,
+   "text": "6 · The family side · 6 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j6": {
+   "x": 0,
+   "y": 8920,
+   "text": "7 · Me and settings · 7 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j7": {
+   "x": 0,
+   "y": 10120,
+   "text": "8 · Sharing and growth · 2 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "j8": {
+   "x": 0,
+   "y": 11320,
+   "text": "9 · States · 3 screens",
+   "kind": "title1",
+   "maxW": 4230,
+   "page": "journeys"
+  },
+  "bs3": {
+   "kind": "title1",
+   "page": "brainstorm",
+   "text": "Earlier systems and landing pages",
+   "x": 0,
+   "y": 6600,
+   "maxW": 4000
+  },
+  "mvp": {
+   "kind": "title1",
+   "page": "journeys",
+   "text": "MVP: 29 screens at launch",
+   "x": -1720,
+   "y": -260,
+   "maxW": 1600
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Moment.dc.html",
+  "Book.dc.html",
+  "Identity-A.dc.html",
+  "Identity-B.dc.html",
+  "Identity-C.dc.html",
+  "Identity-D.dc.html",
+  "Onboarding-1.dc.html",
+  "Onboarding-2.dc.html",
+  "Onboarding-3.dc.html",
+  "Onboarding-4.dc.html",
+  "Onboarding-5.dc.html",
+  "Trail-1.dc.html",
+  "Trail-2.dc.html",
+  "Trail-3.dc.html",
+  "Add-1.dc.html",
+  "Add-2.dc.html",
+  "Add-3.dc.html",
+  "Book-1.dc.html",
+  "Book-2.dc.html",
+  "Book-3.dc.html",
+  "Book-4.dc.html",
+  "Book-5.dc.html",
+  "Family-1.dc.html",
+  "Family-2.dc.html",
+  "Family-3.dc.html",
+  "Account-1.dc.html",
+  "Account-2.dc.html",
+  "Account-3.dc.html",
+  "System-A.dc.html",
+  "Characters-A.dc.html",
+  "Landing.dc.html",
+  "Landing-rationale.dc.html",
+  "Business-model.dc.html",
+  "Landing-A.dc.html",
+  "System-D.dc.html",
+  "Landing-D.dc.html",
+  "MVP-scope.dc.html",
+  "App-map.dc.html",
+  "Auth-1.dc.html",
+  "Auth-2.dc.html",
+  "Auth-3.dc.html",
+  "Auth-4.dc.html",
+  "Onboarding-6.dc.html",
+  "Onboarding-7.dc.html",
+  "Trail-6.dc.html",
+  "Trail-7.dc.html",
+  "Trail-4.dc.html",
+  "Trail-5.dc.html",
+  "Trail-8.dc.html",
+  "Add-4.dc.html",
+  "Add-5.dc.html",
+  "Add-6.dc.html",
+  "Book-6.dc.html",
+  "Book-7.dc.html",
+  "Book-8.dc.html",
+  "Book-9.dc.html",
+  "Family-4.dc.html",
+  "Family-5.dc.html",
+  "Family-6.dc.html",
+  "Account-4.dc.html",
+  "Account-5.dc.html",
+  "Account-6.dc.html",
+  "Account-7.dc.html",
+  "State-1.dc.html",
+  "State-2.dc.html",
+  "State-3.dc.html",
+  "Share-1.dc.html",
+  "Share-2.dc.html",
+  "State-4.dc.html",
+  "Family-7.dc.html",
+  "Family-8.dc.html"
+ ],
+ "pages": [
+  {
+   "id": "systems",
+   "name": "TeddySteps system"
+  },
+  {
+   "id": "journeys",
+   "name": "App journeys"
+  },
+  {
+   "id": "brainstorm",
+   "name": "Brainstorm (not used)"
+  }
+ ],
+ "title": "TeddySteps"
+}

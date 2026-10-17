@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Je kaartjes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&amp;family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&amp;family=Nunito:wght@400;700;800&amp;family=Shantell+Sans:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+@keyframes ts-bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+@keyframes ts-sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes ts-hop{0%,60%,100%{transform:translateY(0) scale(1,1)}20%{transform:translateY(-16px) scale(0.97,1.04)}40%{transform:translateY(0) scale(1.04,0.96)}}
+@keyframes ts-drift{0%,100%{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(10px,-10px) rotate(4deg)}}
+@keyframes ts-tw{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.25) rotate(18deg)}}
+.ts-bob,.ts-sway,.ts-hop,.ts-drift,.ts-tw{transform-box:fill-box;transform-origin:50% 100%}
+.ts-tw{transform-origin:50% 50%}
+.ts-bob{animation:ts-bob 2.6s ease-in-out infinite}
+.ts-sway{animation:ts-sway 3.2s ease-in-out infinite}
+.ts-hop{animation:ts-hop 2s ease-in-out infinite}
+.ts-drift{animation:ts-drift 5s ease-in-out infinite}
+.ts-tw{animation:ts-tw 2.4s ease-in-out infinite}
+.d1{animation-delay:-0.7s}.d2{animation-delay:-1.4s}.d3{animation-delay:-2.1s}
+.ts-btn{transition:transform .12s ease, box-shadow .12s ease}
+.ts-btn:hover{transform:translateY(-2px)}
+.ts-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #2D1E2F !important}
+@media (prefers-reduced-motion: reduce){.ts-bob,.ts-sway,.ts-hop,.ts-drift,.ts-tw{animation:none}.ts-btn{transition:none}}
+.sw{appearance:none;-webkit-appearance:none;width:50px;height:30px;border-radius:15px;background:#CBBFCB;box-shadow:inset 0 0 0 2px #2D1E2F;position:relative;flex:0 0 auto;margin:0;cursor:pointer}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:12px;background:#FFFFFF;box-shadow:0 0 0 2px #2D1E2F;transition:left .2s}
+.sw:checked{background:#3D6AE0;box-shadow:inset 0 0 0 2px #2D1E2F}
+.sw:checked::after{left:23px}
+.sw:focus-visible,.rc:focus-visible + span,a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #2D1E2F;outline-offset:3px}
+.rc{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.rc + span{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;box-sizing:border-box;border-radius:22px;border:2px solid #2D1E2F;background:#FBF8F2;font-weight:800;font-size:14px;cursor:pointer}
+.rc:checked + span{background:#FFD84D;color:#2D1E2F;box-shadow:0 3px 0 #2D1E2F;transform:translateY(-2px)}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F2ECE1; color: #2D1E2F; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<div style="position: relative; flex: 0 0 auto; z-index: 1"><div style="background: #F7E3A3; padding: 0 24px 12px; position: relative"><div style="height: 56px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 6px 0 0"><a href="Family-2.dc.html" aria-label="Terug" style="width: 44px; height: 44px; border-radius: 22px; background: transparent; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex: 0 0 auto"><g fill="none" stroke="#2D1E2F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></g></svg></a><div style="font-size: 16px; font-weight: 800"></div><div style="min-width: 44px; display: flex; justify-content: flex-end"></div></div><h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 700; letter-spacing: -0.01em; font-weight: 800; font-size: 30px; line-height: 1.05; color: #2D1E2F">Je kaartjes</h1><div style="font-size: 16px; font-weight: 800; margin-top: 4px">Eén keer instellen, oma. Wij doen de rest.</div></div><svg viewBox="0 0 1000 24" width="100%" height="22" preserveAspectRatio="none" aria-hidden="true" style="display: block; margin-top: -1px"><path d="M0 0 H1000 V8 Q987.5 18 975 8 Q962.5 6 950 8 Q937.5 18 925 8 Q912.5 6 900 8 Q887.5 18 875 8 Q862.5 6 850 8 Q837.5 18 825 8 Q812.5 6 800 8 Q787.5 18 775 8 Q762.5 6 750 8 Q737.5 18 725 8 Q712.5 6 700 8 Q687.5 18 675 8 Q662.5 6 650 8 Q637.5 18 625 8 Q612.5 6 600 8 Q587.5 18 575 8 Q562.5 6 550 8 Q537.5 18 525 8 Q512.5 6 500 8 Q487.5 18 475 8 Q462.5 6 450 8 Q437.5 18 425 8 Q412.5 6 400 8 Q387.5 18 375 8 Q362.5 6 350 8 Q337.5 18 325 8 Q312.5 6 300 8 Q287.5 18 275 8 Q262.5 6 250 8 Q237.5 18 225 8 Q212.5 6 200 8 Q187.5 18 175 8 Q162.5 6 150 8 Q137.5 18 125 8 Q112.5 6 100 8 Q87.5 18 75 8 Q62.5 6 50 8 Q37.5 18 25 8 Q12.5 6 0 8 Z" fill="#F7E3A3"/></svg></div><div aria-hidden="true" style="position: absolute; right: 12px; top: 26px; transform: rotate(-6deg); pointer-events: none; z-index: 2"><div class="ts-hop "><svg viewBox="-6 0 212 200" width="90" aria-hidden="true" aria-label="Puddle de eend" style="display: block; overflow: visible; "><defs><filter id="cr189" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.55 0 0 0 -0.2" result="s"/><feComposite in="s" in2="d" operator="in" result="sp"/><feMerge><feMergeNode in="d"/><feMergeNode in="sp"/></feMerge></filter><filter id="cr189r" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter></defs><g filter="url(#cr189)"><path d="M84 174 L 68 190 L 100 190 Z M122 174 L 108 190 L 140 190 Z" fill="#F2762E" stroke="#F2762E" stroke-width="5" stroke-linejoin="round"/><path d="M160 126 C 176 114, 186 100, 192 92 C 194 114, 186 138, 168 148 Z" fill="#7393E6"/><ellipse cx="108" cy="140" rx="66" ry="44" fill="#7393E6"/><circle cx="86" cy="80" r="42" fill="#7393E6"/><path d="M100 136 C 116 118, 150 118, 158 136 C 148 154, 116 158, 100 136 Z" fill="#5878D0"/><path d="M84 40 C 82 28, 90 22, 96 26 M90 40 C 96 30, 106 30, 106 36" fill="none" stroke="#2D1E2F" stroke-width="3" stroke-linecap="round"/><path d="M50 84 C 34 80, 18 86, 20 95 C 22 104, 42 106, 54 98 Z" fill="#F2762E"/><path d="M24 95 Q 38 98 52 94" fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="66" cy="96" rx="9.9" ry="7.7" fill="#FF6B8E" opacity="0.62"/><ellipse cx="114" cy="92" rx="9.9" ry="7.7" fill="#FF6B8E" opacity="0.62"/><path d="M65.7 76.7 q6.3 -9.0 12.6 0 M97.7 74.7 q6.3 -9.0 12.6 0" fill="none" stroke="#2D1E2F" stroke-width="3.4" stroke-linecap="round"/></g></svg></div></div>
+<main style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: 4px 24px 0; gap: 12px; font-size: 17px">
+
+<div style="font-size: 16px; font-weight: 800" id="f5f">Hoe vaak?</div>
+<div role="radiogroup" aria-labelledby="f5f" style="display: flex; flex-direction: column; gap: 8px"><label style="position: relative; display: block"><input type="radio" name="freq" class="rc" ><span style="width: 100%; justify-content: flex-start; flex-direction: column; align-items: flex-start; border-radius: 18px; min-height: 64px; padding: 10px 16px; gap: 2px; font-size: 17px"><span>Bij elk nieuw moment</span><span style="font-size: 14px; font-weight: 700">Zodra Sam of Alex er een toevoegt</span></span></label><label style="position: relative; display: block"><input type="radio" name="freq" class="rc" ><span style="width: 100%; justify-content: flex-start; flex-direction: column; align-items: flex-start; border-radius: 18px; min-height: 64px; padding: 10px 16px; gap: 2px; font-size: 17px"><span>Eén keer per dag</span><span style="font-size: 14px; font-weight: 700">Een bundeltje om 18.00 uur</span></span></label><label style="position: relative; display: block"><input type="radio" name="freq" class="rc" checked><span style="width: 100%; justify-content: flex-start; flex-direction: column; align-items: flex-start; border-radius: 18px; min-height: 64px; padding: 10px 16px; gap: 2px; font-size: 17px"><span>Zondagoverzicht</span><span style="font-size: 14px; font-weight: 700">De hele week in één kaartje</span></span></label></div>
+<div style="font-size: 17px"><label for="f5t" style="display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 8px 0; border-bottom: 1px solid #CFC4BC; cursor: pointer"><div style="flex: 1"><div style="font-size: 16px; font-weight: 800">Extra grote letters</div><div style="font-size: 14px; color: #5E4D5C; line-height: 1.35">Overal makkelijker te lezen</div></div><input id="f5t" type="checkbox" class="sw" role="switch" checked></label><label for="f5v" style="display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 8px 0; border-bottom: 1px solid #CFC4BC; cursor: pointer"><div style="flex: 1"><div style="font-size: 16px; font-weight: 800">Berichtjes meteen afspelen</div><div style="font-size: 14px; color: #5E4D5C; line-height: 1.35">Zodra je ze opent</div></div><input id="f5v" type="checkbox" class="sw" role="switch" ></label></div>
+<a href="#" style="min-height: 44px; display: inline-flex; align-items: center; font-size: 15px; font-weight: 800; color: #7E2048">Lottes pad verlaten</a>
+</main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

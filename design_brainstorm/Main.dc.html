@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BabySteps app prototype</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,input,textarea{font-family:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: {{t.bg}}; color: {{t.ink}}; font-family: 'Nunito Sans', system-ui, sans-serif">
+
+<sc-if value="{{isWelcome}}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+<svg style="position: absolute; top: 0; left: 0" width="390" height="430" viewBox="0 0 390 430" role="img" aria-label="Sunny hills with a dotted trail leading to a small flag">
+<rect width="390" height="430" fill="{{t.peak}}"/>
+<circle cx="292" cy="112" r="54" fill="{{t.sun}}"/>
+<path d="M0 300 C 90 240, 180 270, 260 250 C 320 236, 360 250, 390 260 L390 430 L0 430 Z" fill="{{t.mount}}"/>
+<path d="M0 350 C 100 300, 220 340, 390 300 L390 430 L0 430 Z" fill="{{t.hills}}"/>
+<path d="M0 400 C 120 360, 260 400, 390 370 L390 430 L0 430 Z" fill="{{t.meadow}}"/>
+<path d="M70 430 C 70 395, 250 400, 230 360 C 210 320, 90 330, 120 290 C 150 250, 250 250, 215 215" fill="none" stroke="{{t.solid}}" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10"/>
+<circle cx="120" cy="290" r="13" fill="{{t.accent}}" stroke="{{t.dotRing}}" stroke-width="4"/>
+<path d="M215 215 L215 172 L247 186 L215 200" fill="{{t.accent}}" stroke="{{t.solid}}" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>
+<div style="position: absolute; left: 24px; right: 24px; top: 452px; display: flex; flex-direction: column; gap: 14px">
+<div style="align-self: flex-start; padding: 6px 12px; border-radius: 16px; background: {{t.pillBg}}; color: {{t.pillInk}}; font-size: 13px; font-weight: 700">BabySteps</div>
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 36px; line-height: 1.08">Tiny human.<br>Big expedition.</h1>
+<p style="margin: 0; font-size: 16px; line-height: 1.45; color: {{t.muted}}">Map your baby's first 18 months, one postcard at a time. Snacks not included.</p>
+<button onClick="{{goSetup}}" style="height: 54px; border: 0; border-radius: 27px; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 17px; font-weight: 700; margin-top: 6px">Start the expedition</button>
+<div style="text-align: center; font-size: 13px; color: {{t.muted}}">Free to use. The printed book is optional.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isSetup}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; box-sizing: border-box; padding: 16px 24px 32px">
+<button onClick="{{goWelcome}}" style="display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0; border: 0; background: transparent; color: {{t.sageText}}; font-size: 14px; font-weight: 700">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.sageText}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+Back
+</button>
+<h1 style="margin: 12px 0 6px; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 32px; line-height: 1.1">Who's joining the expedition?</h1>
+<p style="margin: 0 0 24px; font-size: 15px; line-height: 1.45; color: {{t.muted}}">Two quick questions and we'll find where on the map you are.</p>
+
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="babyName" style="font-size: 14px; font-weight: 700">Their name (or nickname)</label>
+<input id="babyName" type="text" value="{{nameInput}}" onChange="{{onName}}" style="height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 2px solid {{t.line}}; background: {{t.field}}; color: {{t.ink}}; font-size: 17px">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="babyBirth" style="font-size: 14px; font-weight: 700">Their birthday</label>
+<input id="babyBirth" type="date" value="{{birth}}" onChange="{{onBirth}}" style="height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 2px solid {{t.line}}; background: {{t.field}}; color: {{t.ink}}; font-size: 17px">
+</div>
+</div>
+
+<div style="margin-top: 24px; box-sizing: border-box; padding: 16px; border-radius: 20px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.sageText}}">Your starting point</div>
+<div style="font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 22px; line-height: 1.2">Week {{weekNum}}, somewhere in {{zoneName}}</div>
+<div style="font-size: 14px; line-height: 1.4; color: {{t.muted}}">{{zoneTag}}</div>
+</div>
+
+<button onClick="{{startTrail}}" style="width: 100%; margin-top: 24px; height: 54px; border: 0; border-radius: 27px; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 17px; font-weight: 700">Pack the bags</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isTrail}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+<div style="position: absolute; top: 0; left: 0; right: 0; height: 80px; box-sizing: border-box; padding: 20px 20px 0; display: flex; align-items: flex-start; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 26px; line-height: 1.1">{{name}}'s trail</h1>
+<div style="font-size: 14px; color: {{t.muted}}">Week {{weekNum}} of 78 · {{ageWord}}</div>
+</div>
+<button onClick="{{toggleNight}}" aria-pressed="{{nightPressed}}" aria-label="Night Shift mode" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: {{t.btn}}; display: flex; align-items: center; justify-content: center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.btnInk}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+</button>
+</div>
+
+<div style="position: absolute; left: 0; top: 80px; width: 390px; height: 480px">
+<svg style="position: absolute; top: 0; left: 0" width="390" height="480" viewBox="0 0 390 480" role="img" aria-label="Illustrated trail map from Cocoon Valley up to First Steps Peak">
+<circle cx="338" cy="40" r="24" fill="{{t.sun}}" opacity="0.9"/>
+<ellipse cx="100" cy="452" rx="190" ry="60" fill="{{t.fog}}"/>
+<ellipse cx="290" cy="385" rx="170" ry="54" fill="{{t.meadow}}"/>
+<ellipse cx="100" cy="305" rx="180" ry="54" fill="{{t.hills}}"/>
+<path d="M175 255 L290 140 L400 255 Z" fill="{{t.mount}}"/>
+<path d="M262 168 L290 140 L318 168 L304 162 L290 174 L276 162 Z" fill="{{t.snow}}"/>
+<ellipse cx="125" cy="152" rx="150" ry="42" fill="{{t.canyon}}"/>
+<path d="M150 92 C210 62 330 72 400 92 L400 122 C320 102 220 112 150 122 Z" fill="{{t.coast}}"/>
+<ellipse cx="195" cy="40" rx="70" ry="22" fill="{{t.peak}}"/>
+<path d="M80 450 C 80 410, 300 420, 300 380 C 300 340, 90 345, 110 300 C 130 255, 310 270, 290 225 C 270 180, 100 195, 130 150 C 160 105, 300 135, 260 92 C 220 49, 215 60, 195 44" fill="none" stroke="{{t.dash}}" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10"/>
+<path d="{{doneD}}" fill="none" stroke="{{t.solid}}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M195 36 L195 12 L215 20 L195 28" fill="{{t.accent}}" stroke="{{t.solid}}" stroke-width="2" stroke-linejoin="round"/>
+</svg>
+
+<sc-for list="{{zoneItems}}" as="z" hint-placeholder-count="7">
+<button onClick="{{z.open}}" aria-label="{{z.aria}}" style="position: absolute; left: {{z.left}}px; top: {{z.top}}px; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; overflow: visible">
+<span style="position: absolute; left: 11px; top: 11px; width: 22px; height: 22px; box-sizing: border-box; border-radius: 11px; background: {{z.dotFill}}; border: 3px solid {{z.dotLine}}"></span>
+<span style="position: absolute; white-space: nowrap; {{z.labelPos}}">
+<span style="display: block; font-size: 13px; font-weight: 700; line-height: 1.2; color: {{t.ink}}">{{z.name}}</span>
+<span style="display: block; font-size: 12px; line-height: 1.2; color: {{t.muted}}">{{z.wkText}}</span>
+</span>
+</button>
+</sc-for>
+
+<button onClick="{{openCurrent}}" aria-label="{{markerAria}}" style="position: absolute; width: 28px; height: 28px; padding: 0; box-sizing: border-box; border-radius: 14px; border: 4px solid {{t.dotRing}}; background: {{t.accent}}; {{markerPos}}">
+<span style="position: absolute; white-space: nowrap; padding: 4px 10px; border-radius: 14px; background: {{t.pillBg}}; color: {{t.pillInk}}; font-size: 13px; font-weight: 700; {{bubblePos}}">Week {{weekNum}}</span>
+</button>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; top: 540px; height: 220px; box-sizing: border-box; background: {{t.card}}; border-radius: 28px 28px 0 0; padding: 18px 20px 0; box-shadow: {{t.shadow}}; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.sageText}}">This week</div>
+<div style="font-size: 13px; color: {{t.muted}}">{{heartTotal}} hearts so far</div>
+</div>
+<div style="font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 21px; line-height: 1.2">{{sheetTitle}}</div>
+<div style="font-size: 14px; line-height: 1.4; color: {{t.muted}}">{{zoneTag}}</div>
+<button onClick="{{openCompose}}" style="margin-top: 6px; height: 48px; border: 0; border-radius: 24px; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 16px; font-weight: 700">Add a postcard</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isZone}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 84px; overflow-y: auto">
+<div style="box-sizing: border-box; padding: 16px 20px 24px; background: {{zoneTint}}; color: #1F2A44; display: flex; flex-direction: column; gap: 6px">
+<button onClick="{{backToTrail}}" style="display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: transparent; color: #1F2A44; font-size: 14px; font-weight: 700">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2A44" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+Back to the trail
+</button>
+<div style="font-size: 13px; font-weight: 700">{{zoneWeeks}}</div>
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 32px; line-height: 1.1">{{zoneName}}</h1>
+<div style="font-size: 16px; line-height: 1.35">{{zoneTag}}</div>
+</div>
+
+<div style="box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="box-sizing: border-box; padding: 16px; border-radius: 20px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.sageText}}">Typical range</div>
+<div style="font-size: 15px; font-weight: 700; line-height: 1.3">{{zoneRangeText}}</div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: {{t.chip}}">
+<div style="position: absolute; top: 0; bottom: 0; border-radius: 5px; background: #A9BC9E; left: {{rangeLeft}}%; width: {{rangeWidth}}%"></div>
+<div style="position: absolute; top: -3px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 8px; background: {{t.accent}}; border: 3px solid {{t.dotRing}}; left: {{markerLeft}}%; margin-left: -8px"></div>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: {{t.muted}}"><span>Birth</span><span>9 months</span><span>18 months</span></div>
+<div style="font-size: 13px; line-height: 1.4; color: {{t.muted}}">A range, not a deadline. Every trail is different, and this isn't medical advice.</div>
+</div>
+
+<div style="box-sizing: border-box; padding: 16px; border-radius: 20px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{t.sageText}}">Weekly Dispatch</div>
+<div style="font-size: 15px; line-height: 1.45">{{zoneDispatch}}</div>
+</div>
+
+<div style="box-sizing: border-box; padding: 14px 16px; border-radius: 20px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; align-items: center; gap: 12px">
+<div style="flex: none; width: 44px; height: 44px; border-radius: 22px; background: {{badgeBg}}; display: flex; align-items: center; justify-content: center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F2A44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.4 6.8 19.2l1-5.9L3.5 9.2l5.9-.8z"/></svg>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 15px; font-weight: 700">{{badgeName}}</div>
+<div style="font-size: 13px; color: {{t.muted}}">{{badgeNote}}</div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 4px 0 0; font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 20px">Postcards from here</h2>
+<sc-if value="{{noZonePostcards}}" hint-placeholder-val="{{ false }}">
+<div style="font-size: 14px; line-height: 1.4; color: {{t.muted}}">Nothing pinned in this stretch yet. The trail is patient.</div>
+</sc-if>
+<sc-for list="{{zonePostcards}}" as="p" hint-placeholder-count="2">
+<div style="box-sizing: border-box; padding: 12px; border-radius: 18px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; align-items: center; gap: 12px">
+<div style="flex: none; width: 56px; height: 56px; border-radius: 14px; background: {{p.tint}}"></div>
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<div style="font-size: 14px; font-weight: 700; line-height: 1.3">{{p.text}}</div>
+<div style="font-size: 12px; color: {{t.muted}}">{{p.meta}}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isCompose}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; box-sizing: border-box; padding: 16px 24px 32px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<button onClick="{{backToTrail}}" style="min-height: 44px; padding: 0; border: 0; background: transparent; color: {{t.sageText}}; font-size: 15px; font-weight: 700">Cancel</button>
+<div style="font-size: 13px; color: {{t.muted}}">Week {{weekNum}} · {{zoneName}}</div>
+</div>
+<h1 style="margin: 8px 0 16px; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 30px; line-height: 1.1">New postcard</h1>
+
+<div style="font-size: 14px; font-weight: 700; margin-bottom: 8px">Pick a photo</div>
+<div style="display: flex; gap: 10px">
+<sc-for list="{{photoItems}}" as="ph" hint-placeholder-count="4">
+<button onClick="{{ph.pick}}" aria-label="{{ph.aria}}" aria-pressed="{{ph.pressed}}" style="flex: 1; height: 76px; padding: 0; box-sizing: border-box; border-radius: 16px; background: {{ph.tint}}; border: 3px solid {{ph.ring}}"></button>
+</sc-for>
+</div>
+<div style="font-size: 12px; color: {{t.muted}}; margin-top: 6px">Sample camera roll. The real app pulls from your photos.</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 20px">
+<label for="caption" style="font-size: 14px; font-weight: 700">What happened?</label>
+<textarea id="caption" rows="3" value="{{caption}}" onChange="{{onCaption}}" placeholder="Rolled over, looked deeply shocked." style="box-sizing: border-box; width: 100%; padding: 12px 16px; border-radius: 14px; border: 2px solid {{t.line}}; background: {{t.field}}; color: {{t.ink}}; font-size: 16px; line-height: 1.4; resize: none"></textarea>
+</div>
+
+<div style="font-size: 14px; font-weight: 700; margin: 20px 0 8px">How would you file it?</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{moodItems}}" as="m" hint-placeholder-count="4">
+<button onClick="{{m.pick}}" aria-pressed="{{m.pressed}}" style="min-height: 44px; padding: 0 18px; border-radius: 22px; border: 2px solid {{m.border}}; background: {{m.bg}}; color: {{m.ink}}; font-size: 15px; font-weight: 700">{{m.label}}</button>
+</sc-for>
+</div>
+
+<button onClick="{{send}}" disabled="{{noCaption}}" style="width: 100%; margin-top: 28px; height: 54px; border: 0; border-radius: 27px; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 17px; font-weight: 700; opacity: {{sendOpacity}}">Send to 4 followers</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isFamily}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 84px; overflow-y: auto; box-sizing: border-box; padding: 24px 20px 24px">
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 30px; line-height: 1.1">The cheer squad</h1>
+<div style="font-size: 14px; color: {{t.muted}}; margin-top: 2px">4 people following {{name}}'s expedition</div>
+
+<div style="margin-top: 18px; box-sizing: border-box; padding: 12px; border-radius: 20px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; flex-direction: column; gap: 10px">
+<div style="height: 120px; border-radius: 14px; background: {{latestTint}}"></div>
+<div style="font-size: 15px; font-weight: 700; line-height: 1.3">{{latestText}}</div>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: {{t.muted}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="{{t.accent}}" stroke="{{t.accent}}" stroke-width="1.5" aria-hidden="true"><path d="M12 21s-7-4.6-9.2-9A5.2 5.2 0 0 1 12 6.5 5.2 5.2 0 0 1 21.2 12C19 16.4 12 21 12 21z"/></svg>
+<span>{{latestHearts}} hearts · {{latestMeta}}</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px">
+<sc-for list="{{followers}}" as="f" hint-placeholder-count="4">
+<div style="box-sizing: border-box; padding: 10px 14px; border-radius: 18px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; align-items: center; gap: 12px">
+<div style="flex: none; width: 40px; height: 40px; border-radius: 20px; background: {{f.tint}}; color: #1F2A44; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700">{{f.initial}}</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 15px; font-weight: 700">{{f.name}}</div>
+<div style="font-size: 13px; color: {{t.muted}}">{{f.note}}</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top: 14px; box-sizing: border-box; padding: 16px; border-radius: 20px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; flex-direction: column; gap: 8px">
+<div style="font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 19px">Know a grandparent with spare hearts?</div>
+<div style="font-size: 13px; color: {{t.muted}}">babysteps.app/join/{{slug}}</div>
+<button onClick="{{copyLink}}" style="height: 46px; border: 0; border-radius: 23px; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 15px; font-weight: 700">{{copyLabel}}</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isBook}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 84px; overflow-y: auto; box-sizing: border-box; padding: 24px 20px 24px">
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 30px; line-height: 1.1">The Book</h1>
+<div style="font-size: 14px; color: {{t.muted}}; margin-top: 2px">Your postcards, bound. The app stays free.</div>
+
+<div style="display: flex; justify-content: center; margin-top: 20px">
+<div style="position: relative; width: 190px; height: 240px; border-radius: 6px 16px 16px 6px; background: {{cover.bg}}; box-shadow: 8px 12px 24px rgba(31,42,68,0.25); overflow: hidden">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 12px; background: {{cover.deep}}"></div>
+<svg style="position: absolute; left: 12px; top: 0" width="178" height="240" viewBox="0 0 178 240" role="img" aria-label="Book cover with a winding dotted trail and a sun">
+<circle cx="136" cy="48" r="18" fill="{{cover.sun}}"/>
+<path d="M0 240 C 36 188, 108 206, 126 160 C 144 116, 54 116, 72 80" fill="none" stroke="{{cover.ink}}" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/>
+<circle cx="72" cy="80" r="6" fill="{{cover.ink}}"/>
+</svg>
+<div style="position: absolute; left: 26px; right: 14px; top: 20px; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 21px; line-height: 1.1; color: {{cover.ink}}">{{name}}'s<br>First Year</div>
+<div style="position: absolute; left: 26px; bottom: 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{cover.ink}}">BabySteps</div>
+</div>
+</div>
+
+<div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 10px">
+<div style="font-size: 13px; color: {{t.muted}}; margin-right: 6px">Cover</div>
+<sc-for list="{{coverItems}}" as="c" hint-placeholder-count="3">
+<button onClick="{{c.pick}}" aria-label="{{c.aria}}" aria-pressed="{{c.pressed}}" style="width: 44px; height: 44px; padding: 0; border-radius: 22px; border: 3px solid {{c.ring}}; background: transparent; display: flex; align-items: center; justify-content: center">
+<span style="width: 26px; height: 26px; border-radius: 13px; background: {{c.bg}}"></span>
+</button>
+</sc-for>
+</div>
+
+<div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<div style="font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 19px">{{bookWeeks}} of 52 weeks collected</div>
+<div style="font-size: 13px; color: {{t.muted}}">Ready at week 52</div>
+</div>
+<div style="height: 10px; border-radius: 5px; background: {{t.chip}}; overflow: hidden"><div style="height: 100%; border-radius: 5px; background: {{t.accent}}; width: {{bookPct}}%"></div></div>
+</div>
+
+<div style="margin-top: 16px; box-sizing: border-box; padding: 14px 16px; border-radius: 18px; background: {{t.card}}; border: 1px solid {{t.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 15px; font-weight: 700">First Year hardcover</div>
+<div style="font-size: 13px; color: {{t.muted}}">Photos, captions, milestones</div>
+</div>
+<div style="font-size: 15px; font-weight: 700">[PRICE]</div>
+</div>
+
+<button onClick="{{toggleNotify}}" aria-pressed="{{notifyPressed}}" style="width: 100%; margin-top: 14px; height: 52px; border-radius: 26px; border: 2px solid {{t.btn}}; background: {{notifyBg}}; color: {{notifyInk}}; font-size: 16px; font-weight: 700">{{notifyLabel}}</button>
+</div>
+</sc-if>
+
+<sc-if value="{{showNav}}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Main" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; box-sizing: border-box; padding: 8px 24px 0; background: {{t.card}}; border-top: 1px solid {{t.line}}; display: flex; justify-content: space-around; align-items: flex-start">
+<sc-for list="{{tabs}}" as="tab" hint-placeholder-count="3">
+<button onClick="{{tab.go}}" aria-current="{{tab.cur}}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 72px; min-height: 48px; padding: 0; border: 0; background: transparent; color: {{tab.color}}">
+<sc-if value="{{tab.isTrail}}" hint-placeholder-val="{{ true }}">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{tab.color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+</sc-if>
+<sc-if value="{{tab.isFamily}}" hint-placeholder-val="{{ false }}">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{tab.color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.6-9.2-9A5.2 5.2 0 0 1 12 6.5 5.2 5.2 0 0 1 21.2 12C19 16.4 12 21 12 21z"/></svg>
+</sc-if>
+<sc-if value="{{tab.isBook}}" hint-placeholder-val="{{ false }}">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{tab.color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>
+</sc-if>
+<span style="font-size: 12px; font-weight: {{tab.weight}}">{{tab.label}}</span>
+</button>
+</sc-for>
+</nav>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position: absolute; left: 24px; right: 24px; bottom: 100px; box-sizing: border-box; padding: 12px 18px; border-radius: 22px; background: {{t.pillBg}}; color: {{t.pillInk}}; font-size: 14px; font-weight: 700; text-align: center">{{toast}}</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      screen: 'welcome', tab: 'trail', night: false,
+      name: 'Lotte', birth: this.isoDaysAgo(161),
+      zone: 0, mood: 'Giggle', photo: 0, caption: '', toast: '',
+      copied: false, cover: 0, notify: false,
+      moments: [
+        { id: 4, week: 21, text: 'Discovered feet. Best day ever.', mood: 'Giggle', hearts: 7, photo: 3 },
+        { id: 3, week: 16, text: 'Rolled over once. Has denied it ever since.', mood: 'Milestone', hearts: 9, photo: 0 },
+        { id: 2, week: 9, text: 'First real smile. Aimed at the dog.', mood: 'Giggle', hearts: 11, photo: 1 },
+        { id: 1, week: 2, text: 'Home from the hospital. The car seat took 40 minutes.', mood: 'Chaos', hearts: 4, photo: 2 }
+      ]
+    };
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._tt);
+    clearTimeout(this._ht);
+  }
+
+  isoDaysAgo(n) {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+
+  themes() {
+    const light = {
+      bg: '#F6EEDF', card: '#FFFAF1', ink: '#1F2A44', muted: '#59627A', line: '#EADFCB', chip: '#ECE3D2',
+      sageText: '#3E5A45', accent: '#F0A468', btn: '#1F2A44', btnInk: '#F6EEDF', field: '#FFFFFF',
+      shadow: '0 -6px 24px rgba(31,42,68,0.10)', pillBg: '#1F2A44', pillInk: '#F6EEDF',
+      sun: '#F0A468', fog: '#D9D5DC', meadow: '#D3E3C2', hills: '#BFD4AE', mount: '#A5BC9A', snow: '#F6EEDF',
+      canyon: '#EDCDA6', coast: '#BBD5DC', peak: '#F9E3C3', dash: '#8A93A8', solid: '#1F2A44',
+      dotDone: '#6E8B6F', dotTodo: '#F6EEDF', dotTodoLine: '#59627A', dotRing: '#FFFFFF'
+    };
+    const night = {
+      bg: '#131A2E', card: '#1D2742', ink: '#F3EAD8', muted: '#A9B2C8', line: '#2B3659', chip: '#2B3659',
+      sageText: '#BBD2B5', accent: '#F0A468', btn: '#F0A468', btnInk: '#1F2A44', field: '#1D2742',
+      shadow: '0 -6px 24px rgba(0,0,0,0.35)', pillBg: '#F0A468', pillInk: '#1F2A44',
+      sun: '#F3EAD8', fog: '#2A3252', meadow: '#26405A', hills: '#2B4A5C', mount: '#3A5668', snow: '#C9D2E3',
+      canyon: '#4A3F5C', coast: '#274A6B', peak: '#3C456A', dash: '#6C7794', solid: '#F0A468',
+      dotDone: '#F0A468', dotTodo: '#131A2E', dotTodoLine: '#A9B2C8', dotRing: '#131A2E'
+    };
+    return this.state.night ? night : light;
+  }
+
+  zones() {
+    return [
+      { name: 'Cocoon Valley', wk: 0, tint: '#D9D5DC', tag: 'Mostly sleeping, eating, repeating.', range: 'Starts following faces: 1 to 3 months', lo: 1, hi: 3, badge: 'Snuggle Certified', dispatch: 'Day and night are a rumor. Your job: snacks (for you) and snuggles (for them). Everything else is a bonus level.' },
+      { name: 'Smile Meadow', wk: 6, tint: '#D3E3C2', tag: 'The first real smile. Worth every 3 am.', range: 'First social smile: 1.5 to 3 months', lo: 1.5, hi: 3, badge: 'Smile Spotter', dispatch: 'The smile arrives and suddenly the night shifts feel worth it. Warning: it is contagious, and mostly aimed at the dog.' },
+      { name: 'Rolling Hills', wk: 14, tint: '#BFD4AE', tag: 'Tummy-to-back adventures. Dramatic flops included.', range: 'Rolling over: 4 to 7 months', lo: 4, hi: 7, badge: 'Roll Model', dispatch: 'Tummy time, roll attempts and the occasional dramatic flop. Cheer loudly. Nobody here keeps score.' },
+      { name: 'Sitting Summit', wk: 24, tint: '#A5BC9A', tag: 'New view unlocked. Bring pillows.', range: 'Sitting without support: 5 to 9 months', lo: 5, hi: 9, badge: 'Summit Sitter', dispatch: 'A whole new view of the living room. Pillows become essential equipment. Expect a wobble, a faceplant, then triumph.' },
+      { name: 'Crawl Canyon', wk: 32, tint: '#EDCDA6', tag: 'Nothing is safe, everything is interesting.', range: 'Crawling: 7 to 11 months', lo: 7, hi: 11, badge: 'Canyon Crawler', dispatch: 'Nothing is safe and everything is fascinating. Pack a sense of humor, cover the sockets, and hide the remote.' },
+      { name: 'Cruising Coast', wk: 44, tint: '#BBD5DC', tag: 'Furniture is a handrail now.', range: 'Pulling up and cruising: 9 to 13 months', lo: 9, hi: 13, badge: 'Coast Cruiser', dispatch: 'The coffee table has become a mountain range and the sofa is a pier. Hold on, let go, repeat.' },
+      { name: 'First Steps Peak', wk: 56, tint: '#F9E3C3', tag: 'Wobble, wobble, victory.', range: 'First steps: 9 to 18 months', lo: 9, hi: 18, badge: 'Peak Pioneer', dispatch: 'Wobble, wobble, victory. Whether it happens at week 56 or week 78, the peak will wait for them.' }
+    ];
+  }
+
+  stops() {
+    return [[80, 450], [300, 380], [110, 300], [290, 225], [130, 150], [260, 92], [195, 44]];
+  }
+
+  geometry() {
+    if (this._geo) return this._geo;
+    const segs = [
+      [[80, 450], [80, 410], [300, 420], [300, 380]],
+      [[300, 380], [300, 340], [90, 345], [110, 300]],
+      [[110, 300], [130, 255], [310, 270], [290, 225]],
+      [[290, 225], [270, 180], [100, 195], [130, 150]],
+      [[130, 150], [160, 105], [300, 135], [260, 92]],
+      [[260, 92], [220, 49], [215, 60], [195, 44]]
+    ];
+    const pts = [];
+    const stopLen = [0];
+    let acc = 0;
+    let prev = null;
+    segs.forEach((s) => {
+      for (let i = 0; i <= 32; i++) {
+        if (i === 0 && prev) continue;
+        const tt = i / 32;
+        const u = 1 - tt;
+        const x = u * u * u * s[0][0] + 3 * u * u * tt * s[1][0] + 3 * u * tt * tt * s[2][0] + tt * tt * tt * s[3][0];
+        const y = u * u * u * s[0][1] + 3 * u * u * tt * s[1][1] + 3 * u * tt * tt * s[2][1] + tt * tt * tt * s[3][1];
+        if (prev) acc += Math.hypot(x - prev[0], y - prev[1]);
+        pts.push({ x: x, y: y, l: acc });
+        prev = [x, y];
+      }
+      stopLen.push(acc);
+    });
+    this._geo = { pts: pts, stopLen: stopLen };
+    return this._geo;
+  }
+
+  info() {
+    const b = new Date(this.state.birth + 'T00:00:00');
+    const now = new Date();
+    let days = Math.floor((now - b) / 86400000);
+    if (isNaN(days) || days < 0) days = 0;
+    if (days > 78 * 7) days = 78 * 7;
+    const week = Math.min(78, Math.floor(days / 7) + 1);
+    const months = Math.floor(days / 30.44);
+    let ageWord = 'just arrived';
+    if (months >= 1) ageWord = months + (months === 1 ? ' month old' : ' months old');
+    else if (days >= 7) ageWord = Math.floor(days / 7) + ' weeks old';
+    const zs = this.zones();
+    let idx = 0;
+    zs.forEach((z, i) => { if (days / 7 >= z.wk) idx = i; });
+    return { days: days, week: week, months: months, monthsF: days / 30.44, ageWord: ageWord, idx: idx };
+  }
+
+  showToast(msg) {
+    clearTimeout(this._tt);
+    this.setState({ toast: msg });
+    this._tt = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+
+  send() {
+    const s = this.state;
+    const text = s.caption.trim();
+    if (!text) return;
+    const id = Date.now();
+    const m = { id: id, week: this.info().week, text: text, mood: s.mood, hearts: 0, photo: s.photo };
+    this.setState({ moments: [m].concat(s.moments), screen: 'trail', tab: 'trail', caption: '' });
+    this.showToast('Postcard sent to 4 followers');
+    clearTimeout(this._ht);
+    this._ht = setTimeout(() => {
+      this.setState({ moments: this.state.moments.map((x) => (x.id === id ? Object.assign({}, x, { hearts: x.hearts + 1 }) : x)) });
+      this.showToast('Oma just sent a heart');
+    }, 4000);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = this.themes();
+    const zs = this.zones();
+    const info = this.info();
+    const geo = this.geometry();
+    const stops = this.stops();
+    const tints = ['#F0C79E', '#BBD5DC', '#BFD4AE', '#D9CBE6'];
+    const photoNames = ['Sunrise tile', 'Sky tile', 'Meadow tile', 'Lilac tile'];
+
+    const curZone = zs[info.idx];
+    const nextZone = zs[info.idx + 1];
+    const viewZone = zs[s.zone];
+    const viewNext = zs[s.zone + 1];
+
+    // marker position along the path
+    const weeksF = Math.min(info.days / 7, zs[zs.length - 1].wk);
+    let L = geo.stopLen[geo.stopLen.length - 1];
+    for (let i = 0; i < zs.length - 1; i++) {
+      if (weeksF >= zs[i].wk && weeksF <= zs[i + 1].wk) {
+        const f = (weeksF - zs[i].wk) / (zs[i + 1].wk - zs[i].wk);
+        L = geo.stopLen[i] + f * (geo.stopLen[i + 1] - geo.stopLen[i]);
+        break;
+      }
+    }
+    let mx = geo.pts[0].x;
+    let my = geo.pts[0].y;
+    let doneD = 'M' + geo.pts[0].x.toFixed(1) + ' ' + geo.pts[0].y.toFixed(1);
+    for (let i = 1; i < geo.pts.length; i++) {
+      const p = geo.pts[i];
+      if (p.l >= L) {
+        const q = geo.pts[i - 1];
+        const span = p.l - q.l || 1;
+        const f = (L - q.l) / span;
+        mx = q.x + f * (p.x - q.x);
+        my = q.y + f * (p.y - q.y);
+        doneD += ' L' + mx.toFixed(1) + ' ' + my.toFixed(1);
+        break;
+      }
+      doneD += ' L' + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
+      mx = p.x;
+      my = p.y;
+    }
+
+    const zoneItems = zs.map((z, i) => {
+      const reached = i <= info.idx;
+      return {
+        name: z.name,
+        wkText: 'wk ' + z.wk,
+        left: stops[i][0] - 22,
+        top: stops[i][1] - 22,
+        dotFill: reached ? t.dotDone : t.dotTodo,
+        dotLine: reached ? t.dotRing : t.dotTodoLine,
+        labelPos: i % 2 === 0 ? 'left: 42px; top: 3px; text-align: left' : 'right: 42px; top: 3px; text-align: right',
+        aria: z.name + ', from week ' + z.wk,
+        open: () => this.setState({ screen: 'zone', zone: i })
+      };
+    });
+
+    const inRange = (m, z, zn) => m.week >= z.wk && m.week < (zn ? zn.wk : 999) && m.week <= info.week;
+    const zonePostcards = s.moments.filter((m) => inRange(m, viewZone, viewNext)).map((m) => ({
+      text: m.text,
+      meta: 'Week ' + m.week + ' · ' + m.mood + ' · ' + m.hearts + (m.hearts === 1 ? ' heart' : ' hearts'),
+      tint: tints[m.photo % 4]
+    }));
+
+    const earned = info.idx >= s.zone;
+    const heartTotal = s.moments.reduce((a, m) => a + m.hearts, 0);
+    const latest = s.moments[0];
+
+    const moods = ['Giggle', 'Milestone', 'Chaos', 'Cuddle'];
+    const covers = [
+      { bg: '#4F6B54', deep: '#3E5A45', ink: '#F6EEDF', sun: '#F0A468', aria: 'Sage cover' },
+      { bg: '#F0A468', deep: '#D98A4A', ink: '#1F2A44', sun: '#F6EEDF', aria: 'Apricot cover' },
+      { bg: '#1F2A44', deep: '#141C33', ink: '#F6EEDF', sun: '#F0A468', aria: 'Navy cover' }
+    ];
+    const coverSel = covers[s.cover];
+    const tabsDef = [
+      { key: 'trail', label: 'Trail' },
+      { key: 'family', label: 'Family' },
+      { key: 'book', label: 'The Book' }
+    ];
+    const followers = [
+      { name: 'Oma', initial: 'O', tint: '#F0C79E', note: 'Left a voice message. 0:18 of pure pride.' },
+      { name: 'Opa', initial: 'P', tint: '#BBD5DC', note: 'Sent a heart. Then another one.' },
+      { name: 'Tante Sanne', initial: 'S', tint: '#BFD4AE', note: 'Asked if the photo was a video.' },
+      { name: 'Bas', initial: 'B', tint: '#D9CBE6', note: "Hasn't opened it yet. Classic." }
+    ];
+    const bookWeeks = Math.min(info.week, 52);
+    const slug = (s.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'baby') + '-' + info.week;
+    const markerLeft = Math.min(info.monthsF, 18) / 18 * 100;
+    const nameShown = s.name.trim() || 'Your baby';
+
+    return {
+      t: t,
+      isWelcome: s.screen === 'welcome',
+      isSetup: s.screen === 'setup',
+      isTrail: s.screen === 'trail' && s.tab === 'trail',
+      isZone: s.screen === 'zone',
+      isCompose: s.screen === 'compose',
+      isFamily: s.screen === 'trail' && s.tab === 'family',
+      isBook: s.screen === 'trail' && s.tab === 'book',
+      showNav: s.screen === 'zone' || (s.screen === 'trail'),
+      hasToast: s.toast !== '',
+      toast: s.toast,
+
+      name: nameShown,
+      nameInput: s.name,
+      birth: s.birth,
+      weekNum: info.week,
+      ageWord: info.ageWord,
+      zoneName: s.screen === 'zone' ? viewZone.name : curZone.name,
+      zoneTag: s.screen === 'zone' ? viewZone.tag : curZone.tag,
+      goWelcome: () => this.setState({ screen: 'welcome' }),
+      goSetup: () => this.setState({ screen: 'setup' }),
+      startTrail: () => this.setState({ screen: 'trail', tab: 'trail' }),
+      onName: (e) => this.setState({ name: e.target.value }),
+      onBirth: (e) => this.setState({ birth: e.target.value }),
+
+      toggleNight: () => this.setState({ night: !s.night }),
+      nightPressed: s.night ? 'true' : 'false',
+      doneD: doneD,
+      zoneItems: zoneItems,
+      markerPos: 'left: ' + (mx - 14).toFixed(1) + 'px; top: ' + (my - 14).toFixed(1) + 'px',
+      bubblePos: mx > 200 ? 'right: 34px; top: -4px' : 'left: 34px; top: -4px',
+      markerAria: nameShown + ' is here, week ' + info.week + ' in ' + curZone.name,
+      openCurrent: () => this.setState({ screen: 'zone', zone: info.idx }),
+      heartTotal: heartTotal,
+      sheetTitle: nextZone ? 'Heading for ' + nextZone.name : 'You made it to the peak',
+      openCompose: () => this.setState({ screen: 'compose' }),
+
+      backToTrail: () => this.setState({ screen: 'trail' }),
+      zoneTint: viewZone.tint,
+      zoneWeeks: viewNext ? 'Weeks ' + viewZone.wk + ' to ' + (viewNext.wk - 1) : 'Week ' + viewZone.wk + ' onwards',
+      zoneRangeText: viewZone.range,
+      rangeLeft: (viewZone.lo / 18 * 100).toFixed(1),
+      rangeWidth: ((viewZone.hi - viewZone.lo) / 18 * 100).toFixed(1),
+      markerLeft: markerLeft.toFixed(1),
+      zoneDispatch: viewZone.dispatch,
+      badgeName: viewZone.badge,
+      badgeNote: earned ? 'Earned. Frame it, or at least tell Oma.' : 'Unlocks at week ' + viewZone.wk,
+      badgeBg: earned ? '#F0A468' : '#D9D5DC',
+      noZonePostcards: zonePostcards.length === 0,
+      zonePostcards: zonePostcards,
+
+      photoItems: tints.map((c, i) => ({
+        tint: c,
+        ring: s.photo === i ? t.ink : 'transparent',
+        pressed: s.photo === i ? 'true' : 'false',
+        aria: photoNames[i],
+        pick: () => this.setState({ photo: i })
+      })),
+      caption: s.caption,
+      onCaption: (e) => this.setState({ caption: e.target.value }),
+      moodItems: moods.map((m) => ({
+        label: m,
+        pressed: s.mood === m ? 'true' : 'false',
+        bg: s.mood === m ? t.btn : 'transparent',
+        ink: s.mood === m ? t.btnInk : t.ink,
+        border: s.mood === m ? t.btn : t.line,
+        pick: () => this.setState({ mood: m })
+      })),
+      noCaption: s.caption.trim() === '',
+      sendOpacity: s.caption.trim() === '' ? 0.45 : 1,
+      send: () => this.send(),
+
+      latestTint: tints[latest.photo % 4],
+      latestText: latest.text,
+      latestHearts: latest.hearts,
+      latestMeta: 'Week ' + latest.week,
+      followers: followers,
+      slug: slug,
+      copyLabel: s.copied ? 'Link copied. Go forth.' : 'Copy invite link',
+      copyLink: () => {
+        this.setState({ copied: true });
+        clearTimeout(this._ct);
+        this._ct = setTimeout(() => this.setState({ copied: false }), 2400);
+      },
+
+      cover: coverSel,
+      coverItems: covers.map((c, i) => ({
+        bg: c.bg,
+        ring: s.cover === i ? t.ink : 'transparent',
+        pressed: s.cover === i ? 'true' : 'false',
+        aria: c.aria,
+        pick: () => this.setState({ cover: i })
+      })),
+      bookWeeks: bookWeeks,
+      bookPct: (bookWeeks / 52 * 100).toFixed(1),
+      notifyLabel: s.notify ? "Got it. We'll nudge you at week 52" : 'Nudge me at week 52',
+      notifyPressed: s.notify ? 'true' : 'false',
+      notifyBg: s.notify ? t.btn : 'transparent',
+      notifyInk: s.notify ? t.btnInk : t.ink,
+      toggleNotify: () => this.setState({ notify: !s.notify }),
+
+      tabs: tabsDef.map((d) => {
+        const on = s.screen === 'trail' && s.tab === d.key;
+        return {
+          label: d.label,
+          cur: on ? 'page' : 'false',
+          color: on ? t.ink : t.muted,
+          weight: on ? 700 : 600,
+          isTrail: d.key === 'trail',
+          isFamily: d.key === 'family',
+          isBook: d.key === 'book',
+          go: () => this.setState({ screen: 'trail', tab: d.key })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+/* TeddySteps — generated from tokens.json */
+:root, [data-theme="paper"] {
+  --paper: #F2ECE1;
+  --card: #FBF8F2;
+  --white: #FFFFFF;
+  --ink: #2D1E2F;
+  --ink-muted: #5E4D5C;
+  --line: #CFC4BC;
+  --track-off: #CBBFCB;
+  --bluebird: #3D6AE0;
+  --on-bluebird: #FFFFFF;
+  --plum: #7E2048;
+  --rose: #FF6B8E;
+  --cornflower: #7393E6;
+  --cornflower-deep: #5878D0;
+  --caramel: #D98E55;
+  --caramel-deep: #B66C3A;
+  --tangerine: #F2762E;
+  --tangerine-deep: #C9561E;
+  --muzzle: #F8EAD4;
+  --sunshine: #FFD84D;
+  --lilac: #D9CFF2;
+  --pistachio: #BFD39A;
+  --butter: #F7E3A3;
+  --apricot: #F7A76C;
+  --forest: #2F6B4F;
+  --tomato: #D2402F;
+  --shadow-lg: 0 5px 0 0 #2D1E2F;
+  --shadow-md: 0 4px 0 0 #2D1E2F;
+  --shadow-sm: 0 3px 0 0 #2D1E2F;
+  --shadow-rose: 0 5px 0 0 #FF6B8E;
+  --shadow-book: 12px 17px 34px -12px rgba(45, 30, 47, 0.55);
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 56px;
+  --radius-s: 14px;
+  --radius-m: 16px;
+  --radius-l: 22px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+  --edge-bold: 2.5px;
+  --edge: 2px;
+  --edge-dash: 2.5px;
+  --tap-min: 44px;
+  --button-lg: 58px;
+  --button-md: 48px;
+  --field: 50px;
+  --fab: 62px;
+  --tabbar: 84px;
+  --screen: 390px;
+  --bob: 2.6s;
+  --sway: 3.2s;
+  --drift: 5s;
+  --hop: 2s;
+  --twinkle: 2.4s;
+  --press: 0.12s;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sticker: "Bagel Fat One", "Nunito", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, sans-serif;
+  --font-hand: "Shantell Sans", "Comic Sans MS", cursive;
+}
+.display-xl { font-family: var(--font-display); font-size: 76px; line-height: 76px; font-weight: 800; letter-spacing: -0.01em; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+.display-l { font-family: var(--font-display); font-size: 56px; line-height: 58px; font-weight: 800; letter-spacing: -0.01em; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+.display { font-family: var(--font-display); font-size: 36px; line-height: 38px; font-weight: 800; letter-spacing: -0.01em; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+.title-l { font-family: var(--font-display); font-size: 30px; line-height: 32px; font-weight: 800; letter-spacing: -0.01em; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+.title-m { font-family: var(--font-display); font-size: 22px; line-height: 26px; font-weight: 700; letter-spacing: -0.01em; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+.title-s { font-family: var(--font-display); font-size: 18px; line-height: 22px; font-weight: 700; letter-spacing: -0.01em; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+.logo { font-family: var(--font-sticker); font-size: 26px; line-height: 26px; font-weight: 400; }
+.button-lg { font-family: var(--font-sticker); font-size: 18px; line-height: 22px; font-weight: 400; letter-spacing: 0.01em; }
+.button-md { font-family: var(--font-sticker); font-size: 16px; line-height: 20px; font-weight: 400; letter-spacing: 0.01em; }
+.number { font-family: var(--font-sticker); font-size: 40px; line-height: 38px; font-weight: 400; }
+.body-l { font-family: var(--font-sans); font-size: 19px; line-height: 28px; font-weight: 400; }
+.row-title { font-family: var(--font-sans); font-size: 16px; line-height: 22px; font-weight: 800; }
+.body { font-family: var(--font-sans); font-size: 14px; line-height: 21px; font-weight: 400; }
+.field-label { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 800; }
+.meta { font-family: var(--font-sans); font-size: 13px; line-height: 18px; font-weight: 700; }
+.eyebrow { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 800; letter-spacing: 0.14em; }
+.tab { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 700; }
+.note { font-family: var(--font-hand); font-size: 19px; line-height: 23px; font-weight: 700; }
+.note-s { font-family: var(--font-hand); font-size: 15px; line-height: 19px; font-weight: 500; }

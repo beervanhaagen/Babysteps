@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Account maken</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&amp;family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&amp;family=Nunito:wght@400;700;800&amp;family=Shantell+Sans:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+@keyframes ts-bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+@keyframes ts-sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes ts-hop{0%,60%,100%{transform:translateY(0) scale(1,1)}20%{transform:translateY(-16px) scale(0.97,1.04)}40%{transform:translateY(0) scale(1.04,0.96)}}
+@keyframes ts-drift{0%,100%{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(10px,-10px) rotate(4deg)}}
+@keyframes ts-tw{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.25) rotate(18deg)}}
+.ts-bob,.ts-sway,.ts-hop,.ts-drift,.ts-tw{transform-box:fill-box;transform-origin:50% 100%}
+.ts-tw{transform-origin:50% 50%}
+.ts-bob{animation:ts-bob 2.6s ease-in-out infinite}
+.ts-sway{animation:ts-sway 3.2s ease-in-out infinite}
+.ts-hop{animation:ts-hop 2s ease-in-out infinite}
+.ts-drift{animation:ts-drift 5s ease-in-out infinite}
+.ts-tw{animation:ts-tw 2.4s ease-in-out infinite}
+.d1{animation-delay:-0.7s}.d2{animation-delay:-1.4s}.d3{animation-delay:-2.1s}
+.ts-btn{transition:transform .12s ease, box-shadow .12s ease}
+.ts-btn:hover{transform:translateY(-2px)}
+.ts-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #2D1E2F !important}
+@media (prefers-reduced-motion: reduce){.ts-bob,.ts-sway,.ts-hop,.ts-drift,.ts-tw{animation:none}.ts-btn{transition:none}}
+.sw{appearance:none;-webkit-appearance:none;width:50px;height:30px;border-radius:15px;background:#CBBFCB;box-shadow:inset 0 0 0 2px #2D1E2F;position:relative;flex:0 0 auto;margin:0;cursor:pointer}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:12px;background:#FFFFFF;box-shadow:0 0 0 2px #2D1E2F;transition:left .2s}
+.sw:checked{background:#3D6AE0;box-shadow:inset 0 0 0 2px #2D1E2F}
+.sw:checked::after{left:23px}
+.sw:focus-visible,.rc:focus-visible + span,a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #2D1E2F;outline-offset:3px}
+.rc{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.rc + span{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;box-sizing:border-box;border-radius:22px;border:2px solid #2D1E2F;background:#FBF8F2;font-weight:800;font-size:14px;cursor:pointer}
+.rc:checked + span{background:#FFD84D;color:#2D1E2F;box-shadow:0 3px 0 #2D1E2F;transform:translateY(-2px)}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F2ECE1; color: #2D1E2F; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<div style="position: relative; flex: 0 0 auto; z-index: 1"><div style="background: #BFD39A; padding: 0 24px 12px; position: relative"><div style="height: 56px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 6px 0 0"><a href="Onboarding-1.dc.html" aria-label="Terug" style="width: 44px; height: 44px; border-radius: 22px; background: transparent; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex: 0 0 auto"><g fill="none" stroke="#2D1E2F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></g></svg></a><div style="font-size: 16px; font-weight: 800"></div><div style="min-width: 44px; display: flex; justify-content: flex-end"></div></div><div style="max-width: 250px"><h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 700; letter-spacing: -0.01em; font-weight: 800; font-size: 30px; line-height: 1.05; color: #2D1E2F">Maak je TeddySteps-account</h1></div></div><svg viewBox="0 0 1000 24" width="100%" height="22" preserveAspectRatio="none" aria-hidden="true" style="display: block; margin-top: -1px"><path d="M0 0 H1000 V8 Q987.5 18 975 8 Q962.5 6 950 8 Q937.5 18 925 8 Q912.5 6 900 8 Q887.5 18 875 8 Q862.5 6 850 8 Q837.5 18 825 8 Q812.5 6 800 8 Q787.5 18 775 8 Q762.5 6 750 8 Q737.5 18 725 8 Q712.5 6 700 8 Q687.5 18 675 8 Q662.5 6 650 8 Q637.5 18 625 8 Q612.5 6 600 8 Q587.5 18 575 8 Q562.5 6 550 8 Q537.5 18 525 8 Q512.5 6 500 8 Q487.5 18 475 8 Q462.5 6 450 8 Q437.5 18 425 8 Q412.5 6 400 8 Q387.5 18 375 8 Q362.5 6 350 8 Q337.5 18 325 8 Q312.5 6 300 8 Q287.5 18 275 8 Q262.5 6 250 8 Q237.5 18 225 8 Q212.5 6 200 8 Q187.5 18 175 8 Q162.5 6 150 8 Q137.5 18 125 8 Q112.5 6 100 8 Q87.5 18 75 8 Q62.5 6 50 8 Q37.5 18 25 8 Q12.5 6 0 8 Z" fill="#BFD39A"/></svg></div><div aria-hidden="true" style="position: absolute; right: 10px; top: 40px; transform: rotate(8deg); pointer-events: none; z-index: 2"><div class="ts-drift "><svg viewBox="-6 0 212 200" width="96" aria-hidden="true" aria-label="Bizzy de bij" style="display: block; overflow: visible; "><defs><filter id="cr120" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.55 0 0 0 -0.2" result="s"/><feComposite in="s" in2="d" operator="in" result="sp"/><feMerge><feMergeNode in="d"/><feMergeNode in="sp"/></feMerge></filter><filter id="cr120r" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter></defs><g filter="url(#cr120)"><ellipse cx="82" cy="54" rx="24" ry="17" fill="#FFFFFF" fill-opacity="0.9" stroke="#2D1E2F" stroke-width="2.6" transform="rotate(-25 82 54)"/><ellipse cx="122" cy="50" rx="22" ry="16" fill="#FFFFFF" fill-opacity="0.9" stroke="#2D1E2F" stroke-width="2.6" transform="rotate(20 122 50)"/><path d="M78 70 Q 68 42 58 38 M108 66 Q 110 38 126 30" fill="none" stroke="#2D1E2F" stroke-width="3.4" stroke-linecap="round"/><circle cx="56" cy="37" r="5.5" fill="#2D1E2F"/><circle cx="128" cy="29" r="5.5" fill="#2D1E2F"/><ellipse cx="80" cy="182" rx="12" ry="7" fill="#2D1E2F"/><ellipse cx="118" cy="182" rx="12" ry="7" fill="#2D1E2F"/><path d="M170 114 L 192 122 L 170 130 Z" fill="#2D1E2F" stroke="#2D1E2F" stroke-width="3" stroke-linejoin="round"/><clipPath id="cr120c"><ellipse cx="100" cy="122" rx="74" ry="62"/></clipPath><ellipse cx="100" cy="122" rx="74" ry="62" fill="#FFD84D"/><g clip-path="url(#cr120c)" fill="#2D1E2F"><rect x="116" y="50" width="14" height="150" rx="7"/><rect x="141" y="50" width="14" height="150" rx="7"/><rect x="166" y="50" width="14" height="150" rx="7"/></g><ellipse cx="46" cy="132" rx="9.9" ry="7.7" fill="#FF6B8E" opacity="0.62"/><ellipse cx="98" cy="132" rx="9.9" ry="7.7" fill="#FF6B8E" opacity="0.62"/><circle cx="58" cy="114" r="5.3" fill="#2D1E2F"/><circle cx="86" cy="114" r="5.3" fill="#2D1E2F"/><circle cx="59.7" cy="112.3" r="1.7" fill="#FFFFFF"/><circle cx="87.7" cy="112.3" r="1.7" fill="#FFFFFF"/><path d="M65.7 124 q6.3 6.3 12.6 0" fill="none" stroke="#2D1E2F" stroke-width="3.1" stroke-linecap="round"/></g></svg></div></div>
+<main style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: 10px 24px 0; gap: 14px">
+
+<a href="Onboarding-2.dc.html" class="ts-btn" style="display: flex; width: 100%; box-sizing: border-box; position: relative; align-items: center; justify-content: center; gap: 10px; min-height: 58px; padding: 0 28px; border-radius: 29px; background: #2D1E2F; color: #F2ECE1; border: 2.5px solid #2D1E2F; box-shadow: 0 5px 0 #FF6B8E; font-family: 'Bagel Fat One', 'Nunito', system-ui, sans-serif; font-size: 18px; letter-spacing: 0.01em; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex: 0 0 auto"><g fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3 C 13 3.5, 12 5, 12 7 M12 8 C 9 6.5, 5 8, 5 13 C 5 17, 8 21, 10 21 C 11 21, 11.5 20.5, 12 20.5 C 12.5 20.5, 13 21, 14 21 C 16 21, 19 17, 19 14 C 17 13, 16.5 11, 18 9 C 16 7, 14 7.5, 12 8 Z"/></g></svg>Ga verder met Apple</a>
+<a href="Onboarding-2.dc.html" class="ts-btn" style="display: flex; width: 100%; box-sizing: border-box; position: relative; align-items: center; justify-content: center; gap: 10px; min-height: 58px; padding: 0 28px; border-radius: 29px; background: #F2ECE1; color: #2D1E2F; border: 2.5px solid #2D1E2F; box-shadow: 0 5px 0 #2D1E2F; font-family: 'Bagel Fat One', 'Nunito', system-ui, sans-serif; font-size: 18px; letter-spacing: 0.01em; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex: 0 0 auto"><g fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12 C 20 16.5, 16.5 20, 12 20 C 7.5 20, 4 16.5, 4 12 C 4 7.5, 7.5 4, 12 4 C 14.2 4, 16 4.8, 17.4 6.1 M20 12 H12"/></g></svg>Ga verder met Google</a>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800"><span style="flex: 1; border-top: 2px dashed #CFC4BC"></span>of met e-mail<span style="flex: 1; border-top: 2px dashed #CFC4BC"></span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="s2e" style="font-size: 14px; font-weight: 800">E-mailadres</label><input id="s2e" type="email" value="sam@voorbeeld.nl" style="height: 50px; box-sizing: border-box; padding: 0 16px; border-radius: 16px; border: 2px solid #2D1E2F; background: #FFFFFF; font-family: 'Nunito', system-ui, sans-serif; font-size: 16px; color: #2D1E2F"></div>
+<a href="Auth-3.dc.html" class="ts-btn" style="display: flex; width: 100%; box-sizing: border-box; position: relative; align-items: center; justify-content: center; gap: 10px; min-height: 58px; padding: 0 28px; border-radius: 29px; background: #3D6AE0; color: #FFFFFF; border: 2.5px solid #2D1E2F; box-shadow: 0 5px 0 #2D1E2F; font-family: 'Bagel Fat One', 'Nunito', system-ui, sans-serif; font-size: 18px; letter-spacing: 0.01em; text-decoration: none">Stuur me een code</a>
+<div style="font-size: 13px; line-height: 1.5; color: #5E4D5C; text-align: center">Door verder te gaan, ga je akkoord met onze <a href="#" style="font-weight: 800; color: #2D1E2F">voorwaarden</a> en <a href="#" style="font-weight: 800; color: #2D1E2F">privacybelofte</a>.</div>
+</main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

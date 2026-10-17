@@ -1,0 +1,180 @@
+@import url("https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&family=Nunito:wght@400;700;800&family=Shantell+Sans:wght@500;700&display=swap");
+
+/* TeddySteps components. Colours, sizes and radii come from tokens.css. */
+body { margin: 0; padding: 16px; background: var(--paper); color: var(--ink); font-family: var(--font-sans); }
+a { color: inherit; }
+button { font-family: inherit; }
+.ts-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.ts-col { display: flex; flex-direction: column; gap: 14px; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, .rc:focus-visible + span, .sw:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+/* ---- Motion: the gang never stands still ---- */
+@keyframes ts-bob { 0%,100% { transform: translateY(0) rotate(-3deg) } 50% { transform: translateY(-9px) rotate(3deg) } }
+@keyframes ts-sway { 0%,100% { transform: rotate(-7deg) } 50% { transform: rotate(7deg) } }
+@keyframes ts-hop { 0%,60%,100% { transform: translateY(0) scale(1,1) } 20% { transform: translateY(-16px) scale(.97,1.04) } 40% { transform: translateY(0) scale(1.04,.96) } }
+@keyframes ts-drift { 0%,100% { transform: translate(0,0) rotate(-4deg) } 50% { transform: translate(10px,-10px) rotate(4deg) } }
+@keyframes ts-tw { 0%,100% { transform: scale(1) rotate(0deg) } 50% { transform: scale(1.25) rotate(18deg) } }
+.ts-bob, .ts-sway, .ts-hop, .ts-drift { transform-origin: 50% 100%; display: inline-block; }
+.ts-bob { animation: ts-bob var(--bob) ease-in-out infinite; }
+.ts-sway { animation: ts-sway var(--sway) ease-in-out infinite; }
+.ts-hop { animation: ts-hop var(--hop) ease-in-out infinite; }
+.ts-drift { animation: ts-drift var(--drift) ease-in-out infinite; }
+.ts-tw-wrap { animation: ts-tw var(--twinkle) ease-in-out infinite; transform-origin: 50% 50%; }
+.d1 { animation-delay: -.7s } .d2 { animation-delay: -1.4s } .d3 { animation-delay: -2.1s }
+.ts-peek { pointer-events: none; z-index: 2; }
+@media (prefers-reduced-motion: reduce) { .ts-bob, .ts-sway, .ts-hop, .ts-drift, .ts-tw-wrap { animation: none } .ts-btn { transition: none } }
+
+/* ---- Type helpers ---- */
+.ts-title-l, .ts-title-s, .ts-display { font-family: var(--font-display); font-variation-settings: 'SOFT' 100, 'WONK' 1; letter-spacing: -.01em; margin: 0; color: var(--ink); }
+.ts-display { font-size: 36px; line-height: 38px; font-weight: 800; }
+.ts-title-l { font-size: 30px; line-height: 32px; font-weight: 800; }
+.ts-title-s { font-size: 18px; line-height: 22px; font-weight: 700; }
+.ts-eyebrow { font-size: 12px; line-height: 16px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.ts-meta { font-size: 13px; line-height: 18px; font-weight: 700; }
+.ts-muted { color: var(--ink-muted); }
+.ts-row-title { font-size: 16px; line-height: 22px; font-weight: 800; }
+.ts-row-body { font-size: 14px; line-height: 1.35; color: var(--ink-muted); }
+.ts-hand { font-family: var(--font-hand); font-weight: 700; line-height: 1.2; display: inline-block; }
+.ts-textlink { min-height: var(--tap-min); display: inline-flex; align-items: center; padding: 0 4px; font-size: 14px; font-weight: 800; color: var(--ink); }
+
+/* ---- Wordmark ---- */
+.ts-wordmark { position: relative; display: inline-block; font-family: var(--font-sticker); line-height: 1; white-space: nowrap; }
+.ts-wm-shadow { position: absolute; }
+.ts-wm-face { position: relative; }
+.ts-wm-star { position: absolute; display: block; }
+
+/* ---- Icon ---- */
+.ts-icon { display: block; flex: 0 0 auto; }
+
+/* ---- Buttons: stickers you could peel off ---- */
+.ts-btn { display: inline-flex; box-sizing: border-box; position: relative; align-items: center; justify-content: center; gap: 10px; border-radius: var(--radius-pill); border: var(--edge-bold) solid var(--ink); font-family: var(--font-sticker); letter-spacing: .01em; text-decoration: none; cursor: pointer; transition: transform var(--press) ease, box-shadow var(--press) ease; }
+.ts-btn:hover { transform: translateY(-2px); }
+.ts-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink) !important; }
+.ts-btn-lg { min-height: var(--button-lg); padding: 0 28px; font-size: 18px; box-shadow: var(--shadow-lg); }
+.ts-btn-md { min-height: var(--button-md); padding: 0 22px; font-size: 16px; box-shadow: var(--shadow-md); }
+.ts-btn-block { display: flex; width: 100%; }
+.ts-btn-primary { background: var(--bluebird); color: var(--on-bluebird); }
+.ts-btn-dark { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-rose); }
+.ts-btn-paper { background: var(--paper); color: var(--ink); }
+.ts-btn-sunshine { background: var(--sunshine); color: var(--ink); }
+.ts-btn-danger { background: var(--plum); color: var(--white); }
+.ts-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.ts-iconbtn { width: var(--tap-min); height: var(--tap-min); border-radius: var(--radius-pill); background: transparent; border: 0; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); cursor: pointer; padding: 0; }
+.ts-iconbtn-white { background: var(--white); }
+.ts-iconbtn-paper { background: var(--paper); border: var(--edge) solid var(--ink); }
+
+/* ---- Choice chips and switches ---- */
+.ts-choice { position: relative; display: inline-flex; }
+.rc { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.rc + span { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--tap-min); padding: 0 16px; box-sizing: border-box; border-radius: 22px; border: var(--edge) solid var(--ink); background: var(--card); font-weight: 800; font-size: 14px; cursor: pointer; }
+.rc:checked + span { background: var(--sunshine); color: var(--ink); box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+.ts-switchrow { display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 8px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.sw { appearance: none; -webkit-appearance: none; width: 50px; height: 30px; border-radius: 15px; background: var(--track-off); box-shadow: inset 0 0 0 2px var(--ink); position: relative; flex: 0 0 auto; margin: 0; cursor: pointer; }
+.sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 12px; background: var(--white); box-shadow: 0 0 0 2px var(--ink); transition: left .2s; }
+.sw:checked { background: var(--bluebird); }
+.sw:checked::after { left: 23px; }
+
+/* ---- Fields ---- */
+.ts-field { display: flex; flex-direction: column; gap: 6px; }
+.ts-field label { font-size: 14px; font-weight: 800; }
+.ts-field input, .ts-field textarea { height: var(--field); box-sizing: border-box; padding: 0 16px; border-radius: var(--radius-m); border: var(--edge) solid var(--ink); background: var(--white); font-family: var(--font-sans); font-size: 16px; color: var(--ink); }
+.ts-field input::placeholder { color: var(--ink-muted); }
+.ts-hint { font-size: 13px; color: var(--ink-muted); font-weight: 700; }
+.ts-field.is-error input { border-color: var(--plum); box-shadow: inset 0 0 0 1px var(--plum); }
+.ts-field.is-error .ts-hint { color: var(--plum); }
+.ts-code { display: flex; gap: 8px; }
+.ts-code-box { width: 46px; height: 58px; box-sizing: border-box; border-radius: var(--radius-m); border: var(--edge) solid var(--ink); background: var(--white); display: flex; align-items: center; justify-content: center; font-family: var(--font-sticker); font-size: 26px; }
+.ts-code-box.is-next { box-shadow: var(--shadow-sm); background: var(--sunshine); }
+
+/* ---- Header band with scalloped edge ---- */
+.ts-header { position: relative; z-index: 1; max-width: 390px; }
+.ts-header-band { padding: 0 24px 10px; position: relative; }
+.ts-header-bar { height: 56px; display: flex; align-items: center; justify-content: space-between; padding-top: 6px; }
+.ts-header-sub { font-size: 14px; font-weight: 800; margin-top: 4px; }
+.ts-steps { display: flex; align-items: center; gap: 10px; }
+.ts-steps-bar { flex: 1; display: flex; gap: 6px; }
+.ts-step { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.ts-step.is-done { background: var(--ink); }
+.ts-steps-label { font-size: 13px; font-weight: 800; }
+
+/* ---- Tab bar ---- */
+.ts-tabbar { height: var(--tabbar); box-sizing: border-box; padding: 6px 12px 18px; background: var(--white); border-top: var(--edge-bold) solid var(--ink); display: flex; align-items: center; justify-content: space-around; max-width: 390px; margin-top: 40px; }
+.ts-tab { min-width: 56px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; background: none; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer; }
+.ts-tab.is-on { font-weight: 800; }
+.ts-tab-pill { width: 44px; height: 30px; border-radius: 15px; background: var(--sunshine); display: flex; align-items: center; justify-content: center; }
+.ts-fab { width: var(--fab); height: var(--fab); padding: 0; border-radius: 31px; background: var(--bluebird); color: var(--on-bluebird); box-shadow: var(--shadow-lg); margin-top: -30px; }
+
+/* ---- Stickers ---- */
+.ts-sticker { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: var(--radius-s); border: var(--edge) solid var(--ink); font-size: 13px; font-weight: 800; white-space: nowrap; color: var(--ink); }
+.ts-sticker-sunshine { background: var(--sunshine); box-shadow: var(--shadow-sm); }
+.ts-sticker-white { background: var(--white); }
+.ts-sticker-lilac { background: var(--lilac); }
+.ts-sticker-pistachio { background: var(--pistachio); }
+.ts-sticker-butter { background: var(--butter); }
+
+/* ---- Avatar ---- */
+.ts-avatar { border-radius: var(--radius-pill); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-sticker); color: var(--ink); flex: 0 0 auto; border: var(--edge) solid var(--ink); box-sizing: border-box; }
+
+/* ---- Moment card ---- */
+.ts-moment { display: block; position: relative; text-decoration: none; color: var(--ink); background: var(--white); border: var(--edge) solid var(--ink); border-radius: var(--radius-l); box-shadow: var(--shadow-md); padding: 8px; max-width: 340px; }
+.ts-moment-photo { height: 140px; border-radius: 18px; border: var(--edge) solid var(--ink); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ts-moment-foot { padding: 10px 6px 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.ts-moment-foot .ts-meta { color: var(--ink-muted); font-size: 14px; }
+.ts-moment-hugs { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-s); background: var(--lilac); font-size: 13px; font-weight: 800; }
+
+/* ---- Range ---- */
+.ts-range { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 20px; background: var(--paper); border: var(--edge) solid var(--ink); max-width: 340px; }
+.ts-range-track { position: relative; height: 16px; box-sizing: border-box; border-radius: 8px; background: var(--lilac); border: var(--edge) solid var(--ink); }
+.ts-range-band { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: var(--cornflower); }
+.ts-range-now { position: absolute; top: -6px; width: 24px; height: 24px; box-sizing: border-box; border-radius: 12px; background: var(--tangerine); border: var(--edge-bold) solid var(--ink); }
+.ts-range-axis { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--ink-muted); }
+
+/* ---- Rows ---- */
+.ts-listrow { display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 6px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); max-width: 342px; }
+.ts-listrow.is-danger { color: var(--plum); }
+.ts-personrow { display: flex; align-items: center; gap: 12px; min-height: 64px; border-bottom: 2px dashed var(--line); max-width: 342px; }
+
+/* ---- Callout, empty slot ---- */
+.ts-callout { display: flex; align-items: center; gap: 12px; border: var(--edge) solid var(--ink); border-radius: 20px; box-shadow: var(--shadow-md); padding: 12px 14px; max-width: 342px; box-sizing: border-box; }
+.ts-emptyslot { display: flex; align-items: center; gap: 12px; min-height: 62px; padding: 0 14px; border-radius: 20px; border: var(--edge-dash) dashed var(--ink); background: var(--butter); text-decoration: none; color: var(--ink); max-width: 342px; box-sizing: border-box; }
+.ts-emptyslot-plus { width: 38px; height: 38px; box-sizing: border-box; border-radius: 19px; background: var(--bluebird); color: var(--on-bluebird); border: var(--edge) solid var(--ink); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+
+/* ---- Book cover ---- */
+.ts-book { position: relative; flex: 0 0 auto; overflow: hidden; border-radius: 4px; box-shadow: var(--shadow-book); box-sizing: border-box; }
+.ts-book-words { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding-bottom: 16%; }
+.ts-book-name { font-family: var(--font-sticker); line-height: .95; letter-spacing: -.01em; }
+.ts-book-sub { font-family: var(--font-hand); font-weight: 700; color: var(--forest); transform: rotate(-4deg); }
+
+/* ---- Voice note ---- */
+.ts-voice { display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; border-radius: 30px; background: var(--white); border: var(--edge) solid var(--ink); max-width: 320px; }
+.ts-voice-play { width: 44px; height: 44px; border-radius: 22px; background: var(--bluebird); color: var(--on-bluebird); border: var(--edge) solid var(--ink); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; cursor: pointer; padding: 0; }
+.ts-voice-wave { display: flex; align-items: center; gap: 3px; height: 24px; margin-top: 2px; }
+.ts-voice-wave span { width: 4px; border-radius: 2px; background: var(--ink); }
+
+/* ---- Hug notification, banner ---- */
+.ts-hugtoast { display: flex; align-items: center; gap: 12px; padding: 10px 22px 10px 8px; border-radius: 34px; background: var(--butter); border: var(--edge) solid var(--ink); box-shadow: var(--shadow-md); max-width: 342px; box-sizing: border-box; }
+.ts-hugtoast-badge { width: 54px; height: 54px; box-sizing: border-box; border-radius: 27px; background: var(--paper); border: var(--edge) solid var(--ink); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; overflow: hidden; }
+.ts-banner { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 18px; border: var(--edge) solid var(--ink); max-width: 342px; box-sizing: border-box; }
+
+/* ---- Leap timeline and next-up card ---- */
+.ts-leaps { display: flex; flex-direction: column; gap: 10px; padding: 64px 22px 0; box-sizing: border-box; }
+.ts-leaps-track { position: relative; height: 14px; border-radius: 7px; background: var(--white); border: var(--edge) solid var(--ink); }
+.ts-leaps-done { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--pistachio); }
+.ts-leap { position: absolute; top: 50%; transform: translate(-50%, -50%); }
+.ts-leap-dot { width: 26px; height: 26px; box-sizing: border-box; border-radius: 13px; border: var(--edge) solid var(--ink); background: var(--white); display: flex; align-items: center; justify-content: center; font: 800 12px/1 var(--font-sans); }
+.ts-leap.is-past .ts-leap-dot { background: var(--pistachio); }
+.ts-leap.is-next .ts-leap-dot { width: 40px; height: 40px; border-radius: 20px; border-width: 2.5px; background: var(--sunshine); box-shadow: var(--shadow-sm); }
+.ts-leap-tag { position: absolute; left: 50%; bottom: 48px; transform: translateX(-50%); white-space: nowrap; padding: 5px 12px; border-radius: var(--radius-s); border: var(--edge) solid var(--ink); background: var(--sunshine); box-shadow: var(--shadow-sm); font-size: 13px; font-weight: 800; }
+.ts-leaps-now { position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; box-sizing: border-box; border-radius: 11px; background: var(--tangerine); border: var(--edge-bold) solid var(--ink); }
+.ts-leaps-now-tag { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 800; }
+.ts-leaps-axis { display: flex; justify-content: space-between; margin-top: 30px; font-size: 12px; font-weight: 700; color: var(--ink-muted); }
+.ts-nextup { border: var(--edge-bold) solid var(--ink); border-radius: var(--radius-l); box-shadow: var(--shadow-md); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; max-width: 342px; box-sizing: border-box; }
+.ts-nextup-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.ts-nextup-list { margin: 0; padding-left: 18px; font-size: 14px; line-height: 21px; }
+.ts-nextup-list li { margin-bottom: 3px; }
+@media (max-width: 520px) {
+  .ts-leaps { padding: 60px 12px 0; }
+  .ts-leap-dot { width: 20px; height: 20px; font-size: 10px; }
+  .ts-leap.is-next .ts-leap-dot { width: 32px; height: 32px; }
+  .ts-leaps-axis span:not(:first-child):not(:last-child) { display: none; }
+}
