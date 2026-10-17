@@ -1,6 +1,6 @@
 # Analytics plan (launch)
 
-Status: proposal, 17 Oct 2026, reviewed by `tech-architect` (privacy first). Confirm the tooling once the stack is chosen. Not legal advice: everything marked "lawyer" is checked by a privacy lawyer before launch.
+Status: decided, 17 Oct 2026. Tooling confirmed with the stack (see `docs/bouwplan.md`): Aptabase and Sentry, both in their EU region and both in the app only. Reviewed by `tech-architect` (privacy first). Not legal advice: everything marked "lawyer" is checked by a privacy lawyer before launch.
 
 ## Principle: count the loop, never look at the family
 
@@ -19,7 +19,7 @@ We hold photos of babies. Analytics must never see them, and parents must be abl
 | 1. Our own database | The four MVP questions: retention, family love, invites, book list | SQL views over our own tables, aggregated weekly | The database already knows when moments, invites, reactions and sign-ups happen. Nothing leaves our system, and per-family retention needs no tracker. **This is the source of truth.** |
 | 2. Anonymous app events | Where parents get stuck: onboarding drop-off, abandoned adds, upload errors, which entry points work | **Aptabase** (EU region; confirm the location in its processing agreement) | No device IDs, no cookies, no persistent user IDs, short-lived session IDs only, IP not stored. SDKs for React Native, Flutter, Swift and Kotlin. Free up to 20,000 events a month, paid plans from $10 a month. |
 | 3. Landing page | Which campaigns and sections turn visitors into downloads | **Plausible** (EU, cookieless) | Cookieless web analytics with UTM and goals, so no cookie banner on the landing page. |
-| Crashes | What breaks | Crash reporting with an EU region and PII scrubbing on, no screenshots or breadcrumbs with text, tokens stripped from URLs (see `family-email.md` › Token hygiene) | `tech-architect` picks it with the stack. App only; nothing on the family page. |
+| Crashes | What breaks | **Sentry, EU region** (chosen when the organisation is created; can't be changed later), Developer plan. Settings: `sendDefaultPii: false`; no Replay integration; `attachScreenshot` and `attachViewHierarchy` off; touch and console breadcrumbs off; `beforeSend` clears `event.user` (Sentry adds an installation ID) and strips URLs and codes; `beforeBreadcrumb` strips query strings. | App only; nothing on the family page. |
 
 Considered and not chosen:
 
@@ -30,10 +30,10 @@ Considered and not chosen:
 
 - We expect layers 2 and 3 to fall under the Dutch exemption for analytics with little or no privacy impact (Telecommunicatiewet art. 11.7a), because they set no cookies, store no identifiers and do not keep IP addresses. **Lawyer:** confirm this, including whether the exemption covers an app SDK as well as cookies. We describe both layers in the privacy statement either way.
 - Layer 1 uses data we already hold to run the service. The proposed legal basis is legitimate interest (product improvement, aggregates only). **Lawyer:** confirm it for the privacy statement and the processing register.
-- The parent can switch layer 2 off in M6 Privacy en gegevens: "Anoniem meten wat beter kan" (on by default). When it is off, the SDK sends nothing.
+- The parent can switch layer 2 off in M6 Privacy en gegevens: "Anoniem meten wat beter kan" (on by default). The choice is stored in `profiles.analytics_opt_out`, so it follows the parent to every device; when it is on, the SDK is never started.
 - Family members are never tracked by an SDK.
 - Before launch, do a DPIA (privacy impact assessment): we process photos of children at scale, which likely makes it required. **Lawyer:** confirm its scope.
-- Keep a processor list with signed processing agreements: hosting, database, image storage, e-mail provider, Aptabase, Plausible and crash reporting.
+- Keep a processor list with signed processing agreements: Supabase (database, auth, storage, Frankfurt), Vercel (family page and landing), Lettermint (app mail), Expo (EAS Update sees IP and a random installation ID), Apple (APNs, Sign in with Apple), Google (FCM, Google Sign-In), Sentry, Aptabase and Plausible. Several are US companies with EU hosting. **Lawyer:** check the transfer basis (DPF or SCCs) in the DPIA.
 
 ## What the MVP has to prove (layer 1, from the database)
 
@@ -52,8 +52,8 @@ Also watch: time from sign-up to first moment (target: same day for 60%), and th
 Implementation:
 
 - A few SQL views (for example `metrics_weekly`), refreshed nightly by the database's own scheduler.
-- They run as saved queries in the database dashboard, under a read-only role that can only see the views. There is no custom internal page at launch.
-- The data model must include `trails.created_at`, `trails.deleted_at`, `moments.created_at`, `moments.week`, `reactions.created_at`, `circle_members.joined_at`, `invites.sent_at` and `accepted_at`, `book_list.joined_at`, `children.due_date`, and `children.leap_cards_on`. The last one is stored on the server, so the leap metric can be calculated.
+- They are read under the database role `metrics_reader`, which can only see the views. Supabase's SQL editor runs as admin, so we use either its "Read-only member" role (if our plan has it) or a separate read-only login from a local SQL tool. There is no custom internal page at launch.
+- The data model must include `trails.created_at`, `trails.deleted_at`, `moments.created_at`, `moments.trail_week`, `reactions.created_at`, `circle_members.invited_at` and `joined_at`, `parent_invites.sent_at` and `accepted_at`, `book_list.joined_at`, `family_visits_daily`, `children.due_date`, and `children.leap_cards_on`. The last one is stored on the server, so the leap metric can be calculated.
 - "Share cards per active trail" is the layer-2 total divided by the layer-1 active trails, as a rough ratio only.
 
 ## Event list (layer 2, Aptabase)
@@ -97,7 +97,8 @@ Do not add events without updating this file. `design-reviewer` and `tech-archit
 
 ## Retention and rights
 
-- **Raw events:** kept at most 13 months, **if Aptabase lets us set this. Verify before launch**; otherwise state their retention period.
-- **Deleting a trail:** its rows, photos and derivatives go after the 30-day undo. Database backups roll off within a further 30 days, so the privacy statement says "binnen 60 dagen volledig verwijderd".
+- **Raw events:** kept at most 13 months, **if Aptabase lets us set this. Verify before launch**; their privacy policy mentions up to 5 years with no deletion, in which case the privacy statement states their period. Sentry keeps errors 30 days (Developer plan).
+- **Deleting a trail:** its rows, photos and derivatives go after the 30-day undo. Supabase database backups (Pro) roll off within 7 days; storage (photos) is not part of those backups. The privacy statement says "binnen 60 dagen volledig verwijderd".
+- **Test phase:** while on Supabase Free (no backups), a weekly encrypted backup is kept on the owner's Mac for at most 4 weeks and wiped when we move to Pro. It is listed in the processing register.
 - **Family visits:** counted as one daily number per trail. Per person we store only `last_seen_at`, with no visit history.
 - **Layers 2 and 3** are designed to hold nothing linkable to a person, so there is nothing to delete there.

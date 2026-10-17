@@ -2,7 +2,7 @@
 
 Opgesteld door `tech-architect` op 17 oktober 2026. Stack: Expo (React Native) + Supabase Frankfurt + Lettermint. Prijzen en limieten gecontroleerd op 17 oktober 2026 (bronnen onderaan); wat niet gecontroleerd kon worden, staat erbij.
 
-**Status:** voorstel, wacht op akkoord van de eigenaar. Open vragen staan in §10.
+**Status:** goedgekeurd door de eigenaar op 17 oktober 2026, met alle adviezen. De besluiten staan in §10.
 
 ## 0. In het kort
 
@@ -254,18 +254,20 @@ Gebruik één bedrijfsadres (bijv. `apps@teddysteps.nl`), een wachtwoordmanager,
 7. M5 "Nieuws van TeddySteps" is marketing en vraagt aparte toestemming → niet bij de launch.
 8. Opnameformaat van berichtjes verschilt per browser → eerst testen.
 
-**Open vragen**
-1. Welk weeknummer telt? Advies: pad en boek vanaf de geboorte, sprongetjes vanaf de uitgerekende datum.
-2. Mogen ouders bij "Nog onderweg" al vastpinnen, en met welke weeklabels?
-3. Speciaal = automatisch elke eerste keer (advies), of een schakelaar?
-4. Familielink herbruikbaar per persoon met apparatenlijst en intrekken (advies), of één toestel?
-5. Zien familieleden elkaars reacties? Advies: aantal knuffels wel, berichtjes alleen ouders.
-6. Medeouder uitnodigen via e-mailadres (advies)?
-7. Als één ouder het pad verwijdert: melding en ongedaan maken voor de andere ouder? Advies: ja.
-8. Vercel Pro eerder? Advies: zodra de landingspagina openbaar is, of de pagina tot dan zonder prijs.
-9. Supabase Pro bij het eerste onbekende testgezin (advies) of pas bij de launch?
-10. Sign in with Apple alleen op iOS (advies)?
-11. Berichtjes van een ingetrokken familielid: blijven of weg? (Ook juristvraag.)
+Alle acht bevindingen hierboven worden overgenomen zoals voorgesteld (T2: de regel "Gezien door" vervalt).
+
+**Besluiten (17 oktober 2026)**
+1. **Weken:** pad en boek tellen vanaf de geboorte, sprongetjes vanaf de uitgerekende datum.
+2. **Vóór de geboorte:** bij de launch nog niet vastpinnen. Een ouder met "Nog onderweg" kan familie uitnodigen; het pad begint bij de geboorte. *(Standaardkeuze van de hoofdsessie, er was geen advies; de eigenaar kan dit nog wijzigen.)*
+3. **Speciaal:** automatisch elke foto in een "eerste keer"-moment, geen schakelaar.
+4. **Familielink:** herbruikbaar per persoon, max. 5 toestellen, apparatenlijst en intrekken in M3.
+5. **Reacties:** familie ziet het aantal knuffels; berichtjes zien alleen de ouders.
+6. **Medeouder:** uitnodigen via e-mailadres.
+7. **Pad verwijderen:** de andere ouder krijgt een melding en kan het ongedaan maken.
+8. **Vercel Pro:** zodra de landingspagina openbaar is met een prijs; tot dan een pagina zonder prijs.
+9. **Supabase Pro:** bij het eerste testgezin dat we niet persoonlijk kennen, bij 700 MB of bij de launch, wat het eerst komt.
+10. **Sign in with Apple:** alleen op iOS.
+11. **Berichtjes van een ingetrokken familielid:** blijven in het pad (een cadeau aan het kind). Vraagt het familielid om verwijdering, dan halen we ze bij de launch met de hand weg via hallo@. *(Standaardkeuze van de hoofdsessie; de jurist bevestigt.)*
 
 **Juristpunten**
 - Bestaand: art. 11.7a Tw voor Aptabase; gerechtvaardigd belang; DPIA-reikwijdte; zondagmail met boekprompt.

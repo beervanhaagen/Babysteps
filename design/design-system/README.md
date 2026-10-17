@@ -1,6 +1,10 @@
 TeddySteps turns a baby's first 18 months into a trail of moments that family follows along, and at 12 months it becomes a year book. The look is a riso-printed nursery picture book: warm paper, aubergine ink, soft colour blocks, crayon doodles, and a little gang of animals that wander through every screen. Every action is a bright blue sticker you want to press.
 
-Build every screen from `tokens.json` and the components on `window.TeddySteps`. Design phone-first at `screen` (390px). The app journeys canvas (52 screens) is the reference for layouts.
+Build every screen from `tokens.json` and the components on `window.TeddySteps`. Design phone-first at `screen` (390px). The app journeys canvas (55 screens) is the reference for layouts.
+
+## Platform
+
+The reference components here are DOM React. The app and the family page use a React Native version in `packages/ui` with the same names and props as `components/index.d.ts` (react-native-svg, Reanimated). Its tokens are generated from `tokens.json`; when they differ, `tokens.json` wins.
 
 ## Content fundamentals
 
@@ -41,11 +45,12 @@ One theme, **Paper**. Never hard-code a hex; use the tokens.
 - **Bagel Fat One** (`logo`, `button-lg`, `button-md`, `number`) for the wordmark, every button label, big numbers, avatar initials and book-cover names. Never for paragraphs.
 - **Nunito** for everything you read and tap: `row-title`, `body`, `field-label`, `meta`, `eyebrow`, `tab`.
 - **Shantell Sans** (`note`, `note-s`) for handwritten notes, rotated about -4deg.
-- All four load from Google Fonts (`components/bundle.css` imports them).
+- **Fonts are self-hosted, never loaded from Google Fonts**: bundled in the app (expo-font) and served as Latin-subset WOFF2 on familie.teddysteps.nl. The Google Fonts `@import` in `components/bundle.css` is only for the design boards.
+- React Native can't use Fraunces' variable axes, so the app uses static Fraunces instances baked with SOFT 100 and WONK 1.
 
 ## Shape, edge and depth
 
-- **Stickers.** Anything you can press or collect has an ink edge (`edge-bold` on buttons, `edge` on cards and fields) and a hard drop: `shadow-lg` on 58px buttons, `shadow-md` on cards, `shadow-sm` on week stickers. Pressing moves it 3px down into its shadow.
+- **Stickers.** Anything you can press or collect has an ink edge (`edge-bold` on buttons, `edge` on cards and fields) and a hard drop: `shadow-lg` on 58px buttons, `shadow-md` on cards, `shadow-sm` on week stickers. Pressing moves it 3px down into its shadow. In React Native the hard drop is `boxShadow` with 0 blur (new architecture).
 - **Tilt.** Moment cards and callouts tilt a degree or two, alternating, like postcards on a fridge. Fields, rows and buttons never tilt.
 - **Scallops.** Every screen header is a soft-block band with a scalloped bottom edge (`ScreenHeader`), with a character peeking over it.
 - Corners: `radius-pill` for buttons, avatars and switches; `radius-l` for cards; `radius-m` for fields; `radius-s` for stickers.
@@ -72,7 +77,7 @@ Four animals made like hand-cut stickers: one round body, one bold pattern, cray
 - `Doodle` (stars, twinkles, hearts, sparkles, suns, zigzags, squiggles) fill gaps and connect the gang to the content. Two to five per area, never behind body text.
 - The gang never stands still: slow loops of 2 to 5 seconds (`bob`, `sway`, `drift`, `hop`, `twinkle`), always offset with `delay` so nobody moves in sync.
 - Delight screens (splash, pinned, month birthday, recap, order placed) go full colour with the whole gang dancing. Everything else stays calm enough to use one-handed at 3 a.m.
-- Under `prefers-reduced-motion` all loops stop.
+- Under `prefers-reduced-motion` all loops stop. In the app they follow the system's Reduce Motion setting (`useReducedMotion`).
 
 ## Iconography
 

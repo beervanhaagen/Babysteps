@@ -41,6 +41,8 @@ Ship one loop: a parent pins a moment, family sends love within a day, the paren
 
 **Later:** T5 all weeks, A5 letter, B3 page editor, B9 books and prints, M2 siblings, F5 family settings, M4 founders screen, SH1 referral credit.
 
+**Where the build differs from the boards** (decided 2026-10-17, see `docs/bouwplan.md` §10): F1's link preview never shows the child's name or photo; T2 has no "Gezien door …" line per person; A1 has no video at launch; M7 becomes "Pad en account verwijderen" (Apple requires account deletion); M5 has no "Nieuws van TeddySteps" at launch; no pinning before birth at launch.
+
 All launch gaps are designed: terms and privacy promise sit on S2, feedback on M1 and X4. Analytics and family e-mail are decided in `docs/analytics.md` and `docs/family-email.md` (items marked "lawyer" still need a privacy lawyer before launch).
 
 ## Sprongetjes: "wat komt eraan"
@@ -81,8 +83,8 @@ Keep it light: no extra agents, no autonomous loops, and at most one review roun
 
 - `teddysteps.nl` and `www`: the landing page (Vercel), with Plausible only.
 - `familie.teddysteps.nl`: the private family page and the `/e/` image links. No analytics or third-party scripts at all (see `docs/family-email.md`).
-- `api.teddysteps.nl`: the backend, if the stack needs its own host.
-- Human mail (hallo@, feedback@) runs on TransIP Email. App mail (login codes, postcards, the Sunday email) goes from the subdomain `post.teddysteps.nl` through the EU e-mail provider `tech-architect` picks, with its own SPF, DKIM and DMARC, so problems with app mail never hurt the main domain.
+- No separate API host: the family page reaches Supabase through rewrites on `familie.teddysteps.nl` (`/api/*`, `/e/*`).
+- Human mail (hallo@, feedback@) runs on TransIP Email. App mail (login codes, postcards, the Sunday email) goes from the subdomain `post.teddysteps.nl` through **Lettermint** (EU), with its own SPF, DKIM and DMARC, so problems with app mail never hurt the main domain.
 - Never put tokens or personal data in query strings on the landing domain.
 
 ## Product rules (non-negotiable)
@@ -101,7 +103,7 @@ Paper ground (`paper`), aubergine ink (`ink`) for all text and outlines, **blueb
 
 ## Working agreements
 
-- Stack chosen (2026-10-17): **Expo (React Native) for iOS, Android and the family web view, Supabase in Frankfurt, Lettermint for app mail**, push straight to APNs/FCM (not Expo's push service). The build plan still needs the owner's OK before scaffolding.
+- Stack chosen (2026-10-17): **Expo (React Native) for iOS, Android and the family web view, Supabase in Frankfurt, Lettermint for app mail**, push straight to APNs/FCM (not Expo's push service). The build plan in `docs/bouwplan.md` is approved, including all its advice and the decisions in its §10; build in its step order.
 - **Keep running costs as low as possible until the idea has traction**: use free tiers where they are safe and move to paid plans only when usage or safety (backups of real photos) needs it. Agreed: free tiers during the build and test phase; from the official launch Supabase Pro and Vercel Pro (about €39 a month together) are fine.
 - Photos: keep a print-quality version (about 3600px) by default; special moments may be stored larger.
 - All accounts (Apple, Google, Supabase, Vercel, Lettermint, Expo) belong to Haagen Trade, with two-factor sign-in. The owner already has an Apple developer account.
