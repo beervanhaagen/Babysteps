@@ -6,7 +6,7 @@ export const CONTACT = 'hallo@teddysteps.nl';
 export const KEEP_POSTED = `mailto:${CONTACT}?subject=${encodeURIComponent('Hou me op de hoogte')}`;
 export const TEST_ALONG = `mailto:${CONTACT}?subject=${encodeURIComponent('Ik wil meetesten')}&body=${encodeURIComponent('Mijn kleintje is geboren in / wordt verwacht in: ')}`;
 
-export function page({ title, description, ogTitle = title, ogDescription = description, path, nav, navOnPhone = true, body }) {
+export function page({ title, description, ogTitle = title, ogDescription = description, path, nav, navOnPhone = true, robots, body }) {
   return `<!doctype html>
 <html lang="nl">
 <head>
@@ -14,7 +14,7 @@ export function page({ title, description, ogTitle = title, ogDescription = desc
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${title}</title>
 <meta name="description" content="${description}">
-<link rel="canonical" href="https://teddysteps.nl${path}">
+${robots ? `<meta name="robots" content="${robots}">` : `<link rel="canonical" href="https://teddysteps.nl${path}">`}
 <meta name="theme-color" content="#F2ECE1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TeddySteps">
@@ -37,7 +37,7 @@ export function page({ title, description, ogTitle = title, ogDescription = desc
 <a class="lp-skip" href="#inhoud">Naar de inhoud</a>
 <header class="lp-wrap lp-nav">
 <a class="lp-logo" href="/" aria-label="TeddySteps, naar de homepagina">${ui('Wordmark', { size: 34 })}</a>
-<nav aria-label="Hoofdmenu"${navOnPhone ? '' : ' class="lp-hide-s"'}>${nav}</nav>
+${nav ? `<nav aria-label="Hoofdmenu"${navOnPhone ? '' : ' class="lp-hide-s"'}>${nav}</nav>` : ''}
 </header>
 <main id="inhoud">
 ${body}

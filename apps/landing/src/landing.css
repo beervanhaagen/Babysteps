@@ -144,6 +144,9 @@ details.lp-faq p { margin: 0 0 14px; font-size: 16px; line-height: 25px; color: 
 .lp-privacy-item p { font-size: 16px; line-height: 25px; }
 .lp-privacy-item:target { background: var(--butter); }
 
+/* ---- 404 ---- */
+.lp-notfound { display: flex; flex-direction: column; gap: var(--space-6); padding-top: var(--space-7); padding-bottom: var(--lp-section); max-width: 840px; }
+
 /* ---- Phone width ---- */
 @media (max-width: 760px) {
   .lp-hide-s { display: none !important; }

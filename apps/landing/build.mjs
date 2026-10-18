@@ -4,6 +4,7 @@ import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { home } from './src/home.mjs';
+import { notFound } from './src/notfound.mjs';
 import { privacy } from './src/privacy.mjs';
 import { designSystem, ui } from './src/ui.mjs';
 
@@ -21,4 +22,12 @@ writeFileSync(join(dist, 'styles.css'), css);
 writeFileSync(join(dist, 'favicon.svg'), ui('Hug', { size: 64 }).replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
 writeFileSync(join(dist, 'index.html'), home());
 writeFileSync(join(dist, 'privacy/index.html'), privacy());
+writeFileSync(join(dist, '404.html'), notFound());
+// Search engines may index the site (owner, 18 October); the 404 page itself says noindex.
+const pages = ['/', '/privacy'];
+writeFileSync(join(dist, 'robots.txt'), 'User-agent: *\nAllow: /\n\nSitemap: https://teddysteps.nl/sitemap.xml\n');
+writeFileSync(
+  join(dist, 'sitemap.xml'),
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map((p) => `  <url><loc>https://teddysteps.nl${p}</loc></url>`).join('\n')}\n</urlset>\n`,
+);
 console.log('Built apps/landing/dist');

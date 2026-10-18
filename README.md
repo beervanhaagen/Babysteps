@@ -8,7 +8,7 @@ A private baby-memory app for Dutch parents. Product, design and working rules: 
 | --- | --- |
 | `apps/mobile` | The parent app (Expo, iOS and Android, Expo Router). The only place where Sentry and Aptabase may be used. |
 | `apps/family` | The family page on familie.teddysteps.nl (Expo for web, one page without a router, so it stays light). Deployed to Vercel with `vercel.json`. |
-| `apps/landing` | The landing page on teddysteps.nl, after `design/brand/TeddySteps-landing.dc.html`. Plain HTML and CSS without any script: `build.mjs` renders the design-system components (`bundle.js`) to HTML at build time. Pages are in `src/` (home and `/privacy`, the privacy promise the family page links to). |
+| `apps/landing` | The landing page on teddysteps.nl, after `design/brand/TeddySteps-landing.dc.html`. Plain HTML and CSS without any script: `build.mjs` renders the design-system components (`bundle.js`) to HTML at build time. Pages are in `src/` (home, `/privacy` with the privacy promise the family page links to, and the 404 page); the build also writes `robots.txt` and `sitemap.xml`. |
 | `packages/ui` | The design system in React Native, same names and props as `design/design-system/components/index.d.ts`. `src/tokens.ts` and `src/art.ts` (the gang, The Hug, icons, doodles) are generated from the design system; fonts are built by `scripts/build-fonts.py`. In development, open the gallery at `/galerij` (app: button on the home screen; family page: `localhost:8081/galerij`). |
 | `packages/core` | Shared logic without UI: week counting, texts, types. |
 | `supabase` | Local Supabase config; migrations, functions and RLS tests follow. |
