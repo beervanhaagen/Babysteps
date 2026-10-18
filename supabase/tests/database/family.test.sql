@@ -1,7 +1,7 @@
 -- Privacy tests for step 4: the circle, links, sessions and hugs. Run: npx supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(33);
+select plan(36);
 
 -- The same SHA-256 the edge function uses, for the steps that stand in for it.
 create function pg_temp.h(text) returns text language sql as $$ select encode(extensions.digest($1, 'sha256'), 'hex') $$;
@@ -23,6 +23,7 @@ select public.create_trail('Lotte', '2026-03-12', '2026-03-19');
 create temp table invite on commit drop as select * from public.invite_family('Oma Ria', 'oma');
 grant select on invite to service_role;
 select is((select count(*) from public.circle_members), 1::bigint, 'the parent sees the invited person');
+select throws_ok($$select email from public.circle_members$$, '42501', null, 'but never their e-mail address');
 select ok((select length(code) >= 40 from invite), 'the link code is long and random');
 reset role;
 
@@ -119,6 +120,8 @@ select public.family_leave((select member_id from invite));
 select is((select count(*) from public.family_member(pg_temp.h('s9'))), 0::bigint, 'after leaving, the page is closed');
 select is((select email from public.circle_members where id = (select member_id from invite)), null, 'and no e-mail address stays behind');
 reset role;
+select is((select count(*) from private.family_sessions where circle_member_id = (select member_id from invite)), 0::bigint, 'her devices are deleted, not just blocked');
+select is((select count(*) from private.access_keys where circle_member_id = (select member_id from invite)), 0::bigint, 'and so are her links');
 
 select * from finish();
 rollback;

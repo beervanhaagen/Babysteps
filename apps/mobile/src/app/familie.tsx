@@ -28,7 +28,7 @@ export default function Family() {
       >
         {members && !members.length ? <Text style={styles.empty}>Nog niemand in de kring. Nodig iemand uit, dan kijken ze mee en sturen ze knuffels.</Text> : null}
         <CircleList members={members ?? []} onEdit={(m) => router.push({ pathname: '/kring/[id]', params: { id: m.id } })} />
-        <Text style={styles.note}>Familie kan foto’s niet downloaden of buiten TeddySteps delen. Dat zet je aan bij Privacy en gegevens.</Text>
+        <Text style={styles.note}>Familie heeft geen downloadknop, tenzij je die aanzet bij Privacy en gegevens. Een schermafbeelding kan altijd, dus nodig alleen mensen uit die je vertrouwt.</Text>
       </Screen>
       <Tabs active="family" />
     </View>

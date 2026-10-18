@@ -43,7 +43,11 @@ export function Photo({ uri, label }: { uri?: string; label: string }) {
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+      // No "Bewaar afbeelding" on a long press or right click: there is no download unless the
+      // parents allow it (M6). A screenshot can't be stopped, and the privacy promise says so.
+      draggable={false}
+      onContextMenu={(e) => e.preventDefault()}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', WebkitTouchCallout: 'none', userSelect: 'none' }}
     />
   );
 }
