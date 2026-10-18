@@ -1,27 +1,10 @@
-import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, Character, color, space, text, Wordmark } from '@teddysteps/ui';
+import { Redirect } from 'expo-router';
+import { useAuth } from '@/lib/auth';
 
-// Placeholder until S1 Splash is built (step 2 of docs/bouwplan.md).
-export default function Home() {
-  return (
-    <View style={styles.screen}>
-      <Wordmark size={48} />
-      <Character name="bo" size={140} />
-      <Text style={styles.body}>Hier komt het pad van je kleintje. We zijn nog aan het bouwen.</Text>
-      {__DEV__ ? <Button onPress={() => router.push('/galerij')}>Bekijk de galerij</Button> : null}
-    </View>
-  );
+const HOME = { 'signed-out': '/start', onboarding: '/kleintje', ready: '/pad', offline: '/opnieuw' } as const;
+
+export default function Index() {
+  const { state } = useAuth();
+  if (state.status === 'loading') return null;
+  return <Redirect href={HOME[state.status]} />;
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: space.space6,
-    gap: space.space5,
-    backgroundColor: color.paper,
-  },
-  body: { ...text('body'), color: color.inkMuted, textAlign: 'center' },
-});

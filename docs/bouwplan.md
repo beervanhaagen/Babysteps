@@ -86,6 +86,19 @@ Nog te doen:
 - **Op een Android-toestel controleren:** tekstpositie van Bagel en Nunito, en of de paarse overdruk van het woordmerk (`mixBlendMode`) verschijnt.
 - **S3 (stap 2):** CodeInput krijgt de echte invoer.
 
+**Stap 2 (18 oktober 2026): wat gebouwd is en wat openstaat**
+
+Gebouwd: S1, O1, S2, S3, S4 en O2 met inloggen via een e-mailcode (6 cijfers, 10 minuten geldig, één per minuut); de sessie versleuteld op de telefoon (sleutel in Keychain/Keystore); de tabellen `profiles`, `trails`, `children` en `trail_parents` met RLS; namen en profielfoto van Apple en Google worden bij binnenkomst gewist; een pad starten gaat via de databasefunctie `create_trail`; 17 privacytests in `supabase/tests`, ook in CI. Alle schermen achter de juiste inlogstatus (Expo Router `Stack.Protected`).
+
+Open, voor de eigenaar:
+- **Voornaam van de ouder:** nergens in de lanceringsschermen gevraagd, terwijl M3 ("Sam (jij)") en de familiepagina hem gebruiken. M1 toont op het bord bovendien een achternaam ("Sam de Vries"). Voorstel: één veld "Hoe heet jij?" op O2 of O3.
+- **Teksten die niet uit een bord komen:** S4 zegt "Je pad heeft je gemist." (de naam van het kind is voor het inloggen nog niet bekend); het scherm achter O1 "Ik ben uitgenodigd door familie" heeft nog geen bord.
+
+Later in het plan:
+- **Apple en Google inloggen:** zodra de accounts er zijn (§9); tot dan alleen de e-mailcode, geen knoppen die niets doen.
+- **Echte server (bij het aanmaken):** dezelfde instellingen als lokaal (code 10 minuten, één per minuut, bevestigen verplicht), de mailsjablonen uit `supabase/templates`, en een limiet op het aantal codes per uur. Lokaal weigert de server een tweede code binnen de minuut niet; de app laat zelf 60 seconden wachten.
+- **"Foto toevoegen" op O2** komt met de fotostroom in stap 3.
+
 **Repo-indeling**
 
 ```

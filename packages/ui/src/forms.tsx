@@ -56,17 +56,58 @@ export interface CodeInputProps {
   value?: string;
   length?: number;
   label?: string;
+  /** Without it the boxes only show a value (as in the gallery). */
+  onChangeText?: (code: string) => void;
+  autoFocus?: boolean;
+  invalid?: boolean;
 }
 
-/** The boxes of a login code. The actual input comes with S3 in step 2. */
-export function CodeInput({ value = '', length = 6, label = 'Code van zes cijfers' }: CodeInputProps) {
-  return (
-    <View role="group" aria-label={label} style={styles.code}>
+/**
+ * The boxes of a login code (S3). One invisible input lies over the boxes, so typing, pasting
+ * and the phone's "code from Mail/Messages" suggestion all work; screen readers hear one field.
+ */
+export function CodeInput({ value = '', length = 6, label = 'Code van zes cijfers', onChangeText, autoFocus, invalid }: CodeInputProps) {
+  const focus = useFocusRing();
+  const boxes = (
+    <View style={styles.code} aria-hidden={onChangeText ? true : undefined}>
       {Array.from({ length }, (_, i) => (
-        <View key={i} accessible aria-label={`Cijfer ${i + 1}${value.charAt(i) ? `: ${value.charAt(i)}` : ''}`} style={[styles.codeBox, i === value.length && styles.codeNext]}>
+        <View
+          key={i}
+          accessible={!onChangeText}
+          aria-label={onChangeText ? undefined : `Cijfer ${i + 1}${value.charAt(i) ? `: ${value.charAt(i)}` : ''}`}
+          style={[styles.codeBox, i === value.length && styles.codeNext, invalid && styles.codeInvalid]}
+        >
           <Text style={styles.codeDigit}>{value.charAt(i)}</Text>
         </View>
       ))}
+    </View>
+  );
+  if (!onChangeText) {
+    return (
+      <View role="group" aria-label={label}>
+        {boxes}
+      </View>
+    );
+  }
+  return (
+    <View style={focus.ring}>
+      {boxes}
+      <TextInput
+        accessibilityLabel={label}
+        aria-invalid={invalid || undefined}
+        value={value}
+        onChangeText={(text) => onChangeText(text.replace(/\D/g, '').slice(0, length))}
+        autoFocus={autoFocus}
+        onFocus={focus.onFocus}
+        onBlur={focus.onBlur}
+        keyboardType="number-pad"
+        inputMode="numeric"
+        textContentType="oneTimeCode"
+        autoComplete="one-time-code"
+        maxLength={length}
+        caretHidden
+        style={styles.codeCapture}
+      />
     </View>
   );
 }
@@ -100,5 +141,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   codeNext: { backgroundColor: color.sunshine, boxShadow: shadow.shadowSm },
+  codeInvalid: { borderColor: color.plum },
+  // Covers the boxes so a tap anywhere focuses it; nearly transparent but still tappable.
+  codeCapture: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, opacity: 0.02, color: 'transparent', fontSize: 1 },
   codeDigit: { fontFamily: fontFamily('sticker', 400), fontSize: 26, color: color.ink, includeFontPadding: false },
 });

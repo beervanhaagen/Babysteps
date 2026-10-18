@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Platform, type ViewStyle } from 'react-native';
+import { Platform } from 'react-native';
 import { color } from './tokens';
 
 // Focus ring from the design system: 3px solid ink, 3px offset, only for keyboard focus.
-const RING: ViewStyle = { outlineStyle: 'solid', outlineWidth: 3, outlineColor: color.ink, outlineOffset: 3 };
+// Typed by its shape only, so it fits both View and TextInput styles.
+const RING = { outlineStyle: 'solid', outlineWidth: 3, outlineColor: color.ink, outlineOffset: 3 } as const;
 
 export function useFocusRing() {
   const [focused, setFocused] = useState(false);

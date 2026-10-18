@@ -19,10 +19,13 @@ Needs Node 22. For the local database also Docker Desktop and the Supabase CLI.
 
 ```sh
 npm install
-npm run mobile          # parent app: scan the QR code with Expo Go, or press i for the iOS simulator
+npx supabase start      # local database, auth and mail catcher (Docker Desktop must be running)
+npm run local-env       # points the app at it (writes apps/mobile/.env.local, not committed)
+npm run mobile          # parent app: scan the QR code with Expo Go on a phone on the same Wi-Fi
 npm run family          # family page in the browser
-supabase start          # local database (Docker must be running)
 ```
+
+Local Supabase uses ports 554xx, so it can run next to other local Supabase projects. Login codes don't leave your Mac: read them in the mail catcher at http://127.0.0.1:55324. The database dashboard is at http://127.0.0.1:55323. `npx supabase db reset` starts the local database fresh from the migrations.
 
 ## Checks (the same as CI)
 
@@ -32,6 +35,7 @@ npm run art             # regenerate the gang, icons and doodles after changing 
 npm run typecheck
 npm run lint
 npm test
+npx supabase test db    # privacy tests on the database (local Supabase must be running)
 npm run family:export && npm run check:web-bundle
 ```
 

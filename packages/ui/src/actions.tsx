@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon, type IconName } from './brand';
 import { useFocusRing } from './focus';
@@ -107,6 +107,20 @@ export function ChoiceChip({ children, selected, type = 'radio', onPress }: Choi
   );
 }
 
+/** A labelled group of ChoiceChips, like "Is je baby er al?" on O2. */
+export function ChoiceGroup({ label, type = 'radio', children }: { label: string; type?: 'radio' | 'checkbox'; children: ReactNode }) {
+  return (
+    <View style={styles.choiceGroup}>
+      <Text aria-hidden style={text('fieldLabel')}>
+        {label}
+      </Text>
+      <View role={type === 'radio' ? 'radiogroup' : 'group'} aria-label={label} style={styles.choiceRow}>
+        {children}
+      </View>
+    </View>
+  );
+}
+
 export interface SwitchProps {
   label: string;
   hint?: string;
@@ -176,6 +190,8 @@ const styles = StyleSheet.create({
     borderColor: color.ink,
     backgroundColor: color.card,
   },
+  choiceGroup: { gap: 8 },
+  choiceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chipOn: { backgroundColor: color.sunshine, boxShadow: shadow.shadowSm, transform: [{ translateY: -2 }] },
   switchRow: {
     flexDirection: 'row',

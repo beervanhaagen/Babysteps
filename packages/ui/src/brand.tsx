@@ -100,7 +100,7 @@ export function Wordmark({ size = 54, tone = 'paper', twinkle = true }: { size?:
   const onDark = tone === 'header';
   const letters = { fontFamily: fontFamily('sticker', 400), fontSize: size, lineHeight: size * 1.15 };
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel="TeddySteps" style={styles.wordmark}>
+    <View accessible accessibilityRole="image" accessibilityLabel="TeddySteps">
       <Text style={[letters, styles.wordmarkShadow, { left: offset, top: offset, color: onDark ? color.ink : color.cornflower }]}>teddysteps</Text>
       <Text style={[letters, { color: onDark ? color.paper : color.rose, mixBlendMode: onDark ? 'normal' : 'multiply' }]}>teddysteps</Text>
       {twinkle && !onDark ? (
@@ -113,6 +113,5 @@ export function Wordmark({ size = 54, tone = 'paper', twinkle = true }: { size?:
 }
 
 const styles = StyleSheet.create({
-  wordmark: { alignSelf: 'flex-start' },
   wordmarkShadow: { position: 'absolute' },
 });

@@ -28,6 +28,15 @@ module.exports = defineConfig([
     ignores: ['**/dist/*', '**/.expo/*', 'design/**', 'design_brainstorm/**', 'supabase/**'],
   },
   {
+    // Resolve each app's "@/..." paths from its own tsconfig.
+    settings: {
+      'import/resolver': {
+        typescript: { project: ['apps/*/tsconfig.json'] },
+        node: true,
+      },
+    },
+  },
+  {
     files: ['apps/family/**', 'packages/**'],
     rules: appOnlySdks,
   },
