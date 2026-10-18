@@ -18,7 +18,7 @@ export default function InviteFamily() {
     <Screen
       header={{
         title: 'Wie lopen er met je mee?',
-        color: 'butter',
+        color: onboarding ? 'lilac' : 'pistachio',
         step: onboarding ? [2, 3] : undefined,
         onBack: onboarding ? undefined : router.back,
         character: 'bizzy',

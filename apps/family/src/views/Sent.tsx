@@ -4,22 +4,20 @@ import { StyleSheet, Text, View } from 'react-native';
 import { border, Button, Character, color, fontFamily, Hug, Scallop, shadow, space, text } from '@teddysteps/ui';
 import { api, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
-import { Heading, Page } from './shared';
+import { Heading, Page, TextLink } from './shared';
 
 // F4 Stuur liefde, after "Knuffelen" on a card (the hug itself is sent from the card, so
 // reloading this page never sends another). Voice notes come in step 6. "Naar Sam en Alex"
 // needs the parents' first names, which aren't asked yet.
-export function Sent({ page, onChange }: { page: FamilyPage; onChange: () => void }) {
+export function Sent({ page, onBookList }: { page: FamilyPage; onBookList: () => void }) {
   const name = page.child.firstName;
-  const [onList, setOnList] = useState(page.me.onBookList);
   const [failed, setFailed] = useState(false);
   useView('Knuffel verstuurd');
 
   async function joinList() {
     try {
       await api.bookList();
-      setOnList(true);
-      onChange();
+      onBookList();
     } catch {
       setFailed(true);
     }
@@ -33,7 +31,7 @@ export function Sent({ page, onChange }: { page: FamilyPage; onChange: () => voi
           <Heading style={styles.title}>Knuffel verstuurd!</Heading>
         </View>
       </View>
-      <Scallop color="lilac" />
+      <Scallop color="pistachio" />
       <Page>
         <View style={styles.book}>
           <View style={styles.cover} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
@@ -42,7 +40,7 @@ export function Sent({ page, onChange }: { page: FamilyPage; onChange: () => voi
           <View style={styles.bookText}>
             <Text style={text('titleS')}>Dit later op papier?</Text>
             <Text style={styles.body}>Na een jaar wordt {possessive(name)} pad een boek. Ook een voor jou?</Text>
-            {onList ? (
+            {page.me.onBookList ? (
               <Text role="status" style={styles.done}>
                 Genoteerd! We laten het je weten.
               </Text>
@@ -58,9 +56,7 @@ export function Sent({ page, onChange }: { page: FamilyPage; onChange: () => voi
             ) : null}
           </View>
         </View>
-        <Button block variant="paper" onPress={() => navigate('/')}>
-          Terug naar de kaartjes
-        </Button>
+        <TextLink onPress={() => navigate('/')}>Terug naar de kaartjes</TextLink>
       </Page>
     </View>
   );
@@ -68,9 +64,9 @@ export function Sent({ page, onChange }: { page: FamilyPage; onChange: () => voi
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
-  band: { backgroundColor: color.lilac, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 10 },
+  band: { backgroundColor: color.pistachio, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 10 },
   status: { flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%', maxWidth: 520, alignSelf: 'center' },
-  title: { fontSize: 24, lineHeight: 28, flex: 1 },
+  title: { ...text('titleL'), flex: 1 },
   book: {
     flexDirection: 'row',
     gap: 14,

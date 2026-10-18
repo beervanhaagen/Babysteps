@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     borderWidth: border.edge,
     borderColor: color.ink,
-    backgroundColor: color.rose,
+    backgroundColor: color.lilac,
   },
   hugsText: { fontFamily: fontFamily('sans', 800), fontSize: 14, color: color.ink },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, paddingHorizontal: GUTTER },

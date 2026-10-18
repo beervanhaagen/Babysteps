@@ -27,7 +27,7 @@ Opgesteld door `tech-architect` op 17 oktober 2026. Stack: Expo (React Native) +
 
 | Risico | Maatregel (€0) |
 |---|---|
-| Geen back-ups: een foute migratie of delete en echte babyfoto's zijn weg. | Wekelijkse back-up op de Mac van de eigenaar (`supabase db dump` + `rclone sync` van de opslag) naar een versleutelde schijfkopie, 4 weken bewaren, wissen zodra Pro draait. "Alles downloaden" (M6) al in stap 4. |
+| Geen back-ups: een foute migratie of delete en echte babyfoto's zijn weg. | Wekelijkse back-up op de Mac van de eigenaar (`supabase db dump` + `rclone sync` van de opslag) naar een versleutelde schijfkopie, 4 weken bewaren, wissen zodra Pro draait. "Alles downloaden" (M6) in stap 8. |
 | 1 GB opslag is snel vol. | Maximaal 5 testgezinnen die we persoonlijk kennen, maximaal ~8 weken. Bij 700 MB naar Pro. |
 | Project pauzeert na 1 week zonder activiteit. | Alleen tijdens het bouwen met nepdata; bouwen gebeurt lokaal. |
 | Testers denken dat het al "echt" is. | Korte afspraak: "testversie, bewaar je foto's ook op je telefoon". |
@@ -128,7 +128,7 @@ Nog te doen:
 
 **Stap 4 (20 oktober 2026): wat gebouwd is en wat openstaat**
 
-Gebouwd: de kring (`circle_members`, met relatie tot het kind), persoonlijke links (alleen de hash van de code bewaard), familiesessies met cookie `__Host-ts` (max. 5 toestellen per persoon), knuffels (`reactions`), één bezoektelling per pad per dag, en de boeklijst. Familie heeft geen database-login: alles loopt via de serverfunctie `family-api`, die links van 15 minuten geeft naar kijk- en kleine versies van momenten die klaar zijn. Familiepagina: `/j#code` (code direct uit de adresbalk), F2, F3 en F7 (breed scherm), knuffelen, F4 met "Laat het me weten". App: O3 na O2 (overslaan kan), "Iemand toevoegen" (naam en relatie), F1 met deelmenu en "Kopieer de link", het Familie-tabblad met nieuwe link en "Uit de kring halen", T6 Activiteit met belletje op het pad, knuffels op T1 en T2. 20 nieuwe databasetests (61 in totaal) en een end-to-end-test van uitnodigen tot intrekken.
+Gebouwd: de kring (`circle_members`, met relatie tot het kind), persoonlijke links (alleen de hash van de code bewaard), familiesessies met cookie `__Host-ts` (max. 5 toestellen per persoon), knuffels (`reactions`), één bezoektelling per pad per dag, en de boeklijst. Familie heeft geen database-login: alles loopt via de serverfunctie `family-api`, die links van 15 minuten geeft naar kijk- en kleine versies van momenten die klaar zijn. Familiepagina: `/j#code` (code direct uit de adresbalk), F2, F3 en F7 (breed scherm), knuffelen, F4 met "Laat het me weten". App: O3 na O2 (overslaan kan), "Iemand toevoegen" (naam en relatie), F1 met deelmenu en "Kopieer de link", het Familie-tabblad met nieuwe link en "Uit de kring halen", T6 Activiteit met belletje op het pad, knuffels op T1 en T2. 20 nieuwe databasetests (61 in totaal, na de reviews 74) en een end-to-end-test van uitnodigen tot intrekken.
 
 Bewuste afwijkingen van de borden (voor de design-review):
 - **Headerkleur:** F3, F7 en T6 in pistachio (familie) in plaats van rose; rose is in het ontwerpsysteem een accent, geen headerband.
@@ -137,10 +137,20 @@ Bewuste afwijkingen van de borden (voor de design-review):
 - **F3/F4:** "Inspreken" en het berichtje komen in stap 6.
 - **F1:** het linkvoorbeeld zonder naam of foto van het kind (besluit 17 oktober).
 
+Uit de reviews van stap 4 al opgelost: een nieuwe link stopt ook alle toestellen waarop de oude link al geopend was (handig bij een doorgestuurde link), en de teksten in F1 en "Wijzig" zeggen dat; dezelfde telefoon die de link opnieuw opent houdt zijn sessie en telt niet als nieuw toestel; het zesde toestel krijgt een eigen melding in plaats van "link werkt niet"; familiesessies verlopen na 180 dagen zonder bezoek; foute codes worden per (ingekort, gehasht) IP en in totaal beperkt en na een uur gewist, het IP-adres zelf wordt nergens bewaard; "Ik wil niet meer meekijken" op F2 (twee keer tikken) wist het e-mailadres en alle toestellen; de familiepagina laadt per 12 kaartjes ("Eerdere kaartjes") en vraagt op de telefoon alleen kleine foto's op; F7 op laptopbreedte heeft twee kolommen zoals het bord (groot nieuwste moment, "Eerder" in een raster, rechts begroeting, kaartjes, boek en privacyregel); knuffelen toont meteen "Je knuffelde dit" en de telling; privacyregel en link naar de privacybelofte op F2; laadtekst in de HTML en opnieuw laden na 10 minuten weg; T6-rijen openen het moment en "Nieuw" wordt voorgelezen; O3 in lila tijdens onboarding. 33 familietests (74 databasetests in totaal) en een uitgebreide end-to-end-test: claim van een andere site geweigerd, cookie-instellingen, geen printpaden, vijf toestellen plus een zesde, nieuwe link, afmelden en intrekken.
+
 Nog te doen:
-- **Bij het online zetten:** de rewrite `/api/*` naar `family-api` en de exacte Supabase-host in `img-src` (zie README); testen dat de cookie door de rewrite van Vercel komt (§2, reserve: Vercel-functies in Frankfurt).
+- **Bij het online zetten:** de rewrite `/api/*` naar `family-api` en de exacte Supabase-host in `img-src` (zie README); testen dat de cookie door de rewrite van Vercel komt (§2, reserve: Vercel-functies in Frankfurt); controleren dat `x-forwarded-for` achter Vercel het echte IP van de bezoeker is, anders telt de beperking op foute codes iedereen samen.
+- **`og:image`** (De Knuffel, absolute URL) voor het WhatsApp-linkvoorbeeld; nu alleen titel en tekst.
+- **"Alles downloaden"** stond in stap 4 maar is nog niet gebouwd; schuift naar M6 (export) in stap 8. Tot dan geldt de back-up op de Mac (§1).
+- **Opruimen:** een dagelijkse taak (pg_cron) wist ingetrokken sessies en links na 30 dagen.
+- **Vóór stap 7:** `access_keys` krijgt `expires_at` en de soorten voor e-mailknoppen (7 dagen) en `/e/`-foto's.
+- **Stap 5 (push):** trigger op `reactions` met een wachtrij, één melding per moment per 10 minuten gebundeld ("Oma Ria en 2 anderen…"), tabel `push_tokens` per toestel.
+- **Sentry (stap 10):** de code staat in de route-parameters van F1 (`/uitnodiging/[id]?code=`); die moet uit breadcrumbs en URL's blijven (`beforeBreadcrumb`).
 - **Stap 7 (mail):** het e-mailadres uit F2 wordt bewaard maar nog niet bevestigd; kaartjes gaan pas na bevestiging.
 - **M3 (stap 8):** apparaten per persoon tonen en per toestel intrekken, de andere ouder uitnodigen.
+- **Besluit eigenaar:** mogen ouders zien wanneer iemand voor het laatst keek (`last_seen_on`, alleen een datum)? Nu niet getoond.
+- **Privacyverklaring (jurist):** een eigen blok voor familieleden zonder account, waar F2 naar linkt.
 
 **Repo-indeling**
 

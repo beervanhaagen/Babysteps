@@ -1,8 +1,8 @@
 // The family page's only door to the data (docs/family-email.md, "Family page sign-in").
 // Family has no database login: a personal link code is swapped once for a session cookie
 // (__Host-ts, HttpOnly), and every request after that is checked here with the service role.
-// Family only ever gets the view and small versions of moments that are ready, through
-// signed links that expire after 15 minutes; never a print version.
+// Family only ever gets the view or small version of moments that are ready, 12 at a time,
+// through signed links that expire after 15 minutes; never a print version.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -69,23 +69,23 @@ async function signed(paths: string[]): Promise<Map<string, string>> {
   return urls;
 }
 
-async function page(who: { member: string; trail: string }) {
-  const [{ data: child }, { data: me }, { data: moments }, { data: hugs }] = await Promise.all([
+const PAGE_SIZE = 12;
+
+/** One page of postcards: at most 12, links only for the version this screen shows. */
+async function page(who: { member: string; trail: string }, skip: number, wide: boolean) {
+  const [{ data: child }, { data: me }, { data: rows }] = await Promise.all([
     service.from('children').select('first_name, birth_date').eq('trail_id', who.trail).single(),
     service.from('circle_members').select('label, relation, email, email_frequency, joined_at, book_list_at').eq('id', who.member).single(),
-    service
-      .from('moments')
-      .select('id, trail_week, caption, is_first, first_label, happened_on, created_at, moment_photos(position, width, height, view_path, small_path)')
-      .eq('trail_id', who.trail)
-      .eq('status', 'ready')
-      .is('deleted_at', null)
-      .order('trail_week', { ascending: false })
-      .order('created_at', { ascending: false }),
-    service.from('reactions').select('moment_id, circle_member_id').eq('trail_id', who.trail).eq('kind', 'hug'),
+    // One more than shown, to know whether there are older ones.
+    service.rpc('family_page', { member: who.member, skip, page_size: PAGE_SIZE + 1 }),
   ]);
   type Photo = { position: number; width: number; height: number; view_path: string; small_path: string };
-  const photos = (moments ?? []).flatMap((m) => (m.moment_photos as Photo[]).flatMap((p) => [p.view_path, p.small_path]));
-  const urls = await signed(photos);
+  type Row = { id: string; trail_week: number; caption: string | null; is_first: boolean; first_label: string | null; day: string; hugs: number; my_hugs: number; photos: Photo[] | null };
+  const all = (rows ?? []) as Row[];
+  const moments = all.slice(0, PAGE_SIZE);
+  // Phones get the small version, laptops the view version; never both, never print.
+  const pathOf = (p: Photo) => (wide ? p.view_path : p.small_path);
+  const urls = await signed(moments.flatMap((m) => (m.photos ?? []).map(pathOf)));
   return {
     child: { firstName: child?.first_name, birthDate: child?.birth_date },
     me: {
@@ -96,21 +96,22 @@ async function page(who: { member: string; trail: string }) {
       joined: !!me?.joined_at,
       onBookList: !!me?.book_list_at,
     },
-    moments: (moments ?? []).map((m) => ({
+    moments: moments.map((m) => ({
       id: m.id,
       week: m.trail_week,
       caption: m.caption,
       isFirst: m.is_first,
       firstLabel: m.first_label,
-      day: m.happened_on ?? m.created_at.slice(0, 10),
-      photos: [...(m.moment_photos as Photo[])]
-        .sort((a, b) => a.position - b.position)
-        .map((p) => ({ width: p.width, height: p.height, view: urls.get(p.view_path), small: urls.get(p.small_path) })),
-      hugs: (hugs ?? []).filter((h) => h.moment_id === m.id).length,
-      myHugs: (hugs ?? []).filter((h) => h.moment_id === m.id && h.circle_member_id === who.member).length,
+      day: m.day,
+      photos: (m.photos ?? []).map((p) => ({ width: p.width, height: p.height, url: urls.get(pathOf(p)) })),
+      hugs: m.hugs,
+      myHugs: m.my_hugs,
     })),
+    more: all.length > PAGE_SIZE,
   };
 }
+
+const sessionCookie = (token: string) => `${COOKIE}=${token}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`;
 
 Deno.serve(async (request) => {
   const route = new URL(request.url).pathname.split('/family-api')[1] || '/';
@@ -120,6 +121,7 @@ Deno.serve(async (request) => {
   if (route === '/claim' && request.method === 'POST') {
     const code = typeof body.code === 'string' ? body.code : '';
     if (!/^[A-Za-z0-9_-]{20,100}$/.test(code)) return json(404, { error: 'unknown link' });
+    const existing = cookie(request);
     const token = newToken();
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
     const { data } = await service.rpc('family_claim', {
@@ -127,17 +129,26 @@ Deno.serve(async (request) => {
       session_hash: await sha256(token),
       device: deviceHint(request.headers.get('user-agent') ?? ''),
       ip,
+      existing_session_hash: existing ? await sha256(existing) : null,
     });
-    if (!data) return json(404, { error: 'unknown link' });
-    return json(200, { ok: true }, {
-      'Set-Cookie': `${COOKIE}=${token}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`,
-    });
+    const result = (data as { member: string | null; status: string }[] | null)?.[0];
+    // The same device opening its link again keeps its session (and renews the cookie).
+    if (result?.status === 'same' && existing) return json(200, { ok: true }, { 'Set-Cookie': sessionCookie(existing) });
+    if (result?.status === 'ok') return json(200, { ok: true }, { 'Set-Cookie': sessionCookie(token) });
+    if (result?.status === 'full') return json(409, { error: 'five devices' });
+    return json(404, { error: 'unknown link' });
   }
 
   const who = await member(request);
   if (!who) return json(401, { error: 'no access' });
 
-  if (route === '/page' && request.method === 'GET') return json(200, await page(who));
+  if (route === '/page' && request.method === 'GET') {
+    const params = new URL(request.url).searchParams;
+    const skip = Number(params.get('skip'));
+    const data = await page(who, Number.isInteger(skip) && skip > 0 ? Math.min(skip, 10_000) : 0, params.get('wide') === '1');
+    // Every visit renews the cookie, so a session lasts 180 days after its last use.
+    return json(200, data, { 'Set-Cookie': sessionCookie(cookie(request)!) });
+  }
 
   if (route === '/join' && request.method === 'POST') {
     const frequency = FREQUENCIES.includes(body.frequency) ? body.frequency : 'weekly';
@@ -151,12 +162,18 @@ Deno.serve(async (request) => {
   if (route === '/hug' && request.method === 'POST') {
     const { data, error } = await service.rpc('family_hug', { member: who.member, hugged_moment: body.moment });
     if (error) return json(404, { error: 'unknown moment' });
-    return json(200, { mine: data });
+    const counts = (data as { mine: number; total: number }[])[0];
+    return json(200, counts);
   }
 
   if (route === '/book' && request.method === 'POST') {
     await service.rpc('family_book_list', { member: who.member });
     return json(200, { ok: true });
+  }
+
+  if (route === '/leave' && request.method === 'POST') {
+    await service.rpc('family_leave', { member: who.member });
+    return json(200, { ok: true }, { 'Set-Cookie': `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
   }
 
   return json(404, { error: 'not found' });

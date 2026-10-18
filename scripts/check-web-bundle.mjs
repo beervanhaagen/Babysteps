@@ -12,7 +12,9 @@ const dist = join(family, 'dist');
 
 // Hosts that only appear as text inside React, react-native-web and SVG markup (error messages,
 // namespaces); nothing loads from them.
-const ALLOWED_HOSTS = ['www.w3.org', 'react.dev', 'necolas.github.io', 'github.com'];
+// teddysteps.nl is our own landing page, only linked to (the privacy promise); the CSP keeps
+// the page from loading anything from it.
+const ALLOWED_HOSTS = ['www.w3.org', 'react.dev', 'necolas.github.io', 'github.com', 'teddysteps.nl'];
 const FORBIDDEN = [
   'sentry', 'aptabase', 'googleapis', 'gstatic', 'google-analytics', 'googletagmanager', 'firebase',
   'posthog', 'mixpanel', 'amplitude', 'segment.io', 'bugsnag', 'datadog', 'logrocket',

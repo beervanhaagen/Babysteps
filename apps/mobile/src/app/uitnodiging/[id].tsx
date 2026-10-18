@@ -34,7 +34,7 @@ export default function InviteMessage() {
 
   return (
     <Screen
-      header={{ title: member ? `Dit krijgt ${member.label}` : 'Dit krijgen ze', color: 'butter', onBack: router.back }}
+      header={{ title: member ? `Dit krijgt ${member.label}` : 'Dit krijgen ze', color: 'pistachio', onBack: router.back }}
       footer={
         <>
           <Button block icon="share" onPress={share}>
@@ -61,7 +61,9 @@ export default function InviteMessage() {
       </View>
       <TextField label="Je eigen tekst" value={message} onChangeText={setMessage} multiline maxLength={300} />
       <Text style={styles.note}>
-        De link is alleen voor deze persoon. Stuurt iemand hem door? Dan kun je hem in Familie intrekken en een nieuwe sturen.
+        {member
+          ? `Deze link is alleen voor ${member.label}. Doorgestuurd? Stuur ${member.label} dan in Familie een nieuwe link: de oude stopt, ook op apparaten waar hij al geopend is.`
+          : 'Deze link is alleen voor deze persoon. Doorgestuurd? Stuur dan in Familie een nieuwe link: de oude stopt, ook op apparaten waar hij al geopend is.'}
       </Text>
     </Screen>
   );

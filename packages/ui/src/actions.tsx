@@ -111,10 +111,10 @@ export function ChoiceChip({ children, selected, type = 'radio', onPress }: Choi
 }
 
 /** A labelled group of ChoiceChips, like "Is je baby er al?" on O2. */
-export function ChoiceGroup({ label, type = 'radio', children }: { label: string; type?: 'radio' | 'checkbox'; children: ReactNode }) {
+export function ChoiceGroup({ label, type = 'radio', size = 'md', children }: { label: string; type?: 'radio' | 'checkbox'; size?: 'md' | 'lg'; children: ReactNode }) {
   return (
     <View style={styles.choiceGroup}>
-      <Text aria-hidden style={text('fieldLabel')}>
+      <Text aria-hidden style={[text('fieldLabel'), size === 'lg' && { fontSize: 16, lineHeight: 22 }]}>
         {label}
       </Text>
       <View role={type === 'radio' ? 'radiogroup' : 'group'} aria-label={label} style={styles.choiceRow}>

@@ -1,24 +1,26 @@
 import { possessive } from '@teddysteps/core';
 import { useState } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Linking, StyleSheet, Text, View } from 'react-native';
 import { Button, ChoiceChip, ChoiceGroup, color, fontFamily, Hug, TextField, useAnnounce, useLoop } from '@teddysteps/ui';
 import { api, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
-import { Heading, Page } from './shared';
+import { Heading, Page, TextLink } from './shared';
 
 type Frequency = FamilyPage['me']['frequency'];
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
 
-// F2 Uitnodiging geaccepteerd, also "Kaartjes instellen" later (`editing`).
-// The board says "Sam nodigt je uit"; the parent's first name isn't asked yet.
-export function Join({ page, editing, onSaved }: { page: FamilyPage; editing?: boolean; onSaved: () => void }) {
+// F2 Uitnodiging geaccepteerd, also "Kaartjes instellen" later (`editing`), with the way out:
+// "Ik wil niet meer meekijken". The board says "Sam nodigt je uit"; the parent's first name
+// isn't asked yet.
+export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; editing?: boolean; onSaved: () => void; onLeft: () => void }) {
   const name = page.child.firstName;
   const [label, setLabel] = useState(page.me.label);
   const [email, setEmail] = useState(page.me.email ?? '');
   const [frequency, setFrequency] = useState<Frequency>(page.me.joined ? page.me.frequency : 'weekly');
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const bob = useLoop('bob');
   useView(editing ? 'Je kaartjes' : `Uitnodiging voor ${possessive(name)} pad`);
   useAnnounce(error);
@@ -37,6 +39,16 @@ export function Join({ page, editing, onSaved }: { page: FamilyPage; editing?: b
     }
   }
 
+  async function leave() {
+    if (!leaving) return setLeaving(true);
+    try {
+      await api.leave();
+      onLeft();
+    } catch {
+      setError('Dat lukte even niet. Probeer het zo nog eens.');
+    }
+  }
+
   return (
     <Page background={color.butter}>
       <Animated.View style={[styles.hug, { transform: bob }]}>
@@ -45,7 +57,7 @@ export function Join({ page, editing, onSaved }: { page: FamilyPage; editing?: b
       <Heading>{editing ? 'Je kaartjes' : `Je bent uitgenodigd voor ${possessive(name)} pad!`}</Heading>
       {editing ? null : <Text style={styles.lead}>Kijk mee met elk nieuw moment. Geen app, geen wachtwoord.</Text>}
       <TextField size="lg" label={`Hoe noemt ${name} jou?`} value={label} onChangeText={setLabel} maxLength={40} autoComplete="off" />
-      <ChoiceGroup label="Hoe vaak wil je een kaartje in je mail?">
+      <ChoiceGroup size="lg" label="Hoe vaak wil je een kaartje in je mail?">
         <ChoiceChip selected={frequency === 'each'} onPress={() => setFrequency('each')}>
           Bij elk moment
         </ChoiceChip>
@@ -74,11 +86,28 @@ export function Join({ page, editing, onSaved }: { page: FamilyPage; editing?: b
           {error}
         </Text>
       ) : null}
+      <Text style={styles.small}>
+        De ouders zien hoe {name} jou noemt, je knuffels en of je meekijkt. Je e-mailadres gebruiken we alleen voor je kaartjes.{' '}
+        <Text accessibilityRole="link" style={styles.smallLink} onPress={() => Linking.openURL('https://teddysteps.nl/privacy')}>
+          Onze privacybelofte
+        </Text>
+      </Text>
       <View style={styles.action}>
         <Button block onPress={save} busy={busy}>
           {editing ? 'Opslaan' : `Open ${possessive(name)} pad`}
         </Button>
       </View>
+      {editing ? (
+        <>
+          <TextLink onPress={() => navigate('/')}>Terug naar de kaartjes</TextLink>
+          {leaving ? (
+            <Text role="alert" style={styles.leaveText}>
+              Dan werkt je link niet meer en wissen we je e-mailadres. Weet je het zeker?
+            </Text>
+          ) : null}
+          <TextLink onPress={leave}>{leaving ? 'Ja, ik wil niet meer meekijken' : 'Ik wil niet meer meekijken'}</TextLink>
+        </>
+      ) : null}
     </Page>
   );
 }
@@ -87,5 +116,8 @@ const styles = StyleSheet.create({
   hug: { alignSelf: 'center', marginTop: 16, transformOrigin: '50% 100%' },
   lead: { fontFamily: fontFamily('sans', 400), fontSize: 19, lineHeight: 28, color: color.ink },
   error: { fontFamily: fontFamily('sans', 700), fontSize: 14, color: color.plum },
+  small: { fontFamily: fontFamily('sans', 700), fontSize: 14, lineHeight: 20, color: color.inkMuted },
+  smallLink: { fontFamily: fontFamily('sans', 800), color: color.ink, textDecorationLine: 'underline' },
   action: { marginTop: 8 },
+  leaveText: { fontFamily: fontFamily('sans', 800), fontSize: 16, lineHeight: 22, color: color.plum, textAlign: 'center' },
 });

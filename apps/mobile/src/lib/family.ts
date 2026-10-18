@@ -70,7 +70,7 @@ export async function inviteFamily(label: string, relation: Relation | null) {
   return { memberId: row.member_id, code: row.code };
 }
 
-/** A fresh link for someone; the old one stops working, devices already in stay in. */
+/** A fresh link for someone; the old link and every device it was opened on stop working. */
 export async function newFamilyLink(memberId: string): Promise<string> {
   const { data, error } = await supabase.rpc('new_family_link', { member: memberId });
   if (error) throw error;
@@ -99,6 +99,8 @@ export interface ActivityItem {
 export function useActivity() {
   const [items, setItems] = useState<ActivityItem[] | null>(null);
   const refresh = useCallback(async () => {
+    // Hugs that arrive after this moment stay new, even if they're in this fetch's results.
+    const fetchedAt = new Date().toISOString();
     const [hugs, joined] = await Promise.all([
       supabase
         .from('reactions')
@@ -136,8 +138,8 @@ export function useActivity() {
       })),
     ].sort((a, b) => b.at.localeCompare(a.at));
     setItems(list);
-    const unseen = list.filter((i) => i.kind === 'hug' && !i.seen).map((i) => i.key);
-    if (unseen.length) await supabase.from('reactions').update({ seen_at: new Date().toISOString() }).in('id', unseen);
+    // Everything up to the fetch counts as seen, also beyond the 100 shown.
+    await supabase.from('reactions').update({ seen_at: new Date().toISOString() }).is('seen_at', null).lte('created_at', fetchedAt);
   }, []);
   useFocusEffect(
     useCallback(() => {

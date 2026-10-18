@@ -53,7 +53,7 @@ Implementation:
 
 - A few SQL views (for example `metrics_weekly`), refreshed nightly by the database's own scheduler.
 - They are read under the database role `metrics_reader`, which can only see the views. Supabase's SQL editor runs as admin, so we use either its "Read-only member" role (if our plan has it) or a separate read-only login from a local SQL tool. There is no custom internal page at launch.
-- The data model must include `trails.created_at`, `trails.deleted_at`, `moments.created_at`, `moments.trail_week`, `reactions.created_at`, `circle_members.invited_at` and `joined_at`, `parent_invites.sent_at` and `accepted_at`, `book_list.joined_at`, `family_visits_daily`, `children.due_date`, and `children.leap_cards_on`. The last one is stored on the server, so the leap metric can be calculated.
+- The data model must include `trails.created_at`, `trails.deleted_at`, `moments.created_at`, `moments.trail_week`, `reactions.created_at`, `circle_members.invited_at` and `joined_at`, `parent_invites.sent_at` and `accepted_at`, `circle_members.book_list_at`, `family_visits_daily`, `children.due_date`, and `children.leap_cards_on`. The last one is stored on the server, so the leap metric can be calculated.
 - "Share cards per active trail" is the layer-2 total divided by the layer-1 active trails, as a rough ratio only.
 
 ## Event list (layer 2, Aptabase)
@@ -100,5 +100,5 @@ Do not add events without updating this file. `design-reviewer` and `tech-archit
 - **Raw events:** kept at most 13 months, **if Aptabase lets us set this. Verify before launch**; their privacy policy mentions up to 5 years with no deletion, in which case the privacy statement states their period. Sentry keeps errors 30 days (Developer plan).
 - **Deleting a trail:** its rows, photos and derivatives go after the 30-day undo. Supabase database backups (Pro) roll off within 7 days; storage (photos) is not part of those backups. The privacy statement says "binnen 60 dagen volledig verwijderd".
 - **Test phase:** while on Supabase Free (no backups), a weekly encrypted backup is kept on the owner's Mac for at most 4 weeks and wiped when we move to Pro. It is listed in the processing register.
-- **Family visits:** counted as one daily number per trail. Per person we store only `last_seen_at`, with no visit history.
+- **Family visits:** counted as one daily number per trail. Per person we store only `last_seen_on` (a date), with no visit history; per device `last_used_on` and a rough `device_hint`.
 - **Layers 2 and 3** are designed to hold nothing linkable to a person, so there is nothing to delete there.

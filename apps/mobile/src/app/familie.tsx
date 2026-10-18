@@ -21,13 +21,14 @@ export default function Family() {
       <Screen
         header={{
           title: `${possessive(name)} kring`,
-          subtitle: joined === 1 ? '1 persoon loopt mee' : `${joined} mensen lopen mee`,
+          subtitle: joined === 0 ? 'Nog niemand loopt mee' : joined === 1 ? '1 persoon loopt mee' : `${joined} mensen lopen mee`,
           color: 'pistachio',
           character: 'puddle',
         }}
       >
         {members && !members.length ? <Text style={styles.empty}>Nog niemand in de kring. Nodig iemand uit, dan kijken ze mee en sturen ze knuffels.</Text> : null}
         <CircleList members={members ?? []} onEdit={(m) => router.push({ pathname: '/kring/[id]', params: { id: m.id } })} />
+        <Text style={styles.note}>Familie kan foto’s niet downloaden of buiten TeddySteps delen. Dat zet je aan bij Privacy en gegevens.</Text>
       </Screen>
       <Tabs active="family" />
     </View>
@@ -37,4 +38,5 @@ export default function Family() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
   empty: { ...text('body'), fontSize: 15, lineHeight: 22 },
+  note: { ...text('meta'), color: color.inkMuted, marginTop: 8 },
 });

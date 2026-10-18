@@ -1,7 +1,7 @@
 import { daysBetween, todayInAmsterdam } from '@teddysteps/core';
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
-import { Avatar, border, color, fontFamily, Hug, text } from '@teddysteps/ui';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Avatar, border, color, fontFamily, Hug, text, useFocusRing } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
 import { TextLink } from '@/components/TextLink';
 import { useActivity, type ActivityItem } from '@/lib/family';
@@ -42,6 +42,7 @@ export default function Activity() {
 }
 
 function Row({ item }: { item: ActivityItem }) {
+  const focus = useFocusRing();
   const title = item.kind === 'hug' ? `${item.who} stuurde een knuffel` : `${item.who} loopt nu mee`;
   const sub =
     item.kind === 'hug'
@@ -51,8 +52,18 @@ function Row({ item }: { item: ActivityItem }) {
         : item.frequency === 'each'
           ? 'Krijgt bij elk moment een kaartje'
           : 'Krijgt elke zondag een kaartje';
+  const isNew = item.kind === 'hug' && !item.seen;
+  const open = item.momentId ? () => router.push(`/moment/${item.momentId}`) : undefined;
   return (
-    <View style={styles.row} accessible accessibilityLabel={`${title}. ${sub}`}>
+    <Pressable
+      disabled={!open}
+      onPress={open}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      accessibilityRole={open ? 'link' : undefined}
+      accessibilityLabel={`${isNew ? 'Nieuw. ' : ''}${title}. ${sub}`}
+      style={[styles.row, focus.ring]}
+    >
       {item.kind === 'hug' ? (
         <View style={[styles.badge, !item.seen && styles.badgeNew]}>
           <Hug size={40} decorative />
@@ -66,7 +77,7 @@ function Row({ item }: { item: ActivityItem }) {
           {sub}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

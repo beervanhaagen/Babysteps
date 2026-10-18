@@ -39,11 +39,17 @@
         height: 100%;
         flex: 1;
       }
+      /* Shown until the page has loaded; React replaces it. */
+      .loading {
+        margin: auto;
+        font: 800 18px/1.4 "Nunito-ExtraBold", system-ui, sans-serif;
+        color: #2D1E2F;
+      }
     </style>
   </head>
 
   <body>
     <noscript>Zet JavaScript aan om deze pagina te bekijken.</noscript>
-    <div id="root"></div>
+    <div id="root"><p class="loading">Even geduld…</p></div>
   </body>
 </html>

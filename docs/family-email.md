@@ -15,7 +15,8 @@ Status: decided, 17 Oct 2026, confirmed with the stack (Expo web on Vercel, Supa
 - **The code sits after the `#`.** Invite links look like `https://familie.teddysteps.nl/j#<code>`. Browsers never send the part after `#` to a server, so the code never lands in any log, and WhatsApp's link preview only sees `/j`.
 - **Swapped once for a cookie.** The page reads the code, removes it from the address bar right away (`history.replaceState`) and sends it in the request body (never the URL) to `/api/claim`. That sets the cookie `__Host-ts` (HttpOnly, Secure, SameSite=Lax, 180 days, renewed on use).
 - **Generic link preview.** The Open Graph tags of `/j` never show the child's name or a photo ("Je bent uitgenodigd op TeddySteps", with The Hug), plus `noindex`. The child's name is only in the message text the parent sends.
-- **Personal and reusable.** A family member's link works on new devices (Oma's iPad) until the parent revokes it, up to 5 devices. M3 shows "op 2 apparaten" and revokes all sessions at once.
+- **Personal and reusable.** A family member's link works on new devices (Oma's iPad) up to 5 devices; opening it again on a device that is already in creates no new session, and a sixth device is refused (nobody is pushed out). "Nieuwe link sturen" stops the old link and every device; "Uit de kring halen" stops everything and wipes the e-mail address. Family can stop themselves too ("Ik wil niet meer meekijken").
+- **Sessions last 180 days after their last use**, on the server and in the cookie (renewed on every visit).
 - **E-mail buttons** carry their own sign-in code after the `#`, valid for 7 days and only for that recipient.
 - Failed claims are rate-limited per IP (20 per 10 minutes); POST requests must come from the family page itself (`Sec-Fetch-Site: same-origin`, or an Origin on the allow-list).
 - **Built (step 4):** `supabase/functions/family-api` (routes `/claim`, `/page`, `/join`, `/hug`, `/book`) with the `family_*` database functions, which only the service role may call. Family gets signed links (15 minutes) to view and small versions of ready moments only. Locally `scripts/family-dev.mjs` plays the part of the Vercel rewrites.
@@ -67,7 +68,7 @@ The privacy statement says this in plain Dutch, and that is why photos in the ma
 
 ## Other rules
 
-- **No tracking pixels and no open tracking.** Family visits are counted as one daily number per trail. Per person we store only `last_seen_at`, with no visit history.
+- **No tracking pixels and no open tracking.** Family visits are counted as one daily number per trail. Per person we store only `last_seen_on` (a date), and per device `last_used_on` and a rough `device_hint` ("iPhone · Safari"). Wrong link codes are rate-limited by a hash of the IP address, kept one hour.
 - **One-click unsubscribe in every e-mail:** "Afmelden", plus the `List-Unsubscribe` and `List-Unsubscribe-Post` headers that Gmail and Yahoo require from bulk senders, and a "Wijzig hoe vaak" link to F2. Whether Dutch rules on commercial e-mail also apply depends on the content (for example a book prompt); the lawyer confirms.
 - **Confirm first.** A family member gets no postcards until they click "Bevestig je e-mailadres", so a typo never sends the child's name (or photos) to a stranger. Bounces and complaints stop all sending to that address.
 - **"Liever niet" means no e-mail address.** F2 then doesn't ask for one. The catch: a new device can only join through a new link from the parent.
