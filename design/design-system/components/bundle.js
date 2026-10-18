@@ -230,7 +230,7 @@
       var st = w <= now ? "is-past" : (w === next ? "is-next" : "is-future");
       return h("div", { key: w, className: "ts-leap " + st, style: { left: pct(w) + "%" } },
         h("span", { className: "ts-leap-dot" }, w === next ? h(Doodle, { name: "twinkle", size: 18, twinkle: true }) : String(i + 1)),
-        w === next ? h("span", { className: "ts-leap-tag" }, (p.nextLabel || "Next leap") + " · " + (p.weekWord || "week") + " " + w) : null);
+        w === next ? h("span", { className: "ts-leap-tag" }, (p.nextLabel || "Next leap") + " · " + (p.nextWeekWord || p.weekWord || "week") + " " + w) : null);
     });
     var axis = p.axis || [0, 13, 26, 39, 52];
     var axisLabels = p.axisLabels || axis.map(function (w) { return (p.weekWord || "week") + " " + w; });

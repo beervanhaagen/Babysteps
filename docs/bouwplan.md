@@ -27,7 +27,7 @@ Opgesteld door `tech-architect` op 17 oktober 2026. Stack: Expo (React Native) +
 
 | Risico | Maatregel (€0) |
 |---|---|
-| Geen back-ups: een foute migratie of delete en echte babyfoto's zijn weg. | Wekelijkse back-up op de Mac van de eigenaar (`supabase db dump` + `rclone sync` van de opslag) naar een versleutelde schijfkopie, 4 weken bewaren, wissen zodra Pro draait. "Alles downloaden" (M6) in stap 8. |
+| Geen back-ups: een foute migratie of delete en echte babyfoto's zijn weg. | Wekelijkse back-up op de Mac van de eigenaar (`supabase db dump` + `rclone sync` van de opslag) naar een versleutelde schijfkopie, 3 weken bewaren (30 dagen terugdraaien + 3 weken blijft binnen de 60 dagen van /privacy), wissen zodra Pro draait. "Alles downloaden" (M6) in stap 8. |
 | 1 GB opslag is snel vol. | Maximaal 5 testgezinnen die we persoonlijk kennen, maximaal ~8 weken. Bij 700 MB naar Pro. |
 | Project pauzeert na 1 week zonder activiteit. | Alleen tijdens het bouwen met nepdata; bouwen gebeurt lokaal. |
 | Testers denken dat het al "echt" is. | Korte afspraak: "testversie, bewaar je foto's ook op je telefoon". |
@@ -152,6 +152,20 @@ Nog te doen:
 - **Besluit eigenaar:** mogen ouders zien wanneer iemand voor het laatst keek (`last_seen_on`, alleen een datum)? Nu niet getoond.
 - **Privacyverklaring (jurist):** een eigen blok voor familieleden zonder account, waar F2 naar linkt.
 
+**Landingspagina teddysteps.nl (18 oktober 2026): wat gebouwd is en wat openstaat**
+
+Gebouwd op verzoek van de eigenaar, vóór stap 5, zodat hij de pagina kan laten zien. `apps/landing`: gewone HTML en CSS zonder script, de componenten uit `bundle.js` bij het bouwen omgezet naar HTML, zelf gehoste variabele lettertypes, en `/privacy` met onze privacybelofte (de familiepagina linkt naar `/privacy#familie`). CI-controle `check:landing`: geen scripts, niets van andere hosts, `script-src 'none'`.
+
+Uit de reviews (ontwerp, groei, kinderontwikkeling, techniek) al opgelost: "Binnenkort" bovenaan en "Hou me op de hoogte" en "Ik wil meetesten" als mailtjes, met het adres zichtbaar; linkvoorbeeld voor WhatsApp (`og.png`) en icoon; sprongetjes overal als ruwe schatting ("misschien", "rond week 26"), geen item meer dat lijkt op een bekende sprongnaam, voorbeelden die bij de leeftijd passen, een vangnet ("Huilt ze anders dan anders…? bel je huisarts"), de tijdlijn begint bij "uitgerekend"; LeapTimeline kreeg `nextWeekWord` voor "rond week"; alleen beloftes die bij de launch kloppen ("Jij bepaalt of familie mag bewaren", geen bestelbelofte, "We verkopen je gegevens niet"); privacybelofte volledig over wat we van familie bewaren en wat blijft na afmelden; maten, ruimtes en randen uit de tokens; decoratie `inert`; tikvlakken van 44px. Ook in de app en database: ouders kunnen het e-mailadres van familie niet meer lezen (kolomrechten), afmelden en intrekken wissen links en toestellen in plaats van ze te blokkeren, en de familiepagina heeft geen "Bewaar afbeelding" meer bij lang drukken. 77 databasetests.
+
+Nog te doen:
+- **Besluit eigenaar, vóór de pagina openbaar gaat:** Vercel Hobby verbiedt commercieel gebruik, en een pagina voor een product dat boeken verkoopt telt al als commercieel, ook zonder prijs. Advies tech-architect: Vercel Pro (~$20/mnd) zodra de pagina openbaar gaat; anders pas openbaar bij de overstap, of een andere host. Besluit 8 hieronder hangt hiervan af.
+- **Bedrijfsgegevens in de footer (wettelijk verplicht, art. 3:15d BW):** Haagen Trade, vestigingsadres, KvK-nummer en btw-id. Jurist: ook in de app-mails?
+- **Mailtjes van geïnteresseerden:** verwerkersovereenkomst met TransIP, hallo@ niet doorsturen naar een privé-mailbox, de launchmail per persoon of in BCC, adressen daarna wissen.
+- **Beloftes op /privacy die pas later gebouwd worden:** export, verwijderen met 30 dagen terugdraaien en de dagelijkse opruimtaak (stap 8), "zonder namen tellen" uitzetten (stap 10). Op de launch-checklist (stap 11); de jurist kijkt naar het woord "zonder namen".
+- **Plausible:** bij toevoegen ook `script-src`, `check-landing.mjs` en het stuk "Deze website" op /privacy aanpassen.
+- **Later:** een aanmeldformulier zonder script (post naar een functie in Frankfurt, dubbele bevestiging via Lettermint) in plaats van de mailtjes.
+
 **Repo-indeling**
 
 ```
@@ -267,7 +281,7 @@ Aannames: 25 foto's per actief gezin per maand, ~5 familieleden, ~100 MB verkeer
 | Aptabase / Sentry | €0 | $10 / €0 | $20–40 / $29 |
 | **Totaal** | **€0** | **~€125 (~€0,13 per gezin)** | **~€650–700 (~€0,07 per gezin)** |
 
-Daarnaast Apple €99/jaar en Google $25 eenmalig. Boven ~5 TB loont het om `print` naar goedkopere EU-opslag te verhuizen. Supabase maakt geen back-up van de opslag: na de launch een wekelijkse kopie van `print` naar koude EU-opslag (een paar euro per maand).
+Daarnaast Apple €99/jaar en Google $25 eenmalig. Boven ~5 TB loont het om `print` naar goedkopere EU-opslag te verhuizen. Supabase maakt geen back-up van de opslag: na de launch een wekelijkse kopie van `print` naar koude EU-opslag (een paar euro per maand), hooguit 21 dagen bewaard, zodat "binnen 60 dagen helemaal weg" (/privacy) blijft kloppen.
 
 ## 7. Bouwvolgorde
 
@@ -356,7 +370,7 @@ Alle acht bevindingen hierboven worden overgenomen zoals voorgesteld (T2: de reg
 5. **Reacties:** familie ziet het aantal knuffels; berichtjes zien alleen de ouders.
 6. **Medeouder:** uitnodigen via e-mailadres.
 7. **Pad verwijderen:** de andere ouder krijgt een melding en kan het ongedaan maken.
-8. **Vercel Pro:** zodra de landingspagina openbaar is met een prijs; tot dan een pagina zonder prijs.
+8. **Vercel Pro:** zodra de landingspagina openbaar is met een prijs; tot dan een pagina zonder prijs. *(18 oktober: volgens tech-architect is de pagina ook zonder prijs commercieel; besluit eigenaar open, zie "Landingspagina".)*
 9. **Supabase Pro:** bij het eerste testgezin dat we niet persoonlijk kennen, bij 700 MB of bij de launch, wat het eerst komt.
 10. **Sign in with Apple:** alleen op iOS.
 11. **Berichtjes van een ingetrokken familielid:** blijven in het pad (een cadeau aan het kind). Vraagt het familielid om verwijdering, dan halen we ze bij de launch met de hand weg via hallo@. *(Standaardkeuze van de hoofdsessie; de jurist bevestigt.)*

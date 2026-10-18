@@ -33,5 +33,5 @@ export interface HandNoteProps { children: string; color?: string; size?: "s"; t
 export interface HugToastProps { title: string; children?: string; }
 export interface BannerProps { title: string; children?: string; icon?: IconName; tone?: SoftBlock; }
 export interface ScallopProps { color: SoftBlock; }
-export interface LeapTimelineProps { now: number; end?: number; leaps?: number[]; nowLabel?: string; nextLabel?: string; weekWord?: string; axis?: number[]; axisLabels?: string[]; label?: string; }
+export interface LeapTimelineProps { now: number; end?: number; leaps?: number[]; nowLabel?: string; nextLabel?: string; weekWord?: string; /** Word before the next leap's week, e.g. "rond week" (leaps are never exact). Defaults to weekWord. */ nextWeekWord?: string; axis?: number[]; axisLabels?: string[]; label?: string; }
 export interface NextUpProps { title: string; when?: string; eyebrow?: string; items?: string[]; character?: CharacterName; tone?: SoftBlock; children?: string; }

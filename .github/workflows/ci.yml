@@ -25,6 +25,8 @@ jobs:
       - run: npm test
       - name: Family page has no analytics, crash reporting or Google fonts
         run: npm run family:export && npm run check:web-bundle
+      - name: Landing page has no scripts and loads nothing from others
+        run: npm run landing:build && npm run check:landing
 
   database:
     runs-on: ubuntu-latest

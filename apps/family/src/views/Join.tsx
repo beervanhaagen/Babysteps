@@ -88,7 +88,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
       ) : null}
       <Text style={styles.small}>
         De ouders zien hoe {name} jou noemt, je knuffels en of je meekijkt. Je e-mailadres gebruiken we alleen voor je kaartjes.{' '}
-        <Text accessibilityRole="link" style={styles.smallLink} onPress={() => Linking.openURL('https://teddysteps.nl/privacy')}>
+        <Text accessibilityRole="link" style={styles.smallLink} onPress={() => Linking.openURL('https://teddysteps.nl/privacy#familie')}>
           Onze privacybelofte
         </Text>
       </Text>

@@ -10,6 +10,8 @@
     "mobile": "npm run start -w @teddysteps/mobile",
     "family": "npm run start -w @teddysteps/family",
     "family:dev": "node scripts/family-dev.mjs",
+    "landing": "npm run start -w @teddysteps/landing",
+    "landing:build": "npm run build -w @teddysteps/landing",
     "local-env": "node scripts/local-env.mjs",
     "tokens": "node scripts/build-tokens.mjs",
     "art": "node scripts/build-art.mjs",
@@ -17,7 +19,8 @@
     "lint": "eslint .",
     "test": "npm run test --workspaces --if-present",
     "family:export": "npm run export -w @teddysteps/family",
-    "check:web-bundle": "node scripts/check-web-bundle.mjs"
+    "check:web-bundle": "node scripts/check-web-bundle.mjs",
+    "check:landing": "node scripts/check-landing.mjs"
   },
   "engines": {
     "node": ">=22"
