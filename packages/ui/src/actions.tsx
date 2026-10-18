@@ -54,7 +54,7 @@ export function Button({ variant = 'primary', size = 'lg', block, icon, disabled
       ]}
     >
       {icon ? <Icon name={icon} size={22} weight={2.6} color={v.ink} /> : null}
-      <Text style={[text(lg ? 'buttonLg' : 'buttonMd'), { color: v.ink }]}>{children}</Text>
+      <Text style={[text(lg ? 'buttonLg' : 'buttonMd'), { color: v.ink, includeFontPadding: false }]}>{children}</Text>
     </Pressable>
   );
 }

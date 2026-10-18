@@ -4,7 +4,13 @@ Build every screen from `tokens.json` and the components on `window.TeddySteps`.
 
 ## Platform
 
-The reference components here are DOM React. The app and the family page use a React Native version in `packages/ui` with the same names and props as `components/index.d.ts` (react-native-svg, Reanimated). Its tokens are generated from `tokens.json`; when they differ, `tokens.json` wins.
+The reference components here are DOM React. The app and the family page use a React Native version in `packages/ui` with the same names. Its tokens (`npm run tokens`) and the gang, icons and doodles (`npm run art`) are generated from this folder; when they differ, this folder wins.
+
+Differences in the React Native version:
+
+- Events and state: `onPress` instead of `onClick` or `href`. `ChoiceChip` (`selected`) and `Switch` (`value`, `onValueChange`) are controlled. `ScreenHeader` takes `onBack` instead of `back`, plus `topInset`; `TabBar` takes `bottomInset`. `MomentCard` takes an image `source` instead of `src`.
+- Drawing: react-native-svg in the app, plain `<svg>` on the family page. Motion uses React Native's `Animated`, not CSS keyframes, and still stops under reduced motion.
+- The crayon-grain filter is not rendered yet (planned: on the web as an SVG filter, in the app as baked images).
 
 ## Content fundamentals
 

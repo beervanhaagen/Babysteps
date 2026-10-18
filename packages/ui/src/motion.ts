@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { AccessibilityInfo, Animated, Easing, Platform } from 'react-native';
 import { duration } from './tokens';
 
@@ -6,19 +6,27 @@ export type Motion = 'bob' | 'sway' | 'drift' | 'hop' | 'twinkle';
 
 const NATIVE = Platform.OS !== 'web';
 
+// One shared answer for every character on screen. The browser knows it right away,
+// so nothing moves for a frame before it stops; the phone answers asynchronously.
+let reduceMotion =
+  Platform.OS === 'web' && typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+const listeners = new Set<() => void>();
+function setReduceMotion(on: boolean) {
+  if (on === reduceMotion) return;
+  reduceMotion = on;
+  listeners.forEach((listener) => listener());
+}
+AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion, () => undefined);
+AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 /** True when the person asked their phone or browser to reduce motion. */
 export function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    let alive = true;
-    AccessibilityInfo.isReduceMotionEnabled().then((on) => alive && setReduced(on));
-    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced);
-    return () => {
-      alive = false;
-      sub.remove();
-    };
-  }, []);
-  return reduced;
+  return useSyncExternalStore(subscribe, () => reduceMotion, () => reduceMotion);
 }
 
 /**
@@ -38,9 +46,12 @@ export function useLoop(motion: Motion | null | undefined, delay?: 1 | 2 | 3) {
     }
     const ms = duration[motion];
     const ease = Easing.inOut(Easing.ease);
+    // Hop has keyframes at 0, 20, 40, 60 and 100%; each stretch eases like the CSS does.
+    const to = (toValue: number, share: number) =>
+      Animated.timing(value, { toValue, duration: ms * share, easing: ease, useNativeDriver: NATIVE });
     const cycle =
       motion === 'hop'
-        ? Animated.timing(value, { toValue: 1, duration: ms, easing: Easing.linear, useNativeDriver: NATIVE })
+        ? Animated.sequence([to(0.2, 0.2), to(0.4, 0.2), to(0.6, 0.2), to(1, 0.4)])
         : Animated.sequence([
             Animated.timing(value, { toValue: 1, duration: ms / 2, easing: ease, useNativeDriver: NATIVE }),
             Animated.timing(value, { toValue: 0, duration: ms / 2, easing: ease, useNativeDriver: NATIVE }),

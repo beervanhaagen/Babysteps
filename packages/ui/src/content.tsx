@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
+import { useEffect } from 'react';
+import { AccessibilityInfo, Image, Platform, Pressable, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { Character, Hug, Icon, type CharacterName, type IconName } from './brand';
 import { useFocusRing } from './focus';
 import type { SoftBlock } from './navigation';
@@ -35,7 +36,7 @@ export function Avatar({ name, size: s = 44, tone = 'pistachio', decorative }: A
     : { accessible: true, accessibilityRole: 'image' as const, accessibilityLabel: name };
   return (
     <View {...a11y} style={[styles.avatar, { width: s, height: s, borderRadius: s / 2, backgroundColor: color[tone] }]}>
-      <Text style={{ fontFamily: fontFamily('sticker', 400), fontSize: Math.round(s * 0.45), color: color.ink }}>{initial}</Text>
+      <Text style={{ fontFamily: fontFamily('sticker', 400), fontSize: Math.round(s * 0.45), color: color.ink, includeFontPadding: false }}>{initial}</Text>
     </View>
   );
 }
@@ -116,19 +117,24 @@ export function MomentCard({ week, caption, note, source, alt, tint = 'lilac', c
     </>
   );
   const card = [styles.moment, { transform: [{ rotate: `${tilt}deg` }] }];
+  const label = [week, caption, hugs == null ? null : hugs === 1 ? '1 knuffel' : `${hugs} knuffels`].filter(Boolean).join(', ');
   if (!onPress) return <View style={card}>{body}</View>;
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[card, focus.ring]}>
+    <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[card, focus.ring]}>
       {body}
     </Pressable>
   );
 }
 
 export function HugToast({ title, children }: { title: string; children?: string }) {
+  // iOS ignores live regions, so announce the hug there ourselves.
+  useEffect(() => {
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(children ? `${title}. ${children}` : title);
+  }, [title, children]);
   return (
-    <View accessibilityLiveRegion="polite" style={styles.hugToast}>
+    <View role="status" accessibilityLiveRegion="polite" style={styles.hugToast}>
       <View style={styles.hugBadge}>
-        <Hug size={50} />
+        <Hug size={50} decorative />
       </View>
       <View style={styles.shrink}>
         <Text style={[text('rowTitle'), { fontSize: 15 }]}>{title}</Text>

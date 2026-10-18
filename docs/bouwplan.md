@@ -74,6 +74,18 @@ Nog te doen, per stap:
 - **Testfase-back-ups:** de versleutelde schijfkopie buiten `~/Documents` en `~/Desktop` bewaren, want die kunnen via iCloud gesynchroniseerd worden.
 - **npm audit:** alle meldingen zitten in Expo's bouwgereedschap, niet in de app of de pagina. Niet `npm audit fix --force` draaien; Expo-patches volgen met `npx expo install --fix`.
 
+**Openstaand uit de review van stap 1 (design-reviewer, 18 oktober 2026)**
+
+Al opgelost: hint en foutmelding van velden worden ook op de familiepagina voorgelezen (`aria-describedby`, foutmelding als `alert`); zichtbare veldlabels worden niet dubbel voorgelezen; tabbalk niet te hoog op een iPhone; dier en actieknop in een header overlappen niet meer; schermtitel is een heading van niveau 1; CodeInput is een groep met "Cijfer n"; MomentCard heeft een eigen label en is een link; De Knuffel in een melding is decoratief; knuffelmeldingen worden op iOS voorgelezen; één gedeelde "beweging beperken"-status (geen frame beweging); hop beweegt vloeiend zoals de CSS; tekstinspringing op Android; galerijteksten gelijk aan de borden.
+
+Nog te doen:
+- **Krijtkorrel, vóór de launch (weegt zwaar voor het merk):** op het web het filter uit `bundle.js` terugzetten in `svg.web.tsx`, met per instantie een eigen id voor filters en clipPaths (`useId`) en `will-change: transform` op de bewegende omhulling. In de app per houding een WebP@3x met korrel (4 dieren × 2–3 houdingen + De Knuffel), gemaakt met een script in headless Chrome; vector alleen voor kleine sidekicks.
+- **Componenten bouwen bij het scherm dat ze nodig heeft:** NextUp (T1), Banner (X2), ListRow (M1, M3, M6), VoiceNote (F4), Callout, HandNote, BookCover (B1). Een `ChoiceGroup` met `role="radiogroup"` en label (O2 "Is je baby er al?"). Een ScreenHeader-variant voor T1 (woordmerk in plaats van titel, cornflower, 20px marge).
+- **Familiepagina (stap 4):** TabBar op het web als `role="navigation"` met `aria-current="page"`; optillen bij hover op knoppen (F7, laptop).
+- **M3 (stap 8):** de stippellijn onder PersonRow als eigen SVG-lijn, want een stippelrand aan één kant tekent iOS/Android niet goed.
+- **Op een Android-toestel controleren:** tekstpositie van Bagel en Nunito, en of de paarse overdruk van het woordmerk (`mixBlendMode`) verschijnt.
+- **S3 (stap 2):** CodeInput krijgt de echte invoer.
+
 **Repo-indeling**
 
 ```

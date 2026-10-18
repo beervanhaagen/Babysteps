@@ -1,11 +1,12 @@
 import { type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { webAria } from './a11y';
 import { IconButton } from './actions';
 import { Character, Icon, type CharacterName, type IconName } from './brand';
 import { useFocusRing } from './focus';
 import { SvgMarkup } from './svg';
 import { fontFamily, text } from './text';
-import { border, color, shadow, size } from './tokens';
+import { border, color, shadow, size, space } from './tokens';
 
 export type SoftBlock = 'lilac' | 'pistachio' | 'butter' | 'cornflower' | 'sunshine' | 'apricot';
 
@@ -65,7 +66,7 @@ export function ScreenHeader({ title, subtitle, onBack, step, color: band = 'lil
           <View style={{ height: 22 }} />
         )}
         {step ? <StepProgress current={step[0]} total={step[1]} /> : null}
-        <Text accessibilityRole="header" style={[text('titleL'), { maxWidth: character ? 240 : undefined, marginTop: step ? 14 : 0 }]}>
+        <Text accessibilityRole="header" {...webAria({ 'aria-level': 1 })} style={[text('titleL'), { maxWidth: character ? 240 : undefined, marginTop: step ? 14 : 0 }]}>
           {title}
         </Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -78,7 +79,8 @@ export function ScreenHeader({ title, subtitle, onBack, step, color: band = 'lil
           size={88}
           decorative
           rotate={characterRotate}
-          peek={step ? { right: -18, top: topInset + 70 } : { right: 14, top: topInset + (onBack ? 18 : 4) }}
+          // Below the button bar when there is an action, so the two never overlap.
+          peek={step ? { right: -18, top: topInset + 70 } : { right: 14, top: topInset + (action ? 56 : onBack ? 18 : 4) }}
         />
       ) : null}
     </View>
@@ -105,7 +107,7 @@ export interface TabBarProps {
 export function TabBar({ active, onChange, onAdd, bottomInset = 0 }: TabBarProps) {
   const tab = (t: (typeof TABS)[number]) => <Tab key={t.id} {...t} on={t.id === active} onPress={() => onChange?.(t.id)} />;
   return (
-    <View accessibilityRole="tabbar" accessibilityLabel="Hoofdmenu" style={[styles.tabbar, { height: size.tabbar + bottomInset, paddingBottom: 18 + bottomInset }]}>
+    <View accessibilityRole="tabbar" accessibilityLabel="Hoofdmenu" style={[styles.tabbar, { height: size.tabbar - 18 + Math.max(18, bottomInset), paddingBottom: Math.max(18, bottomInset) }]}>
       {TABS.slice(0, 2).map(tab)}
       <Fab onPress={onAdd} />
       {TABS.slice(2).map(tab)}
@@ -154,7 +156,7 @@ function Fab({ onPress }: { onPress?: () => void }) {
 
 const styles = StyleSheet.create({
   header: { position: 'relative', zIndex: 1 },
-  band: { paddingHorizontal: 24, paddingBottom: 10 },
+  band: { paddingHorizontal: space.space6, paddingBottom: 10 },
   bar: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6 },
   subtitle: { ...text('rowTitle'), fontSize: 14, marginTop: 4 },
   steps: { flexDirection: 'row', alignItems: 'center', gap: 10 },

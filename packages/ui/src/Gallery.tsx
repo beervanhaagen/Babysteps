@@ -101,13 +101,13 @@ export function Gallery({ topInset = 0, bottomInset = 0 }: { topInset?: number; 
               ))}
             </Row>
             <View>
-              <Switch label="Zondagseintje" hint="Als de week nog leeg is, zondag om 19.00 uur" value={sunday} onValueChange={setSunday} />
-              <Switch label="Familie mag foto's bewaren" value={keep} onValueChange={setKeep} />
+              <Switch label="Seintje op zondag" hint="Als de week nog leeg is, zondag om 19.00 uur" value={sunday} onValueChange={setSunday} />
+              <Switch label="Familie mag foto’s bewaren" value={keep} onValueChange={setKeep} />
             </View>
           </Section>
 
           <Section title="Velden">
-            <TextField label="Naam of bijnaam" placeholder="Lotte" />
+            <TextField label="Naam of roepnaam" placeholder="Lotte" />
             <TextField label="Uitgerekende datum" hint="Sprongetjes tellen vanaf deze datum" placeholder="dd-mm-jjjj" />
             <TextField label="E-mailadres" error="Dit e-mailadres klopt nog niet helemaal" defaultValue="oma@" />
             <CodeInput value="482" />
@@ -116,7 +116,7 @@ export function Gallery({ topInset = 0, bottomInset = 0 }: { topInset?: number; 
 
           <Section title="Headers">
             <View style={styles.bleed}>
-              <ScreenHeader title="Lottes kleintje" onBack={() => {}} step={[1, 3]} character="tiggy" />
+              <ScreenHeader title="Wie is de kleine ontdekker?" onBack={() => {}} step={[1, 3]} character="tiggy" />
             </View>
             <View style={styles.bleed}>
               <ScreenHeader title="Familie" subtitle="Wie volgt Lotte?" color="pistachio" character="puddle" onBack={() => {}} />
@@ -138,8 +138,8 @@ export function Gallery({ topInset = 0, bottomInset = 0 }: { topInset?: number; 
               <Avatar name="Tante Sanne" tone="lilac" size={56} />
             </Row>
             <View>
-              <PersonRow name="Oma Ria" role="Oma · op 2 apparaten" action="Beheren" />
-              <PersonRow name="Opa Henk" role="Opa · uitgenodigd" tone="butter" action="Opnieuw" />
+              <PersonRow name="Oma Ria" role="Familie · kijkt, knuffelt, spreekt in" action="Wijzig" />
+              <PersonRow name="Opa Henk" role="Uitnodiging 2 dagen geleden verstuurd" tone="butter" action="Opnieuw sturen" />
             </View>
             <MomentCard week="Week 28" caption="Zelf rechtop gezeten" note="Heel trots op zichzelf." hugs={4} />
             <MomentCard week="Week 31" caption="Geklapt. Nergens om." tint="pistachio" character="tiggy" hugs={9} tilt={1.5} peek="bizzy" onPress={() => {}} />

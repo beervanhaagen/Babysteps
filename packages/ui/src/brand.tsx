@@ -44,9 +44,12 @@ export function Character({ name, mood = 'default', size = 120, motion, delay, d
   );
 }
 
-export function Hug({ size = 160 }: { size?: number }) {
+export function Hug({ size = 160, decorative }: { size?: number; decorative?: boolean }) {
+  const a11y = decorative
+    ? hidden
+    : { accessible: true, accessibilityRole: 'image' as const, accessibilityLabel: 'De knuffel: Bo de beer met Puddle de eend tegen zich aan' };
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel="De knuffel: Bo de beer met Puddle de eend tegen zich aan">
+    <View {...a11y}>
       <SvgMarkup markup={hug} viewBox="0 0 240 220" width={size} height={(size * 220) / 240} />
     </View>
   );
