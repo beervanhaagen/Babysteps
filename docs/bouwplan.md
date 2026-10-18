@@ -160,7 +160,7 @@ Uit de reviews (ontwerp, groei, kinderontwikkeling, techniek) al opgelost: "Binn
 
 Nog te doen:
 - **Besloten (eigenaar, 18 oktober):** de pagina gaat online op Vercel Hobby, maar wordt nergens gepubliceerd of gepromoot, en de app is gratis. Tech-architect waarschuwde dat Vercel een pagina voor een product dat boeken verkoopt ook zonder prijs commercieel kan vinden; het risico (blokkade, ook van familie.teddysteps.nl) is gemeld. Uiterlijk bij promotie, een prijs of de launch: Vercel Pro. De GitHub-repo blijft openbaar (besluit eigenaar); er staan geen sleutels of persoonsgegevens in.
-- **Bedrijfsgegevens in de footer (wettelijk verplicht, art. 3:15d BW):** Haagen Trade, vestigingsadres, KvK-nummer en btw-id. Jurist: ook in de app-mails?
+- **Bedrijfsgegevens in de footer (wettelijk verplicht, art. 3:15d BW):** Haagen Trade en KvK 97569089 staan erin; vestigingsadres en btw-id nog van de eigenaar. Jurist: ook in de app-mails?
 - **Mailtjes van geïnteresseerden:** verwerkersovereenkomst met TransIP, hallo@ niet doorsturen naar een privé-mailbox, de launchmail per persoon of in BCC, adressen daarna wissen.
 - **Beloftes op /privacy die pas later gebouwd worden:** export, verwijderen met 30 dagen terugdraaien en de dagelijkse opruimtaak (stap 8), "zonder namen tellen" uitzetten (stap 10). Op de launch-checklist (stap 11); de jurist kijkt naar het woord "zonder namen".
 - **Plausible:** bij toevoegen ook `script-src`, `check-landing.mjs` en het stuk "Deze website" op /privacy aanpassen.

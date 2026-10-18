@@ -49,7 +49,8 @@ ${body}
 <li><a href="/privacy">Privacybelofte</a></li>
 <li><a href="mailto:${CONTACT}">Contact</a></li>
 </ul>
-<p>Gemaakt in Nederland. Sprongetjes zijn een ruwe schatting, geen medisch advies. © 2026 Haagen Trade</p>
+<p>Gemaakt in Nederland. Sprongetjes zijn een ruwe schatting, geen medisch advies.</p>
+<p>© 2026 Haagen Trade · KvK 97569089 · ${CONTACT}</p>
 </div>
 </footer>
 </body>
