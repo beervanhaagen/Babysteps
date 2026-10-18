@@ -1,7 +1,9 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { color, useTeddyFonts } from '@teddysteps/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { startQueue } from '@/lib/queue';
 
 export default function RootLayout() {
   const fontsReady = useTeddyFonts();
@@ -18,6 +20,8 @@ export default function RootLayout() {
 // index, which sends the parent to the right place.
 function Routes() {
   const { status } = useAuth().state;
+  // Uploads only run for a parent with a trail.
+  useEffect(() => (status === 'ready' ? startQueue() : undefined), [status]);
   // Wait until we know who this is, so a link into the app isn't bounced while loading.
   if (status === 'loading') return null;
   return (
@@ -36,6 +40,15 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={status === 'ready'}>
         <Stack.Screen name="pad" />
+        <Stack.Screen name="toevoegen" options={{ presentation: 'transparentModal', animation: 'fade' }} />
+        <Stack.Screen name="fotos" />
+        <Stack.Screen name="details" />
+        <Stack.Screen name="vastgepind" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="moment/[id]" />
+        <Stack.Screen name="geboren" />
+        <Stack.Screen name="boek" options={{ animation: 'none' }} />
+        <Stack.Screen name="familie" options={{ animation: 'none' }} />
+        <Stack.Screen name="ik" options={{ animation: 'none' }} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'offline'}>
         <Stack.Screen name="opnieuw" />

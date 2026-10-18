@@ -36,7 +36,7 @@ export function TextField({ label, hint, error, onFocus, onBlur, ...input }: Tex
           focus.onBlur();
           onBlur?.(e);
         }}
-        style={[styles.input, error ? styles.inputError : null, focus.ring]}
+        style={[styles.input, input.multiline && styles.multiline, error ? styles.inputError : null, focus.ring]}
       />
       {note ? (
         <Text
@@ -126,6 +126,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: color.ink,
   },
+  // A few lines of text, like the caption on A3.
+  multiline: { height: undefined, minHeight: 96, paddingVertical: 12, lineHeight: 23, textAlignVertical: 'top' },
   inputError: { borderColor: color.plum, borderWidth: border.edge + 1 },
   hint: { ...text('meta'), color: color.inkMuted },
   hintError: { color: color.plum },

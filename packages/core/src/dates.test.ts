@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { checkChildDates, formatDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate } from './dates.ts';
+import { checkChildDates, formatDutchDate, longDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate } from './dates.ts';
 
 test('reads Dutch dates and rejects impossible ones', () => {
   assert.equal(parseDutchDate('12-03-2026'), '2026-03-12');
@@ -37,4 +37,9 @@ test('a baby on the way: due date in the coming 44 weeks', () => {
 test('today is the Dutch calendar day, also late at night elsewhere', () => {
   // 23:30 UTC on 17 October is already 18 October in Amsterdam (summer time).
   assert.equal(todayInAmsterdam(new Date('2026-10-17T23:30:00Z')), '2026-10-18');
+});
+
+test('long Dutch dates', () => {
+  assert.equal(longDutchDate('2026-09-22'), 'dinsdag 22 september');
+  assert.equal(longDutchDate('2026-03-19', { weekday: false, year: true }), '19 maart 2026');
 });

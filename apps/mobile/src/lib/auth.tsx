@@ -1,3 +1,4 @@
+import type { CalendarDate } from '@teddysteps/core';
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { supabase } from './supabase';
@@ -5,6 +6,9 @@ import { supabase } from './supabase';
 export interface Trail {
   id: string;
   childName: string;
+  /** Null while the baby is still on the way. */
+  birthDate: CalendarDate | null;
+  dueDate: CalendarDate;
 }
 
 type AuthState =
@@ -26,9 +30,9 @@ function isNetworkError(error: { message?: string; code?: string }) {
 
 async function findTrail(): Promise<Trail | null> {
   // RLS only returns the trail this parent belongs to.
-  const { data, error } = await supabase.from('children').select('trail_id, first_name').limit(1).maybeSingle();
+  const { data, error } = await supabase.from('children').select('trail_id, first_name, birth_date, due_date').limit(1).maybeSingle();
   if (error) throw error;
-  return data ? { id: data.trail_id, childName: data.first_name } : null;
+  return data ? { id: data.trail_id, childName: data.first_name, birthDate: data.birth_date, dueDate: data.due_date } : null;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

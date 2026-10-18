@@ -3,7 +3,7 @@ import { createClient, processLock } from '@supabase/supabase-js';
 import * as aesjs from 'aes-js';
 import { getRandomValues } from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 // The session is encrypted on the phone: a fresh AES key per write lives in the Keychain
 // (iOS) or Keystore (Android); only the encrypted session sits in AsyncStorage, because
@@ -56,7 +56,9 @@ if (!url || !key) {
 
 export const supabase = createClient(url, key, {
   auth: {
-    storage: new LargeSecureStore(),
+    // The parent app only ships to phones. A web build exists only for screenshots in
+    // development, where there is no Keychain; it keeps the session in browser storage.
+    storage: Platform.OS === 'web' ? undefined : new LargeSecureStore(),
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,

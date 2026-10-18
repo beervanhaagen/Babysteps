@@ -57,3 +57,15 @@ export function todayInAmsterdam(now = new Date()): CalendarDate {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
   return parts as CalendarDate;
 }
+
+/** "dinsdag 22 september" (T2), or "22 september 2026" with the year and without the weekday. */
+export function longDutchDate(date: CalendarDate, options: { weekday?: boolean; year?: boolean } = {}): string {
+  const [y, m, d] = date.split('-').map(Number);
+  return new Intl.DateTimeFormat('nl-NL', {
+    timeZone: 'UTC',
+    weekday: options.weekday === false ? undefined : 'long',
+    day: 'numeric',
+    month: 'long',
+    year: options.year ? 'numeric' : undefined,
+  }).format(new Date(Date.UTC(y, m - 1, d)));
+}

@@ -1,21 +1,14 @@
-import { checkChildDates, parseDutchDate, todayInAmsterdam, typeDutchDate, type ChildDatesProblem } from '@teddysteps/core';
+import { checkChildDates, parseDutchDate, todayInAmsterdam, typeDutchDate } from '@teddysteps/core';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, ChoiceChip, ChoiceGroup, color, TextField, text, useAnnounce } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
 import { TextLink } from '@/components/TextLink';
 import { useAuth } from '@/lib/auth';
+import { PROBLEMS } from '@/lib/childDates';
 import { friendlyError } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 
-const PROBLEMS: Record<ChildDatesProblem, string> = {
-  'birth-format': 'Schrijf de datum als dd-mm-jjjj.',
-  'birth-future': "Deze datum ligt nog in de toekomst. Nog onderweg? Kies dan 'Nog onderweg'.",
-  'due-format': 'Schrijf de datum als dd-mm-jjjj.',
-  'due-far-from-birth': 'Klopt deze datum? Hij ligt ver van de geboortedatum.',
-  'due-past': "Deze datum is al een tijdje geweest. Is je kleintje er al? Kies dan 'Ja, geboren!'.",
-  'due-too-far': 'Kies een datum binnen tien maanden.',
-};
 
 const HELP = 'Het pad telt vanaf de geboorte. Sprongetjes tellen we vanaf de uitgerekende datum, ook als je kleintje eerder of later kwam.';
 

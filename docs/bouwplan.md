@@ -104,6 +104,23 @@ Later in het plan:
 - **Lokaal:** `npm run local-env` maakt de lokale database bereikbaar op het wifi-netwerk (wachtwoord `postgres`). Alleen thuis en met nepdata gebruiken.
 - **"Foto toevoegen" op O2** komt met de fotostroom in stap 3. De ontwikkeltekst op het tijdelijke pad-scherm verdwijnt met T1.
 
+**Stap 3 (19 oktober 2026): wat gebouwd is en wat openstaat**
+
+Gebouwd: A1 (onderblad), A2, A3, A4, T1 met X1 (leeg pad), X2 (offline) en X4 (upload mislukt), T2, plus "Mijn kleintje is geboren!" voor wie zich aanmeldde toen het kleintje nog onderweg was. De telefoon maakt per foto een print-, kijk- en kleine versie (opnieuw gecodeerd vanuit de pixels); een moment staat eerst veilig op de telefoon en gaat via de wachtrij naar de server (`create_moment` deelt de paden uit, `finish_upload` controleert in de opslag zelf of alles er is). Twee privé-buckets (`print`, `view`) met regels: uploaden alleen naar uitgedeelde paden, lezen alleen in het eigen pad. 15 nieuwe databasetests en een end-to-end-test tegen de opslagserver (uploaden, opnieuw proberen, zichtbaar worden, en geweigerd voor een andere ouder).
+
+Bewuste afwijkingen van de borden (voor de design-review):
+- **A2:** het bord toont een eigen galerij van de hele fotobibliotheek. We gebruiken de systeemkiezer (geen toegang tot alle foto's nodig, §4); A2 toont wat gekozen is, met "Meer kiezen" en "Camera". Header lilac in plaats van tangerine (geen headerkleur in het ontwerpsysteem).
+- **A1:** "Foto’s" zonder "of een video" (video niet bij de launch).
+- **A3:** de week begint bij de week waarin de eerste foto genomen is, zodat oudere foto's in hun eigen week landen; "gedeeld met 5 mensen" komt met familie in stap 4.
+- **A4:** "Delen buiten TeddySteps" (SH2) en wie een kaartje krijgt, komen in latere stappen.
+- **T1:** de "Wat komt eraan"-kaart (stap 9, met child-development-reviewer) en de activiteit-bel (stap 4) ontbreken nog; het rondje rechtsboven toont de eerste letter van het kind tot de voornaam van de ouder bekend is.
+- **T2:** knuffels en berichtjes (stap 4 en 6), opties T8 (stap 9), "toegevoegd door" (wacht op de voornaam van de ouder).
+
+Nog te doen:
+- **Uploaden als de app dicht is:** nu loopt de wachtrij alleen als de app open is (bij openen, bij verbinding terug en elke minuut). Uploaden op de achtergrond en hervatbare upload (TUS) voor de printversie volgen.
+- **Metadata echt weg:** op een echt toestel controleren dat de versies geen EXIF of GPS bevatten (exiftool op de uitvoer), en een servercontrole bij het uploaden.
+- **Tabbladen Boek, Familie en Ik** zijn tijdelijk ("Hier wordt nog aan gebouwd"); uitloggen staat op Ik en vraagt bevestiging als er nog foto's alleen op de telefoon staan.
+
 **Repo-indeling**
 
 ```

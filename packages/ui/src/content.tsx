@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { AccessibilityInfo, Image, Platform, Pressable, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
+import { useEffect, type ReactNode } from 'react';
+import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Character, Hug, Icon, type CharacterName, type IconName } from './brand';
 import { useFocusRing } from './focus';
 import type { SoftBlock } from './navigation';
@@ -78,8 +78,12 @@ export interface MomentCardProps {
   week: string;
   caption: string;
   note?: string;
-  source?: ImageSourcePropType;
+  /** The photo, filling the frame (the app passes an expo-image). Without it a character shows. */
+  photo?: ReactNode;
+  /** Spoken description of the photo. */
   alt?: string;
+  /** "EERSTE KEER!" sticker with Tiggy on the photo. */
+  firstBadge?: string;
   tint?: SoftBlock;
   character?: CharacterName;
   hugs?: number;
@@ -89,16 +93,15 @@ export interface MomentCardProps {
 }
 
 /** A postcard on the fridge: photo, week, one line, and the hugs it got. */
-export function MomentCard({ week, caption, note, source, alt, tint = 'lilac', character = 'bo', hugs, tilt = -1.5, peek, onPress }: MomentCardProps) {
+export function MomentCard({ week, caption, note, photo, alt, firstBadge, tint = 'lilac', character = 'bo', hugs, tilt = -1.5, peek, onPress }: MomentCardProps) {
   const focus = useFocusRing();
   const body = (
     <>
-      <View style={[styles.photo, !source && { backgroundColor: color[tint] }]}>
-        {source ? (
-          <Image source={source} accessibilityLabel={alt} resizeMode="cover" style={StyleSheet.absoluteFill} />
-        ) : (
-          <Character name={character} mood="happy" size={110} decorative motion={null} />
-        )}
+      <View>
+        <View accessible={!!alt} accessibilityRole={alt ? 'image' : undefined} accessibilityLabel={alt} style={[styles.photo, !photo && { backgroundColor: color[tint] }]}>
+          {photo ?? <Character name={character} mood="happy" size={110} decorative motion={null} />}
+        </View>
+        {firstBadge ? <FirstBadge label={firstBadge} /> : null}
       </View>
       <View style={styles.foot}>
         <View style={styles.grow}>
@@ -123,6 +126,17 @@ export function MomentCard({ week, caption, note, source, alt, tint = 'lilac', c
     <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[card, focus.ring]}>
       {body}
     </Pressable>
+  );
+}
+
+/** The "EERSTE KEER!" sticker with Tiggy, on a photo (T1, T2). */
+export function FirstBadge({ label, size = 'md' }: { label: string; size?: 'md' | 'lg' }) {
+  const lg = size === 'lg';
+  return (
+    <View style={[styles.firstBadge, lg && styles.firstBadgeLg]}>
+      <Character name="tiggy" mood="happy" size={lg ? 30 : 26} decorative motion={null} />
+      <Text style={[styles.firstText, lg && { fontSize: 13 }]}>{label}</Text>
+    </View>
   );
 }
 
@@ -230,6 +244,23 @@ const styles = StyleSheet.create({
   },
   foot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, paddingTop: 10, paddingHorizontal: 6, paddingBottom: 4 },
   eyebrow: { ...text('eyebrow'), textTransform: 'uppercase' },
+  firstBadge: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 3,
+    paddingLeft: 3,
+    paddingRight: 10,
+    borderRadius: radius.radiusS,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    backgroundColor: color.sunshine,
+  },
+  firstBadgeLg: { left: 12, top: 12, gap: 6, paddingVertical: 4, paddingLeft: 4, paddingRight: 12, boxShadow: shadow.shadowSm },
+  firstText: { ...text('eyebrow'), fontSize: 12, letterSpacing: 0, textTransform: 'uppercase' },
   hugs: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4, paddingHorizontal: 10, borderRadius: radius.radiusS, backgroundColor: color.lilac },
   hugsText: { ...text('meta'), fontFamily: fontFamily('sans', 800) },
   hugToast: {
