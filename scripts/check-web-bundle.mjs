@@ -10,14 +10,16 @@ import { fileURLToPath } from 'node:url';
 const family = fileURLToPath(new URL('../apps/family/', import.meta.url));
 const dist = join(family, 'dist');
 
-// Hosts that only appear as text inside React, react-native-web and SVG markup; nothing loads from them.
-const ALLOWED_HOSTS = ['www.w3.org', 'react.dev', 'necolas.github.io'];
+// Hosts that only appear as text inside React, react-native-web and SVG markup (error messages,
+// namespaces); nothing loads from them.
+const ALLOWED_HOSTS = ['www.w3.org', 'react.dev', 'necolas.github.io', 'github.com'];
 const FORBIDDEN = [
   'sentry', 'aptabase', 'googleapis', 'gstatic', 'google-analytics', 'googletagmanager', 'firebase',
   'posthog', 'mixpanel', 'amplitude', 'segment.io', 'bugsnag', 'datadog', 'logrocket',
   '_vercel/insights', '_vercel/speed-insights', 'vercel.live',
 ];
-const TEXT = /\.(html|js|mjs|css|json|map|txt|xml|webmanifest)$/;
+// Code and markup only; the font licences (OFL-*.txt) rightly name their own websites.
+const TEXT = /\.(html|js|mjs|css|json|map|xml|webmanifest)$/;
 
 function* files(dir) {
   for (const name of readdirSync(dir)) {

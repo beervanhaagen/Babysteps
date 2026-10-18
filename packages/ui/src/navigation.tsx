@@ -1,0 +1,190 @@
+import { type ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { IconButton } from './actions';
+import { Character, Icon, type CharacterName, type IconName } from './brand';
+import { useFocusRing } from './focus';
+import { SvgMarkup } from './svg';
+import { fontFamily, text } from './text';
+import { border, color, shadow, size } from './tokens';
+
+export type SoftBlock = 'lilac' | 'pistachio' | 'butter' | 'cornflower' | 'sunshine' | 'apricot';
+
+const SCALLOP = (() => {
+  let d = 'M0 0 H1000 V8';
+  for (let x = 1000; x > 0; x -= 50) d += ` Q${x - 12.5} 18 ${x - 25} 8 Q${x - 37.5} 6 ${x - 50} 8`;
+  return `${d} Z`;
+})();
+
+/** The scalloped bottom edge of every header band. */
+export function Scallop({ color: band }: { color: SoftBlock }) {
+  return (
+    <SvgMarkup markup={`<path d="${SCALLOP}" fill="${color[band]}"/>`} viewBox="0 0 1000 24" width="100%" height={22} preserveAspectRatio="none" style={{ marginTop: -1 }} />
+  );
+}
+
+export function StepProgress({ current, total }: { current: number; total: number }) {
+  return (
+    <View style={styles.steps}>
+      <View style={styles.stepsBar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {Array.from({ length: total }, (_, i) => (
+          <View key={i} style={[styles.step, i < current && styles.stepDone]} />
+        ))}
+      </View>
+      <Text style={styles.stepsLabel} accessibilityLabel={`Stap ${current} van ${total}`}>
+        {current} van {total}
+      </Text>
+    </View>
+  );
+}
+
+export interface ScreenHeaderProps {
+  title: string;
+  subtitle?: string;
+  onBack?: () => void;
+  step?: [number, number];
+  color?: SoftBlock;
+  character?: CharacterName;
+  characterRotate?: number;
+  action?: ReactNode;
+  /** Space for the status bar; the band runs up behind it. */
+  topInset?: number;
+  children?: ReactNode;
+}
+
+/** A soft-block band with a scalloped edge and a character peeking over it. */
+export function ScreenHeader({ title, subtitle, onBack, step, color: band = 'lilac', character, characterRotate = 6, action, topInset = 0, children }: ScreenHeaderProps) {
+  return (
+    <View style={styles.header}>
+      <View style={[styles.band, { backgroundColor: color[band], paddingTop: topInset }]}>
+        {onBack || action ? (
+          <View style={styles.bar}>
+            {onBack ? <IconButton icon="back" label="Terug" onPress={onBack} /> : <View style={{ width: size.tapMin }} />}
+            <View>{action}</View>
+          </View>
+        ) : (
+          <View style={{ height: 22 }} />
+        )}
+        {step ? <StepProgress current={step[0]} total={step[1]} /> : null}
+        <Text accessibilityRole="header" style={[text('titleL'), { maxWidth: character ? 240 : undefined, marginTop: step ? 14 : 0 }]}>
+          {title}
+        </Text>
+        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        {children}
+      </View>
+      <Scallop color={band} />
+      {character ? (
+        <Character
+          name={character}
+          size={88}
+          decorative
+          rotate={characterRotate}
+          peek={step ? { right: -18, top: topInset + 70 } : { right: 14, top: topInset + (onBack ? 18 : 4) }}
+        />
+      ) : null}
+    </View>
+  );
+}
+
+export type TabId = 'trail' | 'book' | 'family' | 'me';
+
+const TABS: { id: TabId; label: string; icon: IconName }[] = [
+  { id: 'trail', label: 'Pad', icon: 'trail' },
+  { id: 'book', label: 'Boek', icon: 'book' },
+  { id: 'family', label: 'Familie', icon: 'family' },
+  { id: 'me', label: 'Ik', icon: 'me' },
+];
+
+export interface TabBarProps {
+  active: TabId;
+  onChange?: (id: TabId) => void;
+  onAdd?: () => void;
+  /** Space for the home indicator. */
+  bottomInset?: number;
+}
+
+export function TabBar({ active, onChange, onAdd, bottomInset = 0 }: TabBarProps) {
+  const tab = (t: (typeof TABS)[number]) => <Tab key={t.id} {...t} on={t.id === active} onPress={() => onChange?.(t.id)} />;
+  return (
+    <View accessibilityRole="tabbar" accessibilityLabel="Hoofdmenu" style={[styles.tabbar, { height: size.tabbar + bottomInset, paddingBottom: 18 + bottomInset }]}>
+      {TABS.slice(0, 2).map(tab)}
+      <Fab onPress={onAdd} />
+      {TABS.slice(2).map(tab)}
+    </View>
+  );
+}
+
+function Tab({ label, icon, on, onPress }: { label: string; icon: IconName; on: boolean; onPress: () => void }) {
+  const focus = useFocusRing();
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: on }}
+      onPress={onPress}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={[styles.tab, focus.ring]}
+    >
+      {on ? (
+        <View style={styles.tabPill}>
+          <Icon name={icon} size={22} weight={2.6} />
+        </View>
+      ) : (
+        <Icon name={icon} size={24} weight={2} />
+      )}
+      <Text style={[text('tab'), on && { fontFamily: fontFamily('sans', 800) }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function Fab({ onPress }: { onPress?: () => void }) {
+  const focus = useFocusRing();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Moment toevoegen"
+      onPress={onPress}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={({ pressed }) => [styles.fab, pressed && styles.fabPressed, focus.ring]}
+    >
+      <Icon name="plus" size={28} weight={3} color={color.onBluebird} />
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  header: { position: 'relative', zIndex: 1 },
+  band: { paddingHorizontal: 24, paddingBottom: 10 },
+  bar: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6 },
+  subtitle: { ...text('rowTitle'), fontSize: 14, marginTop: 4 },
+  steps: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  stepsBar: { flex: 1, flexDirection: 'row', gap: 6 },
+  step: { flex: 1, height: 6, borderRadius: 3, backgroundColor: color.line },
+  stepDone: { backgroundColor: color.ink },
+  stepsLabel: { ...text('meta'), fontFamily: fontFamily('sans', 800) },
+  tabbar: {
+    paddingTop: 6,
+    paddingHorizontal: 12,
+    backgroundColor: color.white,
+    borderTopWidth: border.edgeBold,
+    borderTopColor: color.ink,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  tab: { minWidth: 56, minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  tabPill: { width: 44, height: 30, borderRadius: 15, backgroundColor: color.sunshine, alignItems: 'center', justifyContent: 'center' },
+  fab: {
+    width: size.fab,
+    height: size.fab,
+    marginTop: -30,
+    borderRadius: size.fab / 2,
+    borderWidth: border.edgeBold,
+    borderColor: color.ink,
+    backgroundColor: color.bluebird,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: shadow.shadowLg,
+  },
+  fabPressed: { transform: [{ translateY: 3 }], boxShadow: `0 2px 0 0 ${color.ink}` },
+});

@@ -10,6 +10,7 @@
     "mobile": "npm run start -w @teddysteps/mobile",
     "family": "npm run start -w @teddysteps/family",
     "tokens": "node scripts/build-tokens.mjs",
+    "art": "node scripts/build-art.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "test": "npm run test --workspaces --if-present",

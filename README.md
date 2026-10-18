@@ -8,7 +8,7 @@ A private baby-memory app for Dutch parents. Product, design and working rules: 
 | --- | --- |
 | `apps/mobile` | The parent app (Expo, iOS and Android, Expo Router). The only place where Sentry and Aptabase may be used. |
 | `apps/family` | The family page on familie.teddysteps.nl (Expo for web, one page without a router, so it stays light). Deployed to Vercel with `vercel.json`. |
-| `packages/ui` | The design system in React Native. `src/tokens.ts` is generated from `design/design-system/tokens.json`. |
+| `packages/ui` | The design system in React Native, same names and props as `design/design-system/components/index.d.ts`. `src/tokens.ts` and `src/art.ts` (the gang, The Hug, icons, doodles) are generated from the design system; fonts are built by `scripts/build-fonts.py`. In development, open the gallery at `/galerij` (app: button on the home screen; family page: `localhost:8081/galerij`). |
 | `packages/core` | Shared logic without UI: week counting, texts, types. |
 | `supabase` | Local Supabase config; migrations, functions and RLS tests follow. |
 | `scripts` | `build-tokens.mjs`, `check-web-bundle.mjs`. |
@@ -28,6 +28,7 @@ supabase start          # local database (Docker must be running)
 
 ```sh
 npm run tokens          # regenerate tokens after changing tokens.json
+npm run art             # regenerate the gang, icons and doodles after changing bundle.js
 npm run typecheck
 npm run lint
 npm test

@@ -18,8 +18,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Tokens are up to date with tokens.json
-        run: npm run tokens && git diff --exit-code packages/ui/src/tokens.ts
+      - name: Tokens and art are up to date with the design system
+        run: npm run tokens && npm run art && git diff --exit-code packages/ui/src/tokens.ts packages/ui/src/art.ts
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test

@@ -1,15 +1,20 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { border, color, radius, shadow, space, type } from '@teddysteps/ui';
+import { border, color, Hug, radius, shadow, space, text, useTeddyFonts } from '@teddysteps/ui';
+import { Gallery } from '@teddysteps/ui/src/Gallery';
 
 // The family page is one light web page without a router: it only has a few views
 // (invite, postcards, send love), and every kilobyte counts on Oma's old phone.
 // Placeholder until the family loop is built (step 4 of docs/bouwplan.md).
 // Invite links open /j#<code>; this is what anyone else sees.
 export default function App() {
+  const fontsReady = useTeddyFonts();
+  if (!fontsReady) return null;
+  if (__DEV__ && window.location.pathname === '/galerij') return <Gallery />;
   return (
     <View style={styles.screen}>
       <View style={styles.card}>
-        <Text style={styles.title}>TeddySteps</Text>
+        <Hug size={120} />
+        <Text accessibilityRole="header" style={text('titleL')}>TeddySteps</Text>
         <Text style={styles.body}>
           Deze pagina is alleen voor de eigen kring. Open hem met de persoonlijke link uit je uitnodiging.
         </Text>
@@ -28,6 +33,7 @@ const styles = StyleSheet.create({
   },
   card: {
     maxWidth: 420,
+    alignItems: 'center',
     gap: space.space3,
     padding: space.space6,
     borderWidth: border.edge,
@@ -36,15 +42,5 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     boxShadow: shadow.shadowMd,
   },
-  title: {
-    color: color.ink,
-    fontSize: type.titleL.fontSize,
-    lineHeight: type.titleL.lineHeight,
-    fontWeight: '800',
-  },
-  body: {
-    color: color.inkMuted,
-    fontSize: type.body.fontSize,
-    lineHeight: type.body.lineHeight,
-  },
+  body: { ...text('body'), color: color.inkMuted, textAlign: 'center' },
 });
