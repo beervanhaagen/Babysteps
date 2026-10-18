@@ -55,6 +55,6 @@ In Vercel, import the repo with **Root Directory** `apps/family`. `vercel.json` 
 
 In Vercel, add a second project from the same repo: **Root Directory** `apps/landing`, Framework Preset "Other", and keep "Include files outside the Root Directory" on (the build reads `design/design-system`). `vercel.json` sets the build and the security headers (no scripts at all, no cookies). Turn off Web Analytics, Speed Insights and the Vercel Toolbar, for production and previews. Point `teddysteps.nl` at it in TransIP and let `www` redirect to it (308).
 
-Vercel Hobby allows no commercial use, and a page for a product that sells books counts as commercial even without a price, so the page goes public on Vercel Pro (`docs/bouwplan.md` §10, besluit 8). Plausible comes later, with its own entry in `script-src`, in `check-landing.mjs` and in the "Deze website" part of `/privacy`.
+Vercel Hobby allows no commercial use. The owner keeps the page on Hobby while it isn't promoted anywhere and the app is free; move to Vercel Pro at the latest when the page is promoted, shows a price or the app launches (`docs/bouwplan.md` §10, besluit 8). Plausible comes later, with its own entry in `script-src`, in `check-landing.mjs` and in the "Deze website" part of `/privacy`.
 
 `public/og.png` (the WhatsApp and social preview, 1200×630) and `public/apple-touch-icon.png` are screenshots of the design-system components (Wordmark, Hug) on the page's own styles. Remake them by hand if the brand changes.
