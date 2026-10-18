@@ -4,7 +4,7 @@ import { Character, Hug, Icon, type CharacterName, type IconName } from './brand
 import { useFocusRing } from './focus';
 import type { SoftBlock } from './navigation';
 import { fontFamily, text } from './text';
-import { border, color, radius, shadow, size } from './tokens';
+import { border, color, radius, shadow, size, space } from './tokens';
 
 export interface StickerProps {
   tone?: 'sunshine' | 'white' | 'lilac' | 'pistachio' | 'butter';
@@ -144,6 +144,23 @@ export function HugToast({ title, children }: { title: string; children?: string
   );
 }
 
+export interface CalloutProps {
+  title: string;
+  children?: string;
+  tone?: SoftBlock;
+  tilt?: number;
+}
+
+/** A soft-block card with one message; at most one per screen. */
+export function Callout({ title, children, tone = 'lilac', tilt = -1 }: CalloutProps) {
+  return (
+    <View style={[styles.callout, { backgroundColor: color[tone], transform: [{ rotate: `${tilt}deg` }] }]}>
+      <Text style={[text('rowTitle'), { fontSize: 15 }]}>{title}</Text>
+      {children ? <Text style={text('meta')}>{children}</Text> : null}
+    </View>
+  );
+}
+
 export interface EmptySlotProps {
   title?: string;
   subtitle?: string;
@@ -240,6 +257,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  callout: {
+    gap: space.space1,
+    maxWidth: 342,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    boxShadow: shadow.shadowMd,
   },
   emptySlot: {
     flexDirection: 'row',

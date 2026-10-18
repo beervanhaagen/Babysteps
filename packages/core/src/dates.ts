@@ -31,7 +31,8 @@ export type ChildDatesProblem =
 
 /**
  * Checks the dates from O2. Matches the database: a baby is born at most 20 weeks before
- * or 8 weeks after the due date; a baby on the way is due within 44 weeks.
+ * or 8 weeks after the due date. A baby on the way is due within 44 weeks, and may be up to
+ * 3 weeks overdue (40+3 is still "on the way").
  */
 export function checkChildDates(born: boolean, birth: CalendarDate | null, due: CalendarDate | null, today: CalendarDate): ChildDatesProblem[] {
   const problems: ChildDatesProblem[] = [];
@@ -45,7 +46,7 @@ export function checkChildDates(born: boolean, birth: CalendarDate | null, due: 
     if (late < -140 || late > 56) problems.push('due-far-from-birth');
   } else if (!born) {
     const ahead = daysBetween(today, due);
-    if (ahead < 0) problems.push('due-past');
+    if (ahead < -21) problems.push('due-past');
     else if (ahead > 44 * 7) problems.push('due-too-far');
   }
   return problems;

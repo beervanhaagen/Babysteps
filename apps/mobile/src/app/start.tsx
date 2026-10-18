@@ -1,14 +1,22 @@
 import { router } from 'expo-router';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Character, color, fontFamily, useLoop, Wordmark } from '@teddysteps/ui';
+import { Character, color, fontFamily, useFocusRing, useLoop, Wordmark } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 
 // S1 Startscherm: a full-colour delight screen; tap anywhere to begin.
 export default function Start() {
+  const focus = useFocusRing();
   return (
     <View style={styles.screen}>
       <Doodles />
-      <Pressable accessibilityRole="button" accessibilityLabel="Begin met TeddySteps" onPress={() => router.push('/welkom')} style={styles.tap}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Begin met TeddySteps"
+        onPress={() => router.push('/welkom')}
+        onFocus={focus.onFocus}
+        onBlur={focus.onBlur}
+        style={[styles.tap, focus.ring]}
+      >
         <Character name="bo" size={150} decorative />
         <Wordmark size={52} tone="header" />
         <Text style={styles.tagline}>het eerste jaar, voor altijd bewaard</Text>

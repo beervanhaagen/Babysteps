@@ -29,7 +29,8 @@ test('a born baby: birth not in the future, due date near birth', () => {
 test('a baby on the way: due date in the coming 44 weeks', () => {
   const today = '2026-10-18';
   assert.deepEqual(checkChildDates(false, null, '2027-01-10', today), []);
-  assert.deepEqual(checkChildDates(false, null, '2026-10-01', today), ['due-past']);
+  assert.deepEqual(checkChildDates(false, null, '2026-10-15', today), [], 'a few days overdue is still on the way');
+  assert.deepEqual(checkChildDates(false, null, '2026-09-20', today), ['due-past']);
   assert.deepEqual(checkChildDates(false, null, '2027-12-01', today), ['due-too-far']);
 });
 

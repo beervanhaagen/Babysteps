@@ -35,7 +35,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Only what the tests need: the database, auth (for auth.users) and the API.
-      - run: npx supabase start -x studio,imgproxy,realtime,storage-api,edge-runtime,logflare,vector,supavisor,postgres-meta,mailpit
+      # Only what the tests need: the database, auth (for auth.users), storage and the API.
+      - run: npx supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta,mailpit
       - name: Privacy tests (RLS on every table, no names kept, parents see only their own trail)
         run: npx supabase test db

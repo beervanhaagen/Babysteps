@@ -19,6 +19,11 @@ const AuthContext = createContext<{ state: AuthState; refresh: () => Promise<voi
   refresh: async () => {},
 });
 
+// Only a failed request counts as offline; a refused session means signing in again.
+function isNetworkError(error: { message?: string; code?: string }) {
+  return !error.code && /network|fetch|timeout/i.test(error.message ?? '');
+}
+
 async function findTrail(): Promise<Trail | null> {
   // RLS only returns the trail this parent belongs to.
   const { data, error } = await supabase.from('children').select('trail_id, first_name').limit(1).maybeSingle();
@@ -34,10 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const trail = await findTrail();
       setState(trail ? { status: 'ready', session, trail } : { status: 'onboarding', session });
-    } catch {
+    } catch (error) {
       // No connection at start-up: stay signed in and offer to try again,
       // rather than guessing whether this parent already has a trail.
-      setState({ status: 'offline', session });
+      if (isNetworkError(error as { message?: string; code?: string })) return setState({ status: 'offline', session });
+      await supabase.auth.signOut();
     }
   }, []);
 

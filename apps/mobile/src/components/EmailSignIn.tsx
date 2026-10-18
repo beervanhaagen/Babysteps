@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Linking, StyleSheet, Text } from 'react-native';
-import { Button, color, fontFamily, TextField, text } from '@teddysteps/ui';
+import { Button, color, fontFamily, TextField, text, useAnnounce } from '@teddysteps/ui';
 import { friendlyError, isEmail } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 
@@ -13,6 +13,7 @@ export function EmailSignIn({ terms }: { terms?: boolean }) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  useAnnounce(error);
 
   async function send() {
     const address = email.trim().toLowerCase();
@@ -41,7 +42,7 @@ export function EmailSignIn({ terms }: { terms?: boolean }) {
         returnKeyType="send"
         onSubmitEditing={send}
       />
-      <Button block onPress={send} disabled={busy}>
+      <Button block onPress={send} busy={busy}>
         Stuur me een code
       </Button>
       {terms ? (

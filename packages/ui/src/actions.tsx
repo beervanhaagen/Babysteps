@@ -19,6 +19,8 @@ export interface ButtonProps {
   block?: boolean;
   icon?: IconName;
   disabled?: boolean;
+  /** While waiting for the server: shows "Even geduld…" and can't be pressed twice. */
+  busy?: boolean;
   onPress?: () => void;
   /** Spoken instead of the label, when the label alone is not enough. */
   accessibilityLabel?: string;
@@ -26,15 +28,16 @@ export interface ButtonProps {
 }
 
 /** A sticker you could peel off: ink edge, hard drop, presses 3px into its shadow. */
-export function Button({ variant = 'primary', size = 'lg', block, icon, disabled, onPress, accessibilityLabel, children }: ButtonProps) {
+export function Button({ variant = 'primary', size = 'lg', block, icon, disabled: off, busy, onPress, accessibilityLabel, children }: ButtonProps) {
   const v = VARIANTS[variant];
+  const disabled = off || busy;
   const lg = size === 'lg';
   const focus = useFocusRing();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      accessibilityState={{ disabled }}
+      accessibilityState={{ disabled, busy }}
       disabled={disabled}
       onPress={onPress}
       onFocus={focus.onFocus}
@@ -53,8 +56,8 @@ export function Button({ variant = 'primary', size = 'lg', block, icon, disabled
         focus.ring,
       ]}
     >
-      {icon ? <Icon name={icon} size={22} weight={2.6} color={v.ink} /> : null}
-      <Text style={[text(lg ? 'buttonLg' : 'buttonMd'), { color: v.ink, includeFontPadding: false }]}>{children}</Text>
+      {icon && !busy ? <Icon name={icon} size={22} weight={2.6} color={v.ink} /> : null}
+      <Text style={[text(lg ? 'buttonLg' : 'buttonMd'), { color: v.ink, includeFontPadding: false }]}>{busy ? 'Even geduld…' : children}</Text>
     </Pressable>
   );
 }

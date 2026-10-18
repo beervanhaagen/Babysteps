@@ -1,20 +1,23 @@
 import { checkChildDates, parseDutchDate, todayInAmsterdam, typeDutchDate, type ChildDatesProblem } from '@teddysteps/core';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Button, ChoiceChip, ChoiceGroup, color, TextField, text } from '@teddysteps/ui';
+import { Button, ChoiceChip, ChoiceGroup, color, TextField, text, useAnnounce } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
+import { TextLink } from '@/components/TextLink';
 import { useAuth } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 
 const PROBLEMS: Record<ChildDatesProblem, string> = {
   'birth-format': 'Schrijf de datum als dd-mm-jjjj.',
-  'birth-future': 'Deze datum ligt nog in de toekomst.',
+  'birth-future': "Deze datum ligt nog in de toekomst. Nog onderweg? Kies dan 'Nog onderweg'.",
   'due-format': 'Schrijf de datum als dd-mm-jjjj.',
   'due-far-from-birth': 'Klopt deze datum? Hij ligt ver van de geboortedatum.',
-  'due-past': 'Deze datum is al geweest. Is je kleintje er al?',
-  'due-too-far': 'Kies een datum in de komende negen maanden.',
+  'due-past': "Deze datum is al een tijdje geweest. Is je kleintje er al? Kies dan 'Ja, geboren!'.",
+  'due-too-far': 'Kies een datum binnen tien maanden.',
 };
+
+const HELP = 'Het pad telt vanaf de geboorte. Sprongetjes tellen we vanaf de uitgerekende datum, ook als je kleintje eerder of later kwam.';
 
 // O2 Je kleintje (1 van 3). "Foto toevoegen" comes with the photo pipeline in step 3.
 export default function YourLittleOne() {
@@ -25,6 +28,8 @@ export default function YourLittleOne() {
   const [due, setDue] = useState('');
   const [errors, setErrors] = useState<{ name?: string; birth?: string; due?: string; form?: string }>({});
   const [busy, setBusy] = useState(false);
+  // VoiceOver doesn't read role="alert"; announce the first problem ourselves.
+  useAnnounce(errors.name ?? errors.birth ?? errors.due ?? errors.form);
 
   async function next() {
     const birthDate = born ? parseDutchDate(birth) : null;
@@ -45,6 +50,8 @@ export default function YourLittleOne() {
       child_due_date: dueDate,
     });
     if (error) {
+      // The trail may exist even if the answer got lost; refresh moves on if it does.
+      await refresh();
       setBusy(false);
       return setErrors({ form: friendlyError(error) });
     }
@@ -56,7 +63,7 @@ export default function YourLittleOne() {
     <Screen
       header={{ title: 'Wie is de kleine ontdekker?', color: 'lilac', step: [1, 3], character: 'tiggy', characterRotate: -8 }}
       footer={
-        <Button block onPress={next} disabled={busy}>
+        <Button block onPress={next} busy={busy}>
           Volgende
         </Button>
       }
@@ -100,17 +107,20 @@ export default function YourLittleOne() {
             error={errors.due}
             placeholder="dd-mm-jjjj"
             keyboardType="number-pad"
+            accessibilityHint={errors.due ?? HELP}
           />
         </View>
       </View>
-      <Text style={styles.help}>
-        Het pad telt vanaf de geboorte. Sprongetjes tellen we vanaf de uitgerekende datum, ook als je kleintje eerder of later kwam.
+      <Text aria-hidden style={styles.help}>
+        {HELP}
       </Text>
       {errors.form ? (
         <Text role="alert" style={styles.error}>
           {errors.form}
         </Text>
       ) : null}
+      {/* A way out for a second parent who used the wrong address, so no duplicate trail. */}
+      <TextLink onPress={() => supabase.auth.signOut()}>Ander e-mailadres? Uitloggen</TextLink>
     </Screen>
   );
 }

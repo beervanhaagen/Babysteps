@@ -10,7 +10,7 @@ export default function TryAgain() {
   const [busy, setBusy] = useState(false);
   return (
     <Screen
-      header={{ title: 'Even geen verbinding', color: 'butter', character: 'puddle' }}
+      header={{ title: 'Even geen verbinding', color: 'cornflower', character: 'puddle' }}
       footer={
         <Button
           block

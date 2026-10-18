@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
-import { border, Button, Character, CodeInput, color, fontFamily, Icon, IconButton, radius, shadow, text, useLoop } from '@teddysteps/ui';
+import { border, Button, Character, CodeInput, color, fontFamily, Icon, IconButton, radius, shadow, text, useAnnounce, useLoop } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
 import { TextLink } from '@/components/TextLink';
 import { friendlyError } from '@/lib/errors';
@@ -16,6 +16,8 @@ export default function EmailCode() {
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [wait, setWait] = useState(RESEND_AFTER_S);
+  const [resent, setResent] = useState(false);
+  useAnnounce(error ?? (resent ? 'Nieuwe code is onderweg!' : undefined));
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -36,9 +38,11 @@ export default function EmailCode() {
   async function resend() {
     setWait(RESEND_AFTER_S);
     setError(undefined);
+    setResent(false);
     setCode('');
     const { error: sendError } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
     if (sendError) setError(friendlyError(sendError));
+    else setResent(true);
   }
 
   function change(value: string) {
@@ -50,7 +54,7 @@ export default function EmailCode() {
   return (
     <Screen
       footer={
-        <Button block onPress={() => confirm()} disabled={code.length < 6 || busy}>
+        <Button block onPress={() => confirm()} disabled={code.length < 6} busy={busy}>
           Bevestigen
         </Button>
       }
@@ -70,9 +74,11 @@ export default function EmailCode() {
         <Text role="alert" accessibilityLiveRegion="polite" style={styles.error}>
           {error}
         </Text>
+      ) : resent ? (
+        <Text style={styles.resent}>Nieuwe code is onderweg!</Text>
       ) : null}
       <TextLink onPress={resend} disabled={wait > 0}>
-        {wait > 0 ? `Niks gekregen? Nieuwe code over ${wait} s` : 'Niks gekregen? Stuur een nieuwe code'}
+        {wait > 0 ? `Niks gekregen? Over ${wait} seconden kun je een nieuwe vragen.` : 'Niks gekregen? Stuur een nieuwe code'}
       </TextLink>
     </Screen>
   );
@@ -113,4 +119,5 @@ const styles = StyleSheet.create({
   body: { fontFamily: fontFamily('sans', 400), fontSize: 16, lineHeight: 24, color: color.ink },
   strong: { fontFamily: fontFamily('sans', 800) },
   error: { ...text('meta'), color: color.plum },
+  resent: { ...text('meta') },
 });

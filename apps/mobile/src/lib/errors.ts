@@ -10,6 +10,10 @@ export function friendlyError(error: unknown): string {
     if (error.code === 'otp_expired') return 'Deze code klopt niet of is verlopen. Kijk nog eens goed, of vraag een nieuwe aan.';
     if (error.code === 'email_address_invalid') return 'Dit e-mailadres klopt nog niet helemaal.';
   }
+  // A database answer (it has a code) is not a connection problem.
+  if (typeof error === 'object' && error && 'code' in error && (error as { code?: string }).code) {
+    return 'Dat lukte even niet. Probeer het zo nog eens.';
+  }
   return 'Dat lukte even niet. Check je internet en probeer het opnieuw.';
 }
 

@@ -225,13 +225,21 @@ otp_expiry = 600
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"
 
-# Login codes instead of magic links. New accounts get the confirmation mail, existing ones the
-# magic-link mail; both carry the same six-digit code (S3).
+# Login codes instead of links, in Dutch. New accounts get the confirmation mail, existing ones the
+# magic-link mail; changing an address or signing in again uses the same code mail.
 [auth.email.template.confirmation]
 subject = "Je code voor TeddySteps"
 content_path = "./supabase/templates/code.html"
 
 [auth.email.template.magic_link]
+subject = "Je code voor TeddySteps"
+content_path = "./supabase/templates/code.html"
+
+[auth.email.template.email_change]
+subject = "Je code voor TeddySteps"
+content_path = "./supabase/templates/code.html"
+
+[auth.email.template.reauthentication]
 subject = "Je code voor TeddySteps"
 content_path = "./supabase/templates/code.html"
 
