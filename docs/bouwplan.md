@@ -166,6 +166,24 @@ Nog te doen:
 - **Plausible:** bij toevoegen ook `script-src`, `check-landing.mjs` en het stuk "Deze website" op /privacy aanpassen.
 - **Later:** een aanmeldformulier zonder script (post naar een functie in Frankfurt, dubbele bevestiging via Lettermint) in plaats van de mailtjes.
 
+**Landingspagina: app-schermen en vooraanmelding (18 oktober 2026)**
+
+Gebouwd op verzoek van de eigenaar: twee secties met schermen uit de journeys ("Een kijkje in de app": T1, A4, F3; "Elke maand een feestje": X3, B1 zonder prijs), gebouwd met de componenten uit het ontwerpsysteem, en een vooraanmelding zonder script (plan en review tech-architect). Werking, limieten en het online zetten staan in de README, "Pre-registration".
+
+Besluiten:
+- Dubbele bevestiging met een knoppagina (een mailscanner bevestigt niets), codes alleen in het pad en alleen als hash, alles in `private` (niet via de Data API), geen JavaScript op de pagina.
+- Bewaren: onbevestigd 7 dagen na de laatste mail, uiterlijk 12 maanden; na de lanceringsmail wist de eigenaar de lijst. De lijst gaat nooit naar analytics of naar de gebruikers van de app; `baby_month` dient alleen om testgezinnen te kiezen.
+- Limieten: 5 pogingen per IP per 10 minuten, 300 per uur, 150 bevestigingsmails per dag, 3 per adres. De IP-limiet werkt alleen via Vercel (een directe aanroep kan `x-forwarded-for` vervalsen); de daglimiet beschermt `post.teddysteps.nl` hoe dan ook.
+- IP-adressen alleen als HMAC met een geheime sleutel (`_shared/ip.ts`), ook in `family-api` (was een gewone hash, terug te rekenen).
+- Keten: Vercel (doorgeefluik), Supabase Frankfurt, Lettermint. De lanceringsmail per persoon, met afmeldmogelijkheid, zonder tracking.
+- Migraties: nieuwe bestanden krijgen een naam ná `20261021120000` (de bestaande namen liggen in de toekomst; anders weigert `db push`).
+
+Nog te doen:
+- **Online zetten** (eigenaar, zie README): Supabase-project in Frankfurt, Lettermint met `post.teddysteps.nl`, secrets, rewrites in `vercel.json`. Tot dan toont teddysteps.nl de mailknoppen.
+- **Vercel Hobby:** met een aanmeldformulier wordt de pagina duidelijker commercieel (tech-architect); besluit eigenaar of dat het moment is voor Pro. Supabase Free pauzeert een project na een week zonder activiteit, en dan werkt het formulier stil niet meer.
+- **Jurist:** de uitgerekende maand verraadt een zwangerschap (mogelijk een gezondheidsgegeven), de grondslag (toestemming), de bewaartermijn.
+- **Later:** foto's in de app-schermen in plaats van de dieren (groei-advies; besluit eigenaar), een deelknop op `/bevestigd`.
+
 **Repo-indeling**
 
 ```

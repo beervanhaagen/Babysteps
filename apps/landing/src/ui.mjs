@@ -13,6 +13,11 @@ globalThis.window = { React };
 new Function(readFileSync(`${designSystem}components/bundle.js`, 'utf8'))();
 const components = globalThis.window.TeddySteps;
 
+/** Already-rendered HTML as a child of another component, e.g. a Sticker inside a ScreenHeader. */
+export function raw(html) {
+  return React.createElement('div', { dangerouslySetInnerHTML: { __html: html } });
+}
+
 /** One component as HTML, e.g. ui('Button', { href: '#start' }, 'Hou me op de hoogte'). */
 export function ui(name, props = {}, children) {
   if (!components[name]) throw new Error(`No component ${name} in bundle.js`);

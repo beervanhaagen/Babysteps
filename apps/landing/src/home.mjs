@@ -1,7 +1,7 @@
 // teddysteps.nl, after the board design/brand/TeddySteps-landing.dc.html.
 // Differences from the board, on purpose:
-// - The app isn't in the stores yet: "Binnenkort" up top, and every download button is an
-//   e-mail to us ("Hou me op de hoogte", "Ik wil meetesten").
+// - The app isn't in the stores yet: "Binnenkort" up top, and instead of download buttons a
+//   pre-registration form (src/signup.mjs), or e-mails to us until that form is live.
 // - No price yet (docs/bouwplan.md §10, besluit 8).
 // - Rose is never text and no section background (design-system README); plum can't sit on
 //   aubergine, so feeling words on dark sections are sunshine.
@@ -9,6 +9,8 @@
 //   one family-wide "mag foto's bewaren" switch, ordering the book comes in v1.1.
 // - Leap copy checked by child-development-reviewer: always "misschien", "rond", "ongeveer".
 import { check, CONTACT, KEEP_POSTED, page, TEST_ALONG } from './layout.mjs';
+import { appSection, partySection } from './screens.mjs';
+import { SIGNUP_ON, signupForm } from './signup.mjs';
 import { ui } from './ui.mjs';
 
 // Pictures of the app are decoration: hidden from screen readers and out of the tab order.
@@ -172,7 +174,9 @@ const faq = [
   ['Mijn baby is al een paar maanden. Te laat?', 'Helemaal niet. Je zet de eerdere weken in één keer over uit je fotorol, zodat het boek toch het hele eerste jaar laat zien.'],
   ['Kunnen we allebei momenten toevoegen?', 'Ja. Nodig je partner uit als ouder en jullie vullen samen hetzelfde pad.'],
   ['En als ik een paar weken oversla?', 'Dan gebeurt er niets. Het pad wacht gewoon, met hooguit één vriendelijk seintje op zondag. Geen reeksen om bij te houden, geen schuldgevoel.'],
-  ['Wanneer kan ik beginnen?', `Binnenkort. We testen TeddySteps eerst met een kleine groep gezinnen. Wil je meetesten of het als eerste horen? Mail naar <a href="${KEEP_POSTED}">${CONTACT}</a>.`],
+  ['Wanneer kan ik beginnen?', SIGNUP_ON
+    ? 'Binnenkort. We testen TeddySteps eerst met een kleine groep gezinnen. Wil je meetesten of het als eerste horen? <a href="#start">Meld je hier aan</a>.'
+    : `Binnenkort. We testen TeddySteps eerst met een kleine groep gezinnen. Wil je meetesten of het als eerste horen? Mail naar <a href="${KEEP_POSTED}">${CONTACT}</a>.`],
 ];
 
 const questions = `
@@ -188,18 +192,23 @@ ${faq.map(([q, a], i) => `<details class="lp-faq"${i === 0 ? ' open' : ''}><summ
 </div>
 </section>`;
 
-const start = `
-<section id="start" class="lp-section lp-band" data-tone="lilac" aria-labelledby="start-titel">
-<div class="lp-wrap lp-split">
-<div class="lp-col">
-<p class="lp-eyebrow">Bijna klaar</p>
-<h2 id="start-titel" class="lp-h lp-h2">Je onthoudt niet elke eerste keer. <em>Het boek wel.</em></h2>
-<p class="lp-text lp-strong">TeddySteps komt binnenkort naar de App Store en Google Play. Stuur ons een mailtje, dan hoor je het als eerste. Wil je meetesten? Zet erbij hoe oud je kleintje is, of wanneer het wordt verwacht.</p>
+const keepPostedForm = `<p class="lp-text lp-strong">De app is er nog niet, je downloadt nu dus niets. Laat je e-mailadres achter, dan mailen we je zodra TeddySteps in de App Store en Google Play staat. Of meld je aan als testgezin: we zoeken een klein groepje ouders dat hem als eerste probeert.</p>
+${signupForm()}`;
+
+const keepPostedMail = `<p class="lp-text lp-strong">TeddySteps komt binnenkort naar de App Store en Google Play. Stuur ons een mailtje, dan hoor je het als eerste. Wil je meetesten? Zet erbij hoe oud je kleintje is, of wanneer het wordt verwacht.</p>
 <div class="lp-actions">
 ${ui('Button', { href: KEEP_POSTED, icon: 'mail' }, 'Hou me op de hoogte')}
 ${ui('Button', { variant: 'paper', href: TEST_ALONG }, 'Ik wil meetesten')}
 </div>
-<p class="lp-small">Werkt de knop niet? Mail naar ${CONTACT}. We mailen je alleen als de app er is, en over meetesten als je dat vraagt. Daarna wissen we je adres.</p>
+<p class="lp-small">Werkt de knop niet? Mail naar ${CONTACT}. We mailen je alleen als de app er is, en over meetesten als je dat vraagt. Daarna wissen we je adres.</p>`;
+
+const start = `
+<section id="start" class="lp-section lp-band" data-tone="lilac" aria-labelledby="start-titel">
+<div class="lp-wrap lp-split">
+<div class="lp-col">
+<p class="lp-eyebrow">Binnenkort</p>
+<h2 id="start-titel" class="lp-h lp-h2">Je onthoudt niet elke eerste keer. <em>Het boek wel.</em></h2>
+${SIGNUP_ON ? keepPostedForm : keepPostedMail}
 </div>
 ${art(ui('Hug', { size: 240 }), 'lp-col lp-center')}
 </div>
@@ -214,6 +223,6 @@ export function home() {
     path: '/',
     nav,
     navOnPhone: false,
-    body: [hero, memories, how, leaps, circle, book, questions, start].join('\n'),
+    body: [hero, memories, how, appSection, leaps, partySection, circle, book, questions, start].join('\n'),
   });
 }

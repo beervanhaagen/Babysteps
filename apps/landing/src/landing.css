@@ -144,6 +144,55 @@ details.lp-faq p { margin: 0 0 14px; font-size: 16px; line-height: 25px; color: 
 .lp-privacy-item p { font-size: 16px; line-height: 25px; }
 .lp-privacy-item:target { background: var(--butter); }
 
+/* ---- App screens (src/screens.mjs) ---- */
+/* A 390px app screen at 77% in a 300px phone. Where the row doesn't fit, it scrolls sideways
+   inside itself (never the page); "safe center" keeps the first phone reachable. */
+.lp-phones { display: flex; gap: var(--space-7); justify-content: safe center; align-items: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: var(--space-2) var(--space-2) var(--space-4); }
+.lp-phones:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: var(--radius-l); }
+.lp-shot { flex: 0 0 300px; scroll-snap-align: center; margin: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.lp-shot:nth-child(odd) .lp-device { transform: rotate(-1deg); }
+.lp-shot:nth-child(even) .lp-device { transform: rotate(1deg); }
+.lp-device { width: 300px; height: 600px; box-sizing: border-box; border: var(--edge-bold) solid var(--ink); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); background: var(--paper); overflow: hidden; }
+.lp-screen { width: 390px; height: 780px; zoom: 0.763; display: flex; flex-direction: column; overflow: hidden; background: var(--paper); text-align: left; }
+.lp-screen-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-2) var(--space-5) var(--space-5); overflow: hidden; }
+.lp-screen-tabs { flex: 0 0 auto; }
+/* eyebrow and body from tokens.json */
+.lp-screen-label { font-size: 12px; line-height: 16px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+.lp-screen-text { font-size: 14px; line-height: 21px; }
+.lp-screen-buttons { display: flex; gap: var(--space-3); }
+.lp-screen-party { justify-content: center; align-items: stretch; text-align: center; padding-top: var(--space-7); }
+.lp-party-title { margin: 0; }
+.lp-party-gang { display: flex; justify-content: center; gap: var(--space-4); }
+.lp-party-row { gap: var(--space-2); }
+.lp-month { display: flex; justify-content: center; padding: var(--space-3) 0; }
+.lp-grow { background: var(--white); border: var(--edge) solid var(--ink); border-radius: var(--radius-l); box-shadow: var(--shadow-md); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
+.lp-grow-bar { height: 16px; border: var(--edge) solid var(--ink); border-radius: var(--radius-pill); background: var(--paper); overflow: hidden; }
+.lp-grow-bar span { display: block; height: 100%; background: var(--sunshine); border-right: var(--edge) solid var(--ink); }
+.lp-grow-stats { display: flex; gap: var(--space-6); font-size: 14px; font-weight: 700; }
+/* number and title-m from tokens.json */
+.lp-grow-stats b { display: block; font-family: var(--font-sticker); font-size: 40px; line-height: 38px; font-weight: 400; }
+.lp-h4 { font-size: 22px; line-height: 26px; font-weight: 700; }
+.lp-shot figcaption { display: flex; flex-direction: column; gap: var(--space-1); padding: 0 var(--space-2); }
+.lp-shot figcaption p { font-size: 16px; line-height: 24px; }
+/* Two phones need 624px: below that the row goes under the text instead of over it. */
+.lp-phones-two { flex: 1 0 624px; max-width: 100%; flex-direction: row; flex-wrap: nowrap; gap: var(--space-6); }
+
+/* ---- Pre-registration form (src/signup.mjs) ---- */
+.lp-signup { display: flex; flex-direction: column; gap: var(--space-5); max-width: 520px; }
+.lp-signup .ts-field input { width: 100%; }
+/* A select drawn like the design-system field, with the system's chevron instead of the browser's arrow. */
+.lp-select { position: relative; }
+.lp-select select { appearance: none; width: 100%; height: var(--field); box-sizing: border-box; padding: 0 var(--tap-min) 0 var(--space-4); border-radius: var(--radius-m); border: var(--edge) solid var(--ink); background: var(--white); font-family: var(--font-sans); font-size: 16px; color: var(--ink); }
+.lp-select select:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.lp-select .ts-icon { position: absolute; right: var(--space-4); top: 50%; transform: translateY(-50%) rotate(90deg); color: var(--ink-muted); pointer-events: none; }
+.lp-optional { font-weight: 700; color: var(--ink-muted); }
+.lp-test { margin: 0; padding: var(--space-5); border: var(--edge-dash) dashed var(--ink); border-radius: var(--radius-l); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+.lp-test legend { padding: 0 var(--space-2); }
+.lp-test .ts-field { align-self: stretch; }
+.lp-signup .ts-hint { color: var(--ink-muted); }
+/* For bots only: out of sight, out of the tab order, ignored by screen readers. */
+.lp-honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
 /* ---- 404 ---- */
 .lp-notfound { display: flex; flex-direction: column; gap: var(--space-6); padding-top: var(--space-7); padding-bottom: var(--lp-section); max-width: 840px; }
 
@@ -163,4 +212,9 @@ details.lp-faq p { margin: 0 0 14px; font-size: 16px; line-height: 25px; color: 
   .lp-memory:nth-child(2) { margin-left: var(--space-4); }
   .lp-logo { padding-right: 0; }
   .lp-books { transform: scale(0.8); min-height: 300px; }
+  .lp-phones { margin: 0 calc(-1 * var(--space-4)); padding: var(--space-2) var(--space-4) var(--space-4); gap: var(--space-5); }
+  .lp-phones-two { flex-basis: auto; max-width: none; }
+  .lp-shot { flex-basis: 270px; }
+  .lp-device { width: 270px; height: 540px; }
+  .lp-screen { zoom: 0.687; }
 }

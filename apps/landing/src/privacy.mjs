@@ -3,6 +3,7 @@
 // Keep every line true to what the build does (docs/family-email.md, docs/analytics.md);
 // export, deleting and the analytics switch arrive in steps 8 and 10, before launch.
 import { CONTACT, page } from './layout.mjs';
+import { SIGNUP_ON } from './signup.mjs';
 import { ui } from './ui.mjs';
 
 const nav = ui('Button', { size: 'md', variant: 'paper', href: '/' }, 'Naar de homepagina');
@@ -17,7 +18,11 @@ const sections = [
 <p>Op de familiepagina staan geen trackers en geen reclame. Er staat één cookie, alleen om je ingelogd te houden. Er is geen downloadknop, tenzij de ouders die aanzetten. Een schermafbeelding kunnen we niet tegenhouden, dus de ouders nodigen alleen mensen uit die ze vertrouwen.</p>
 <p>Wil je niet meer meekijken? Kies op de familiepagina bij je instellingen "Ik wil niet meer meekijken". Je e-mailadres, je link en je toestellen worden dan gewist. Je knuffels, berichtjes en de naam die de ouders je gaven blijven bij het pad.</p>`],
   ['van-jou', 'Altijd van jou', `<p>Je kunt alles exporteren. Verwijder je je pad, dan kun je dat 30 dagen terugdraaien. Daarna is alles binnen 60 dagen helemaal weg, ook uit onze back-ups. Wat al in de mailbox van je familie staat, zoals namen, bijschriften en foto's als je dat toestond, kunnen we niet terughalen.</p>`],
-  ['site', 'Deze website', `<p>teddysteps.nl zet geen cookies en laadt niets van andere partijen. Mail je ons om op de hoogte te blijven of mee te testen? Dan gebruiken we je adres alleen daarvoor, en daarna wissen we het.</p>`],
+  ['site', 'Deze website', SIGNUP_ON
+    ? `<p>teddysteps.nl zet geen cookies en laadt niets van andere partijen.</p>
+<p>Meld je je aan om op de hoogte te blijven of mee te testen? Dan bewaren we je e-mailadres, of je wilt meetesten en, als je die invult, de maand waarin je kleintje geboren of uitgerekend is. Dat staat in Frankfurt; de bevestigingsmail gaat via Lettermint, ook in de EU. Het formulier loopt via Vercel, dat deze website host. Tegen misbruik houden we een uur lang een versleutelde code van je IP-adres bij, niet het adres zelf.</p>
+<p>Bevestig je niet, dan wissen we je adres na 7 dagen. Bevestig je wel, dan gebruiken we het alleen om je te laten weten dat de app er is, of om je te vragen voor een test. Daarna wissen we het, uiterlijk na 12 maanden. Eerder eraf? Mail naar <a href="mailto:${CONTACT}">${CONTACT}</a>.</p>`
+    : `<p>teddysteps.nl zet geen cookies en laadt niets van andere partijen. Mail je ons om op de hoogte te blijven of mee te testen? Dan gebruiken we je adres alleen daarvoor, en daarna wissen we het.</p>`],
 ];
 
 const body = `

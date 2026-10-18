@@ -58,3 +58,43 @@ In Vercel, add a second project from the same repo: **Root Directory** `apps/lan
 Vercel Hobby allows no commercial use. The owner keeps the page on Hobby while it isn't promoted anywhere and the app is free; move to Vercel Pro at the latest when the page is promoted, shows a price or the app launches (`docs/bouwplan.md` §10, besluit 8). Plausible comes later, with its own entry in `script-src`, in `check-landing.mjs` and in the "Deze website" part of `/privacy`.
 
 `public/og.png` (the WhatsApp and social preview, 1200×630) and `public/apple-touch-icon.png` are screenshots of the design-system components (Wordmark, Hug) on the page's own styles. Remake them by hand if the brand changes.
+
+## Pre-registration (teddysteps.nl)
+
+"Hou me op de hoogte" and "Ik wil meetesten" are one plain form, without any script: it posts to `/api/aanmelden`, Vercel passes that to the edge function `supabase/functions/waitlist` (Frankfurt), and every answer is a redirect to a static page (`/aangemeld`, `/bevestigd`, …). Double opt-in: the mail links to `teddysteps.nl/bevestig/<code>` (the code in the path, only its hash stored), and that page has a "Ja" and a "wis" button, so a mail scanner opening the link confirms nothing. The link from the mail keeps working as a "wis mijn adres" link after confirming.
+
+Stored in `private.waitlist` (not reachable through the Data API): the address, whether someone wants to test, and optionally the month the baby was born or is due (only for testers). Unconfirmed addresses go 7 days after the last mail, everyone after 12 months at the latest (`private.waitlist_cleanup`, daily via pg_cron). Limits: 5 attempts per IP per 10 minutes (IP only as an HMAC, kept an hour; it can be faked by calling the function directly), 300 attempts an hour, 150 confirmation mails a day, 3 mails per address.
+
+The form only appears when `apps/landing/vercel.json` has the rewrite to the function; without it the page keeps the mailto buttons (`src/signup.mjs`, `SIGNUP_ON`).
+
+**Locally:**
+
+```sh
+npx supabase start
+SIGNUP=local npm run landing       # form on, posting to the local function; mails land in Mailpit (http://127.0.0.1:55324)
+node scripts/check-waitlist.mjs    # end-to-end: sign up, mail, confirm, wipe, limits
+npx supabase test db
+```
+
+**Going live** (needs the hosted Supabase project and Lettermint):
+
+1. Supabase project in Frankfurt (Haagen Trade, two-factor). `npx supabase link`, `npx supabase db push`. Check `select jobname, schedule from cron.job;`.
+2. Secrets: `npx supabase secrets set IP_HASH_KEY=$(openssl rand -hex 32) LANDING_ORIGIN=https://teddysteps.nl LETTERMINT_API_TOKEN=… MAIL_FROM="TeddySteps <hallo@post.teddysteps.nl>"`. Never set `MAIL_DEV_URL` online. `family-api` needs `IP_HASH_KEY` too.
+3. `npx supabase functions deploy waitlist` (and `family-api`); in the dashboard "Enforce JWT" stays off for both.
+4. Lettermint: `post.teddysteps.nl` verified (SPF, DKIM, DMARC, return-path at TransIP), a route with slug `transactional`, open and click tracking off (otherwise the confirmation link is rewritten), a token for this project only.
+5. Processing agreements with Supabase, Vercel and Lettermint.
+6. In `apps/landing/vercel.json`: add the rewrites below (with the project ref) and change `form-action 'none'` to `form-action 'self'` in the CSP. `npm run landing:build && npm run check:landing` must pass.
+
+   ```json
+   "rewrites": [
+     { "source": "/api/aanmelden", "destination": "https://REF.supabase.co/functions/v1/waitlist/aanmelden" },
+     { "source": "/bevestig/:code", "has": [{ "type": "header", "key": "content-type" }], "destination": "https://REF.supabase.co/functions/v1/waitlist/bevestig/:code" },
+     { "source": "/bevestig/:code", "destination": "/bevestig" }
+   ]
+   ```
+
+7. Test once on production: your own address (mail arrives, not in spam), opening the link confirms nothing, "Ja" gives `/bevestigd`, a second address with "wis" gives `/gewist`, and only those rows are in the table. Sign up once over Wi-Fi and once over 4G: the two `ip_hash` values must differ, or the IP limit hits everyone at once.
+
+**Switching it off:** remove the rewrites and set `form-action` back to `'none'`; the form disappears and the mailto buttons return.
+
+**Day to day:** export confirmed addresses (and testers by `baby_month`) from the table editor. Wipe someone by hand after a mail to hallo@: `delete from private.waitlist where email = lower(btrim('…'));`. After the launch mail (one per person, with a way to unsubscribe, no tracking), wipe the list. "limit reached" in the function logs means the limits are being hit.
