@@ -1,7 +1,7 @@
 import { longDutchDate, todayInAmsterdam, TRAIL_WEEKS, trailWeek } from '@teddysteps/core';
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Character, color, EmptySlot, fontFamily, MomentCard, space, text } from '@teddysteps/ui';
+import { Banner, Button, Character, color, EmptySlot, fontFamily, MomentCard, space, text } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 import { Photo } from '@/components/Photo';
 import { Tabs } from '@/components/Tabs';
@@ -15,7 +15,7 @@ import { useQueue, useTrailMoments, type TrailMoment } from '@/lib/trail';
 // The "Wat komt eraan" leap card comes with its reviewed copy in step 9.
 export default function Trail() {
   const { state } = useAuth();
-  const { moments, loaded } = useTrailMoments();
+  const { moments, source } = useTrailMoments();
   const { queue, online } = useQueue();
   if (state.status !== 'ready') return null;
   const { trail } = state;
@@ -26,11 +26,18 @@ export default function Trail() {
       <TrailHeader childName={trail.childName} week={week ? `Week ${week} van ${TRAIL_WEEKS}` : null} />
       {!week ? (
         <OnTheWay dueDate={longDutchDate(trail.dueDate, { weekday: false, year: true })} />
-      ) : loaded && !moments.length ? (
+      ) : source === 'server' && !moments.length ? (
         <EmptyTrail week={week} />
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
-          <UploadStatus queue={queue} online={online} />
+          {source === 'failed' || (source === 'cached' && !queue.length) ? (
+            <Banner tone="sunshine" character="bizzy" title="Je bent offline">
+              {source === 'failed'
+                ? 'Je pad verschijnt zodra je weer verbinding hebt.'
+                : 'Dit is je pad zoals we het kenden. Nieuwe dingen zie je zodra je weer verbinding hebt.'}
+            </Banner>
+          ) : null}
+          <UploadStatus queue={queue} online={online && source !== 'failed'} />
           <View style={styles.timeline}>
             <View style={styles.rail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
               <View style={styles.now} />
@@ -40,9 +47,12 @@ export default function Trail() {
               {!moments.some((m) => m.trailWeek === week) ? (
                 <EmptySlot subtitle={`Week ${week} · voeg een moment toe`} onPress={() => router.push('/toevoegen')} />
               ) : null}
-              {moments.map((m, i) => (
-                <Card key={m.key} moment={m} tilt={i % 2 ? 1 : -1.5} />
-              ))}
+              {/* A moment still uploading shows in the upload status above, not twice. */}
+              {moments
+                .filter((m) => !m.queued || m.queued.stage === 'visible')
+                .map((m, i) => (
+                  <Card key={m.key} moment={m} tilt={i % 2 ? 1 : -1.5} />
+                ))}
             </View>
           </View>
         </ScrollView>

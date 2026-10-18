@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { border, Button, ChoiceChip, color, fontFamily, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
+import { border, Button, color, fontFamily, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
 import { setDraft, useDraft } from '@/lib/draft';
 import { MAX_PHOTOS, pickPhotos, takePhoto, type PickedPhoto } from '@/lib/photos';
@@ -52,8 +52,12 @@ export default function Photos() {
       }
     >
       <View style={styles.chips}>
-        <ChoiceChip onPress={() => add('library')}>Meer kiezen</ChoiceChip>
-        <ChoiceChip onPress={() => add('camera')}>Camera</ChoiceChip>
+        <Button size="md" variant="paper" icon="plus" onPress={() => add('library')}>
+          Meer kiezen
+        </Button>
+        <Button size="md" variant="paper" icon="camera" onPress={() => add('camera')}>
+          Camera
+        </Button>
       </View>
       {message ? (
         <Text role="alert" style={styles.message}>
@@ -91,7 +95,7 @@ function Thumb({ photo, index, rank, onPress }: { photo: PickedPhoto; index: num
 }
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   message: { ...text('meta'), color: color.plum },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 },
   cell: { width: '33.333%', aspectRatio: 1, padding: 4 },
@@ -106,12 +110,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: border.edgeBold,
     borderColor: color.ink,
-    backgroundColor: color.white,
-    opacity: 0.75,
+    backgroundColor: color.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markOn: { width: 30, height: 30, borderRadius: 15, backgroundColor: color.tangerine, opacity: 1 },
+  markOn: { width: 30, height: 30, borderRadius: 15, backgroundColor: color.tangerine },
   rank: { fontFamily: fontFamily('sticker', 400), fontSize: 15, color: color.ink, includeFontPadding: false },
   footer: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   count: { flex: 1, fontFamily: fontFamily('sans', 800), fontSize: 16, color: color.ink },

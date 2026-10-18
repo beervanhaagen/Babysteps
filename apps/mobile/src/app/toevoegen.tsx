@@ -14,7 +14,7 @@ export default function WhatHappened() {
 
   return (
     <View style={styles.backdrop}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Sluiten" style={styles.dim} onPress={() => router.back()} />
+      <Pressable accessible={false} importantForAccessibility="no" style={styles.dim} onPress={() => router.back()} />
       <View accessibilityViewIsModal style={[styles.sheet, { paddingBottom: 28 + insets.bottom }]}>
         <View style={styles.handle} />
         <View style={styles.head}>

@@ -27,14 +27,16 @@ export default function Details() {
   const [week, setWeek] = useState(Math.min(photoWeek, current));
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState<string>();
+  const [saveError, setSaveError] = useState<string>();
   const [busy, setBusy] = useState(false);
-  useAnnounce(error);
+  useAnnounce(error ?? saveError);
 
   const name = trail?.childName ?? 'je kleintje';
 
   async function save() {
     if (isFirst && !firstLabel.trim()) return setError(`Wat deed ${name} voor het eerst? Een paar woorden is genoeg.`);
     setError(undefined);
+    setSaveError(undefined);
     setBusy(true);
     try {
       const queued = await pin({ photos: draft.photos, trailWeek: week, caption, isFirst, firstLabel });
@@ -42,7 +44,7 @@ export default function Details() {
       router.replace({ pathname: '/vastgepind', params: { client: queued.clientId } });
     } catch {
       setBusy(false);
-      setError('De foto’s klaarmaken lukte niet. Probeer het nog eens, of kies andere foto’s.');
+      setSaveError('De foto’s klaarmaken lukte niet. Probeer het nog eens, of kies andere foto’s.');
     }
   }
 
@@ -78,15 +80,12 @@ export default function Details() {
       </ChoiceGroup>
       {isFirst ? (
         <TextField label={`Wat deed ${name} voor het eerst?`} value={firstLabel} onChangeText={setFirstLabel} maxLength={60} error={error} />
-      ) : error ? (
-        <Text role="alert" style={styles.error}>
-          {error}
-        </Text>
       ) : null}
       <WeekRow week={week} open={picking} onPress={() => setPicking(!picking)} />
       {picking ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.weeks}>
-          {Array.from({ length: current }, (_, i) => current - i).map((w) => (
+        <ChoiceGroup label="Kies de week">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.weeks}>
+            {Array.from({ length: current }, (_, i) => current - i).map((w) => (
             <ChoiceChip
               key={w}
               selected={w === week}
@@ -98,7 +97,13 @@ export default function Details() {
               {`Week ${w}`}
             </ChoiceChip>
           ))}
-        </ScrollView>
+          </ScrollView>
+        </ChoiceGroup>
+      ) : null}
+      {saveError ? (
+        <Text role="alert" style={styles.error}>
+          {saveError}
+        </Text>
       ) : null}
     </Screen>
   );
@@ -119,7 +124,9 @@ function WeekRow({ week, open, onPress }: { week: number; open: boolean; onPress
       <Icon name="trail" />
       <Text style={styles.weekText}>Week {week}</Text>
       <Text style={[text('meta'), styles.muted]}>{open ? 'kies een week' : 'andere week'}</Text>
-      <Icon name="chevron-right" size={20} color={color.inkMuted} />
+      <View style={{ transform: [{ rotate: open ? '-90deg' : '90deg' }] }}>
+        <Icon name="chevron-right" size={20} color={color.inkMuted} />
+      </View>
     </Pressable>
   );
 }

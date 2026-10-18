@@ -1,25 +1,36 @@
 import { useState } from 'react';
-import { Button } from '@teddysteps/ui';
+import { Text } from 'react-native';
+import { Button, color, text } from '@teddysteps/ui';
 import { ComingSoon } from '@/components/ComingSoon';
 import { clearQueue } from '@/lib/queue';
 import { supabase } from '@/lib/supabase';
-import { useQueue } from '@/lib/trail';
+import { forgetPhotos, useQueue } from '@/lib/trail';
 
 // M1 Account comes in step 8. Signing out is here already, for testing.
 export default function Me() {
   const { queue } = useQueue();
   const [sure, setSure] = useState(false);
-  // Photos that are still only on this phone would be lost; ask once more first.
-  const waiting = queue.filter((q) => q.stage !== 'visible').length;
+  // Anything still in the queue would be lost (also print versions of visible moments,
+  // which the book needs); ask once more first.
+  const waiting = queue.length;
   async function signOut() {
     if (waiting && !sure) return setSure(true);
+    const { data } = await supabase.auth.getSession();
     await clearQueue();
+    if (data.session) await forgetPhotos(data.session.user.id);
     await supabase.auth.signOut();
   }
   return (
     <ComingSoon title="Ik" tab="me" tone="lilac" character="tiggy" step="stap 8">
+      {sure ? (
+        <Text role="alert" style={[text('rowTitle'), { color: color.plum }]}>
+          {waiting === 1
+            ? 'Er staat nog 1 moment alleen op deze telefoon. Log je nu uit, dan is het weg.'
+            : `Er staan nog ${waiting} momenten alleen op deze telefoon. Log je nu uit, dan zijn ze weg.`}
+        </Text>
+      ) : null}
       <Button block variant={sure ? 'danger' : 'paper'} onPress={signOut}>
-        {sure ? `Toch uitloggen (${waiting} nog niet geüpload)` : 'Uitloggen'}
+        {sure ? 'Toch uitloggen' : 'Uitloggen'}
       </Button>
     </ComingSoon>
   );

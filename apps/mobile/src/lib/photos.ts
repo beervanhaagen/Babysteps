@@ -1,5 +1,5 @@
 import type { CalendarDate } from '@teddysteps/core';
-import { Directory, File } from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'react-native';
@@ -67,7 +67,25 @@ async function render(uri: string, width: number, height: number, longEdge: numb
   // Never upscale: a small original stays its own size, but is still re-encoded.
   if (Math.max(width, height) > longEdge) context.resize(width >= height ? { width: longEdge } : { height: longEdge });
   const image = await context.renderAsync();
-  return image.saveAsync({ format, compress });
+  // A 48 MP photo takes ~190 MB decoded: free it as soon as the file is written.
+  context.release();
+  try {
+    return await image.saveAsync({ format, compress });
+  } finally {
+    image.release();
+  }
+}
+
+/** The picker copies photos into the cache, with their metadata; remove them once used. */
+export function forgetPickerCopies(photos: PickedPhoto[]) {
+  for (const photo of photos) {
+    if (!photo.uri.startsWith(Paths.cache.uri)) continue;
+    try {
+      new File(photo.uri).delete();
+    } catch {
+      // Already gone: the system may clear its cache at any time.
+    }
+  }
 }
 
 /**

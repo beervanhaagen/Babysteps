@@ -1,6 +1,9 @@
 import type { CalendarDate } from '@teddysteps/core';
+import { Image } from 'expo-image';
+import { Directory, File, Paths } from 'expo-file-system';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useAuth } from './auth';
 import { getQueue, isOnline, subscribe, type QueuedMoment } from './queue';
 import { supabase } from './supabase';
 
@@ -64,21 +67,52 @@ export function useQueue() {
   return { queue, online };
 }
 
+// The last list from the server, kept on the phone per parent: opened offline, the trail
+// still shows its moments instead of looking empty.
+const cacheOf = (userId: string) => new File(Paths.document, 'trail', `${userId}.json`);
+
+function readCache(userId: string): Row[] | null {
+  try {
+    const file = cacheOf(userId);
+    return file.exists ? (JSON.parse(file.textSync()) as Row[]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(userId: string, rows: Row[]) {
+  try {
+    const folder = new Directory(Paths.document, 'trail');
+    if (!folder.exists) folder.create({ intermediates: true });
+    cacheOf(userId).writeSync(JSON.stringify(rows));
+  } catch {
+    // Only a convenience; the server stays the source.
+  }
+}
+
 /** All moments of the trail, newest week first, including the ones still on the phone. */
 export function useTrailMoments() {
+  const { state } = useAuth();
+  const userId = state.status === 'ready' ? state.session.user.id : '';
   const { queue } = useQueue();
-  const [rows, setRows] = useState<Row[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [rows, setRows] = useState<Row[] | null>(() => (userId ? readCache(userId) : null));
+  /** 'cached' while showing the copy on the phone because the server couldn't be reached. */
+  const [source, setSource] = useState<'loading' | 'server' | 'cached' | 'failed'>('loading');
 
   const refresh = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('moments')
       .select('id, client_id, trail_week, caption, is_first, first_label, happened_on, created_at, status, moment_photos(position, width, height, view_path, small_path)')
       .order('trail_week', { ascending: false })
       .order('created_at', { ascending: false });
-    if (data) setRows(data as Row[]);
-    setLoaded(true);
-  }, []);
+    if (error || !data) {
+      setSource(readCache(userId) ? 'cached' : 'failed');
+      return;
+    }
+    setRows(data as Row[]);
+    setSource('server');
+    if (userId) writeCache(userId, data as Row[]);
+  }, [userId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -99,11 +133,18 @@ export function useTrailMoments() {
     });
   }, [refresh]);
 
-  const moments: TrailMoment[] = rows.map((row) => {
+  const list = rows ?? [];
+  const moments: TrailMoment[] = [];
+  for (const row of list) {
     const queued = queue.find((q) => q.clientId === row.client_id);
     // Until the server has the photos, show the ones on the phone.
-    if (queued && row.status === 'uploading') return { ...fromQueue(queued), key: row.id, momentId: row.id };
-    return {
+    if (queued && row.status === 'uploading') {
+      moments.push({ ...fromQueue(queued), key: row.id, momentId: row.id });
+      continue;
+    }
+    // Still uploading from another phone (the other parent): it appears once it's ready.
+    if (row.status === 'uploading') continue;
+    moments.push({
       key: row.id,
       momentId: row.id,
       trailWeek: row.trail_week,
@@ -116,11 +157,11 @@ export function useTrailMoments() {
         .sort((a, b) => a.position - b.position)
         .map((p) => ({ width: p.width, height: p.height, view: { path: p.view_path }, small: { path: p.small_path } })),
       queued,
-    };
-  });
-  const onlyOnPhone = queue.filter((q) => !rows.some((r) => r.client_id === q.clientId)).map(fromQueue);
+    });
+  }
+  const onlyOnPhone = queue.filter((q) => !list.some((r) => r.client_id === q.clientId)).map(fromQueue);
   const all = [...onlyOnPhone, ...moments].sort((a, b) => b.trailWeek - a.trailWeek || b.createdAt.localeCompare(a.createdAt));
-  return { moments: all, loaded, refresh };
+  return { moments: all, source, refresh };
 }
 
 // Signed links to private photos, valid for an hour; reused until five minutes before expiry.
@@ -152,4 +193,16 @@ export function usePhoto(source: PhotoSource | undefined) {
   const uri = local ?? (signedFor?.path === path ? signedFor.uri : null);
   // The path, not the signed link, identifies the photo in the image cache.
   return uri ? { uri, cacheKey: local ?? path ?? uri } : null;
+}
+
+/** On signing out: no links, cached photos or trail copy of this parent stay behind. */
+export async function forgetPhotos(userId: string) {
+  signed.clear();
+  await Promise.all([Image.clearMemoryCache(), Image.clearDiskCache()]);
+  try {
+    const file = cacheOf(userId);
+    if (file.exists) file.delete();
+  } catch {
+    // Nothing to forget.
+  }
 }

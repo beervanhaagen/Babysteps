@@ -1,5 +1,5 @@
 import { possessive } from '@teddysteps/core';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,10 +20,10 @@ export default function Pinned() {
   const { online } = useQueue();
   // A snapshot: the queue may finish (and forget) this moment while we celebrate.
   const [moment] = useState(() => getQueue().find((q) => q.clientId === client));
-  if (!moment || state.status !== 'ready') return null;
+  if (!moment || state.status !== 'ready') return <Redirect href="/pad" />;
 
   const name = state.trail.childName;
-  const title = (moment.isFirst ? moment.firstLabel : moment.caption) || `${possessive(name)} pad`;
+  const title = (moment.isFirst ? moment.firstLabel : moment.caption) || 'Een moment';
   const toTrail = () => router.replace('/pad');
 
   return (
@@ -33,7 +33,7 @@ export default function Pinned() {
         <IconButton icon="close" label="Sluiten" onPress={toTrail} />
       </View>
       <View style={styles.middle}>
-        <View style={styles.art} accessible accessibilityRole="image" accessibilityLabel={`Kaartje: ${title}, week ${moment.trailWeek}`}>
+        <View style={styles.art} accessible accessibilityRole="image" accessibilityLabel={`Foto: ${title}, week ${moment.trailWeek}`}>
           <View style={styles.card}>
             <View style={styles.photo}>
               <Photo source={{ local: moment.photos[0].view }} />
@@ -57,7 +57,7 @@ export default function Pinned() {
         </Text>
         <Text style={[styles.body, styles.center]}>
           {moment.isFirst ? 'Een eerste keer! Tiggy kwam kijken.' : `Het staat op ${possessive(name)} pad.`}
-          {online ? '' : ' Zodra je weer verbinding hebt, gaat het online.'}
+          {online ? '' : ' Het wacht veilig op je telefoon tot je weer verbinding hebt.'}
         </Text>
       </View>
       <View style={[styles.footer, { paddingBottom: space.space6 + insets.bottom }]}>

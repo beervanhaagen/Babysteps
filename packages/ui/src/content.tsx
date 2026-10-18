@@ -106,7 +106,9 @@ export function MomentCard({ week, caption, note, photo, alt, firstBadge, tint =
       <View style={styles.foot}>
         <View style={styles.grow}>
           <Text style={styles.eyebrow}>{week}</Text>
-          <Text style={text('titleS')}>{caption}</Text>
+          <Text style={text('titleS')} numberOfLines={3}>
+            {caption}
+          </Text>
           {note ? <Text style={[text('meta'), styles.muted, { fontSize: 14 }]}>{note}</Text> : null}
         </View>
         {hugs != null ? (
@@ -120,7 +122,7 @@ export function MomentCard({ week, caption, note, photo, alt, firstBadge, tint =
     </>
   );
   const card = [styles.moment, { transform: [{ rotate: `${tilt}deg` }] }];
-  const label = [week, caption, hugs == null ? null : hugs === 1 ? '1 knuffel' : `${hugs} knuffels`].filter(Boolean).join(', ');
+  const label = [week, firstBadge, caption, note, hugs == null ? null : hugs === 1 ? '1 knuffel' : `${hugs} knuffels`].filter(Boolean).join(', ');
   if (!onPress) return <View style={card}>{body}</View>;
   return (
     <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[card, focus.ring]}>
@@ -135,7 +137,9 @@ export function FirstBadge({ label, size = 'md' }: { label: string; size?: 'md' 
   return (
     <View style={[styles.firstBadge, lg && styles.firstBadgeLg]}>
       <Character name="tiggy" mood="happy" size={lg ? 30 : 26} decorative motion={null} />
-      <Text style={[styles.firstText, lg && { fontSize: 13 }]}>{label}</Text>
+      <Text numberOfLines={1} style={[styles.firstText, lg && { fontSize: 13 }]}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -171,6 +175,31 @@ export function Callout({ title, children, tone = 'lilac', tilt = -1 }: CalloutP
     <View style={[styles.callout, { backgroundColor: color[tone], transform: [{ rotate: `${tilt}deg` }] }]}>
       <Text style={[text('rowTitle'), { fontSize: 15 }]}>{title}</Text>
       {children ? <Text style={text('meta')}>{children}</Text> : null}
+    </View>
+  );
+}
+
+export interface BannerProps {
+  title: string;
+  children?: string;
+  icon?: IconName;
+  tone?: SoftBlock | 'rose';
+  /** A character instead of only the icon, as on X2 and X4. */
+  character?: CharacterName;
+}
+
+/** A status line at the top of a screen: offline (X2), upload failed (X4). */
+export function Banner({ title, children, icon = 'offline', tone = 'butter', character }: BannerProps) {
+  return (
+    <View role="status" accessibilityLiveRegion="polite" style={[styles.banner, { backgroundColor: color[tone] }]}>
+      {character ? <Character name={character} size={52} decorative /> : null}
+      <View style={styles.grow}>
+        <View style={styles.bannerTitle}>
+          <Icon name={icon} size={20} />
+          <Text style={[text('rowTitle'), { fontSize: 15 }]}>{title}</Text>
+        </View>
+        {children ? <Text style={[text('meta'), { fontSize: 14, lineHeight: 20 }]}>{children}</Text> : null}
+      </View>
     </View>
   );
 }
@@ -248,6 +277,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 10,
     top: 10,
+    maxWidth: '80%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -289,6 +319,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    maxWidth: 342,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    boxShadow: shadow.shadowMd,
+  },
+  bannerTitle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   callout: {
     gap: space.space1,
     maxWidth: 342,

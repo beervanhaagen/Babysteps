@@ -19,9 +19,12 @@ export default function RootLayout() {
 // Each group of screens is only reachable in its own state; anything else falls back to
 // index, which sends the parent to the right place.
 function Routes() {
-  const { status } = useAuth().state;
-  // Uploads only run for a parent with a trail.
-  useEffect(() => (status === 'ready' ? startQueue() : undefined), [status]);
+  const { state } = useAuth();
+  const { status } = state;
+  // Uploads only run for a parent with a trail, in that parent's own queue.
+  const userId = state.status === 'ready' ? state.session.user.id : null;
+  const trailId = state.status === 'ready' ? state.trail.id : null;
+  useEffect(() => (userId && trailId ? startQueue(userId, trailId) : undefined), [userId, trailId]);
   // Wait until we know who this is, so a link into the app isn't bounced while loading.
   if (status === 'loading') return null;
   return (
