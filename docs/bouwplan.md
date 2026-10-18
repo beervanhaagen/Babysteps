@@ -62,6 +62,18 @@ Begrippen. **RLS**: regels in de database die per rij bepalen wie iets mag lezen
 
 **Afwijking na meting in stap 0 (17 oktober 2026):** met Expo Router was de familiepagina al 292 KB (gzip) voor een lege pagina, boven het doel van 200 KB. Zonder Router is hij 107 KB. Daarom is `apps/family` één webpagina zonder Router (`web.output: "single"`, eigen `public/index.html`) met dezelfde React Native-onderdelen uit `packages/ui`. De paar weergaven (uitnodiging, kaartjes, liefde sturen) kiezen we zelf op basis van het adres. De HTML heeft geen inline scripts, dus de CSP is `script-src 'self'`. De ouder-app houdt Expo Router.
 
+**Openstaand uit de review van stap 0 (tech-architect, 17 oktober 2026)**
+
+Al opgelost: `vercel.json` stuurt `/api`, `/e` en `/_expo` niet meer naar de HTML en geeft elk pad de juiste Cache-Control; `graphql_public` staat niet meer open; de bundelcontrole werkt met een lijst toegestane adressen en faalt als `script-src` of `connect-src` iets anders dan `'self'` wordt; meer trackers in de lintregel; meer soorten geheimen in `.gitignore`.
+
+Nog te doen, per stap:
+- **Vóór de eerste migratie (stap 1–2):** Supabase CLI bijwerken en dezelfde versie in CI vastzetten; `pg_graphql` uitzetten in de eerste migratie; RLS aan op elke tabel, met een CI-controle die faalt op een `public`-tabel zonder RLS; bij het hosted project "nieuwe tabellen automatisch blootstellen" uit, regio Frankfurt, AI-gegevensdeling uit; GitHub Actions vastzetten op commit-SHA.
+- **Stap 2 (`[auth]` in config.toml):** `otp_expiry = 600`, `max_frequency = "60s"`, `enable_confirmations = true`, site_url en redirect-URL's alleen het app-schema, SMTP via Lettermint. Per bucket een maximale bestandsgrootte en toegestane types. `seed.sql` alleen met nepdata.
+- **Cookietest en stap 4:** `[functions.family-api]` en `[functions.e-image]` krijgen `verify_jwt = false` (de functie controleert zelf de cookie). Cookie `__Host-ts` met `Secure`, `Path=/`, zonder `Domain`. Bij POST `Origin` en `Sec-Fetch-Site` controleren. Codes minstens 128 bits. In de familiepagina de `#` lezen en wissen vóór de eerste render en vóór elke fetch. Een eigen klein routeringshookje (`pathname`, `pushState`, `popstate`, focus en `document.title` per weergave). In de CSP alleen de exacte Supabase-host bij `img-src` en `media-src`, nooit `*.supabase.co`; `connect-src` blijft `'self'` (berichtjes uploaden via `/api`). `og:image` (De Knuffel, absolute URL) toevoegen. Body laten scrollen in plaats van alleen een ScrollView. Lettertypes als woff2, Latin-subset, zelf gehost.
+- **Vercel-project aanmaken:** Web Analytics, Speed Insights en de Vercel Toolbar uit, voor productie én previews.
+- **Testfase-back-ups:** de versleutelde schijfkopie buiten `~/Documents` en `~/Desktop` bewaren, want die kunnen via iCloud gesynchroniseerd worden.
+- **npm audit:** alle meldingen zitten in Expo's bouwgereedschap, niet in de app of de pagina. Niet `npm audit fix --force` draaien; Expo-patches volgen met `npx expo install --fix`.
+
 **Repo-indeling**
 
 ```

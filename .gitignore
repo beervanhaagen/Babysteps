@@ -15,6 +15,14 @@ dist/
 *.p12
 *.pem
 *.key
+*.jks
+*.keystore
+*.mobileprovision
+credentials.json
+credentials/
+*service-account*.json
+*firebase-adminsdk*.json
+.vercel/
 
 # Supabase local state
 supabase/.branches

@@ -3,7 +3,7 @@
   "buildCommand": "npm run export",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/|e/|_expo/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -19,15 +19,24 @@
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" },
         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), geolocation=(), payment=(), usb=(), microphone=(self)" },
-        { "key": "Cache-Control", "value": "no-cache" }
+        { "key": "Permissions-Policy", "value": "camera=(), geolocation=(), payment=(), usb=(), microphone=(self)" }
       ]
     },
     {
+      "source": "/((?!api/|e/|_expo/).*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
       "source": "/_expo/static/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/e/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "private, max-age=3600" }]
     }
   ]
 }

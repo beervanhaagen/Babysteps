@@ -10,7 +10,11 @@ const appOnlySdks = {
     {
       patterns: [
         {
-          group: ['@sentry/*', '@aptabase/*', 'firebase', 'firebase/*', '@react-native-firebase/*'],
+          group: [
+            '@sentry/*', '@aptabase/*', 'firebase', 'firebase/*', '@react-native-firebase/*',
+            '@vercel/analytics', '@vercel/speed-insights', 'posthog*', 'mixpanel*', '@amplitude/*',
+            '@segment/*', 'react-ga*', '@bugsnag/*', '@datadog/*', 'logrocket*', 'expo-insights',
+          ],
           message: 'Not allowed on the family page or in shared packages. Use it in apps/mobile only.',
         },
       ],
