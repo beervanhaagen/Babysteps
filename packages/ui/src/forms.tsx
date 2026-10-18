@@ -9,16 +9,19 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   label: string;
   hint?: string;
   error?: string;
+  /** Extra large, for the family page (F2): Oma reads without her glasses. */
+  size?: 'md' | 'lg';
 }
 
-export function TextField({ label, hint, error, onFocus, onBlur, ...input }: TextFieldProps) {
+export function TextField({ label, hint, error, size = 'md', onFocus, onBlur, ...input }: TextFieldProps) {
+  const lg = size === 'lg';
   const focus = useFocusRing();
   const noteId = useId();
   const note = error ?? hint;
   return (
     <View style={styles.field}>
       {/* The input carries the label itself, so screen readers don't hear it twice. */}
-      <Text aria-hidden style={text('fieldLabel')}>
+      <Text aria-hidden style={[text('fieldLabel'), lg && styles.labelLg]}>
         {label}
       </Text>
       <TextInput
@@ -36,14 +39,14 @@ export function TextField({ label, hint, error, onFocus, onBlur, ...input }: Tex
           focus.onBlur();
           onBlur?.(e);
         }}
-        style={[styles.input, input.multiline && styles.multiline, error ? styles.inputError : null, focus.ring]}
+        style={[styles.input, lg && styles.inputLg, input.multiline && styles.multiline, error ? styles.inputError : null, focus.ring]}
       />
       {note ? (
         <Text
           nativeID={noteId}
           role={error ? 'alert' : undefined}
           accessibilityLiveRegion={error ? 'polite' : undefined}
-          style={[styles.hint, error ? styles.hintError : null]}
+          style={[styles.hint, lg && styles.hintLg, error ? styles.hintError : null]}
         >
           {note}
         </Text>
@@ -126,6 +129,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: color.ink,
   },
+  inputLg: { height: 58, paddingHorizontal: 18, borderRadius: 18, borderWidth: border.edgeBold, fontSize: 19 },
+  labelLg: { fontSize: 16, lineHeight: 22 },
+  hintLg: { fontSize: 14, lineHeight: 20 },
   // A few lines of text, like the caption on A3.
   multiline: { height: undefined, minHeight: 96, paddingVertical: 12, lineHeight: 23, textAlignVertical: 'top' },
   inputError: { borderColor: color.plum, borderWidth: border.edge + 1 },

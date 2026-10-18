@@ -69,3 +69,23 @@ export function longDutchDate(date: CalendarDate, options: { weekday?: boolean; 
     year: options.year ? 'numeric' : undefined,
   }).format(new Date(Date.UTC(y, m - 1, d)));
 }
+
+/**
+ * The age line on the family page (F3): "Vandaag 7 maanden!" on a month birthday,
+ * otherwise "7 maanden", and in the first two months "3 weken".
+ */
+export function ageLine(birth: CalendarDate, today: CalendarDate): string {
+  const [by, bm, bd] = birth.split('-').map(Number);
+  const [ty, tm, td] = today.split('-').map(Number);
+  // A month birthday on the 31st falls on the last day of shorter months.
+  const lastDay = new Date(Date.UTC(ty, tm, 0)).getUTCDate();
+  const birthdayThisMonth = Math.min(bd, lastDay);
+  let months = (ty - by) * 12 + (tm - bm);
+  if (td < birthdayThisMonth) months -= 1;
+  if (months < 2) {
+    const weeks = Math.floor(daysBetween(birth, today) / 7);
+    return weeks === 1 ? '1 week' : `${weeks} weken`;
+  }
+  const birthday = td === birthdayThisMonth;
+  return birthday ? `Vandaag ${months} maanden!` : `${months} maanden`;
+}

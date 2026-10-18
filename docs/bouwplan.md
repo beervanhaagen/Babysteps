@@ -126,6 +126,22 @@ Nog te doen:
 - **Vóór familie (stap 4):** familie krijgt geen database-login en geen opslagregels; `family-api` maakt alleen links voor kijk- en kleine versies van momenten die klaar zijn, van een pad dat niet gepauzeerd of verwijderd is, voor een familielid dat niet is ingetrokken, met een geldigheid van hoogstens 15 tot 60 minuten.
 - **Tabbladen Boek, Familie en Ik** zijn tijdelijk ("Hier wordt nog aan gebouwd"); uitloggen staat op Ik en vraagt bevestiging als er nog foto's alleen op de telefoon staan.
 
+**Stap 4 (20 oktober 2026): wat gebouwd is en wat openstaat**
+
+Gebouwd: de kring (`circle_members`, met relatie tot het kind), persoonlijke links (alleen de hash van de code bewaard), familiesessies met cookie `__Host-ts` (max. 5 toestellen per persoon), knuffels (`reactions`), één bezoektelling per pad per dag, en de boeklijst. Familie heeft geen database-login: alles loopt via de serverfunctie `family-api`, die links van 15 minuten geeft naar kijk- en kleine versies van momenten die klaar zijn. Familiepagina: `/j#code` (code direct uit de adresbalk), F2, F3 en F7 (breed scherm), knuffelen, F4 met "Laat het me weten". App: O3 na O2 (overslaan kan), "Iemand toevoegen" (naam en relatie), F1 met deelmenu en "Kopieer de link", het Familie-tabblad met nieuwe link en "Uit de kring halen", T6 Activiteit met belletje op het pad, knuffels op T1 en T2. 20 nieuwe databasetests (61 in totaal) en een end-to-end-test van uitnodigen tot intrekken.
+
+Bewuste afwijkingen van de borden (voor de design-review):
+- **Headerkleur:** F3, F7 en T6 in pistachio (familie) in plaats van rose; rose is in het ontwerpsysteem een accent, geen headerband.
+- **Namen van ouders:** "Sam nodigt je uit" (F2), "Knuffel verstuurd naar Sam en Alex" (F4) en "Bericht van Sam" (F1) zonder naam, want de voornaam van de ouder wordt nog niet gevraagd.
+- **O3:** geen "Uit je contacten" en geen algemene privélink; iedereen krijgt een eigen link, zodat je per persoon kunt intrekken. De andere ouder uitnodigen komt met M3 in stap 8.
+- **F3/F4:** "Inspreken" en het berichtje komen in stap 6.
+- **F1:** het linkvoorbeeld zonder naam of foto van het kind (besluit 17 oktober).
+
+Nog te doen:
+- **Bij het online zetten:** de rewrite `/api/*` naar `family-api` en de exacte Supabase-host in `img-src` (zie README); testen dat de cookie door de rewrite van Vercel komt (§2, reserve: Vercel-functies in Frankfurt).
+- **Stap 7 (mail):** het e-mailadres uit F2 wordt bewaard maar nog niet bevestigd; kaartjes gaan pas na bevestiging.
+- **M3 (stap 8):** apparaten per persoon tonen en per toestel intrekken, de andere ouder uitnodigen.
+
 **Repo-indeling**
 
 ```

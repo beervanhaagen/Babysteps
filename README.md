@@ -22,8 +22,11 @@ npm install
 npx supabase start      # local database, auth and mail catcher (Docker Desktop must be running)
 npm run local-env       # points the app at it (writes apps/mobile/.env.local, not committed)
 npm run mobile          # parent app: scan the QR code with Expo Go on a phone on the same Wi-Fi
-npm run family          # family page in the browser
+npm run family          # family page (Expo web dev server on 8081)
+npm run family:dev      # the family page with its API on http://localhost:8090, as on familie.teddysteps.nl
 ```
+
+Invite links from the app open the family page on this Mac's address (port 8090), so a phone on the same Wi-Fi can follow them. Family sign-in, photo links and hugs go through the edge function `supabase/functions/family-api`.
 
 Local Supabase uses ports 554xx, so it can run next to other local Supabase projects. Login codes don't leave your Mac: read them in the mail catcher at http://127.0.0.1:55324. The database dashboard is at http://127.0.0.1:55323. `npx supabase db reset` starts the local database fresh from the migrations.
 
@@ -43,4 +46,4 @@ npm run family:export && npm run check:web-bundle
 
 ## Deploying the family page (once the Vercel account exists)
 
-In Vercel, import the repo with **Root Directory** `apps/family`. `vercel.json` sets the build, the single-page fallback and the security headers (strict CSP, no referrer, noindex). The `/api/*` and `/e/*` rewrites to Supabase are added in step 4, together with the Supabase project's image domain in the CSP.
+In Vercel, import the repo with **Root Directory** `apps/family`. `vercel.json` sets the build, the single-page fallback and the security headers (strict CSP, no referrer, noindex). Once the Supabase project exists, add to `vercel.json`: a rewrite of `/api/:path*` to `https://<project>.supabase.co/functions/v1/family-api/:path*` (and `/e/:path*` in step 7), and the project's exact host to `img-src` in the CSP. On Supabase set the edge-function secret `FAMILY_ORIGIN=https://familie.teddysteps.nl`.

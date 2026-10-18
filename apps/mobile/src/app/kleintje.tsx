@@ -1,4 +1,5 @@
 import { checkChildDates, parseDutchDate, todayInAmsterdam, typeDutchDate } from '@teddysteps/core';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, ChoiceChip, ChoiceGroup, color, TextField, text, useAnnounce } from '@teddysteps/ui';
@@ -48,8 +49,9 @@ export default function YourLittleOne() {
       setBusy(false);
       return setErrors({ form: friendlyError(error) });
     }
-    // The parent now has a trail; the router moves on to it (O3 follows in step 4).
+    // The parent now has a trail: on to O3 (2 van 3).
     await refresh();
+    router.replace({ pathname: '/uitnodigen', params: { onboarding: '1' } });
   }
 
   return (

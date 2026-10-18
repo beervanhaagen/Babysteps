@@ -9,6 +9,7 @@
   "scripts": {
     "mobile": "npm run start -w @teddysteps/mobile",
     "family": "npm run start -w @teddysteps/family",
+    "family:dev": "node scripts/family-dev.mjs",
     "local-env": "node scripts/local-env.mjs",
     "tokens": "node scripts/build-tokens.mjs",
     "art": "node scripts/build-art.mjs",

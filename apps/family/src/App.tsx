@@ -1,46 +1,62 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { border, color, Hug, radius, shadow, space, text, useTeddyFonts } from '@teddysteps/ui';
-import { Gallery } from '@teddysteps/ui/src/Gallery';
+import { useCallback, useEffect, useState } from 'react';
+import { useTeddyFonts } from '@teddysteps/ui';
+import { api, NoAccess as NoAccessError, type FamilyPage } from './api';
+import { usePath } from './route';
+import { Cards } from './views/Cards';
+import { Join } from './views/Join';
+import { NoAccess } from './views/NoAccess';
+import { Sent } from './views/Sent';
 
-// The family page is one light web page without a router: it only has a few views
-// (invite, postcards, send love), and every kilobyte counts on Oma's old phone.
-// Placeholder until the family loop is built (step 4 of docs/bouwplan.md).
-// Invite links open /j#<code>; this is what anyone else sees.
-export default function App() {
-  const fontsReady = useTeddyFonts();
-  if (!fontsReady) return null;
-  if (__DEV__ && window.location.pathname === '/galerij') return <Gallery />;
-  return (
-    <View style={styles.screen}>
-      <View style={styles.card}>
-        <Hug size={120} />
-        <Text accessibilityRole="header" style={text('titleL')}>TeddySteps</Text>
-        <Text style={styles.body}>
-          Deze pagina is alleen voor de eigen kring. Open hem met de persoonlijke link uit je uitnodiging.
-        </Text>
-      </View>
-    </View>
-  );
+// The family page (F1 to F7) is one light web page without a router package: every
+// kilobyte counts on Oma's old phone. /j#<code> signs in once; then:
+//   /             F3 Kaartjes (or F2 first, until Oma has said who she is)
+//   /instellingen F2 again, to change name, e-mail or how often
+//   /verstuurd    F4 after a hug
+// The code is read and removed from the address bar before React renders anything, so it
+// never ends up in history, screenshots or a forwarded link (docs/family-email.md).
+const linkCode = (() => {
+  if (window.location.pathname !== '/j') return undefined;
+  const code = window.location.hash.slice(1);
+  window.history.replaceState(null, '', '/');
+  return code;
+})();
+
+type Problem = 'no-link' | 'unknown-link' | 'offline';
+
+// The first request starts right away, before fonts and React are ready.
+const firstPage: Promise<FamilyPage> | null =
+  linkCode === '' ? null : linkCode ? api.claim(linkCode).then(() => api.page()) : api.page();
+
+function problemOf(error: unknown, claiming: boolean): Problem {
+  if (!(error instanceof NoAccessError)) return 'offline';
+  return claiming ? 'unknown-link' : 'no-link';
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: space.space6,
-    backgroundColor: color.paper,
-  },
-  card: {
-    maxWidth: 420,
-    alignItems: 'center',
-    gap: space.space3,
-    padding: space.space6,
-    borderWidth: border.edge,
-    borderColor: color.ink,
-    borderRadius: radius.radiusL,
-    backgroundColor: color.white,
-    boxShadow: shadow.shadowMd,
-  },
-  body: { ...text('body'), color: color.inkMuted, textAlign: 'center' },
-});
+export default function App() {
+  const fontsReady = useTeddyFonts();
+  const path = usePath();
+  const [page, setPage] = useState<FamilyPage | null>(null);
+  const [problem, setProblem] = useState<Problem | null>(linkCode === '' ? 'no-link' : null);
+
+  const load = useCallback(async () => {
+    try {
+      setPage(await api.page());
+      setProblem(null);
+    } catch (error) {
+      setProblem(problemOf(error, false));
+    }
+  }, []);
+
+  useEffect(() => {
+    firstPage?.then(setPage, (error) => setProblem(problemOf(error, !!linkCode)));
+  }, []);
+
+  if (!fontsReady) return null;
+  if (problem) return <NoAccess reason={problem} />;
+  if (!page) return null;
+  if (!page.me.joined || path === '/instellingen') {
+    return <Join page={page} editing={page.me.joined} onSaved={load} />;
+  }
+  if (path === '/verstuurd') return <Sent page={page} onChange={load} />;
+  return <Cards page={page} onChange={load} />;
+}

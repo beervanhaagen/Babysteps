@@ -49,6 +49,11 @@ function Routes() {
         <Stack.Screen name="vastgepind" options={{ gestureEnabled: false }} />
         <Stack.Screen name="moment/[id]" />
         <Stack.Screen name="geboren" />
+        <Stack.Screen name="uitnodigen" />
+        <Stack.Screen name="iemand" />
+        <Stack.Screen name="uitnodiging/[id]" />
+        <Stack.Screen name="kring/[id]" />
+        <Stack.Screen name="activiteit" />
         <Stack.Screen name="boek" options={{ animation: 'none' }} />
         <Stack.Screen name="familie" options={{ animation: 'none' }} />
         <Stack.Screen name="ik" options={{ animation: 'none' }} />

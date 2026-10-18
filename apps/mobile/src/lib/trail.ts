@@ -28,6 +28,8 @@ export interface TrailMoment {
   happenedOn: CalendarDate | null;
   createdAt: string;
   photos: MomentPhoto[];
+  /** Hugs from family (T1, T2). */
+  hugs: number;
   /** Still on the phone (fully or partly): show X2 or X4 for it. */
   queued?: QueuedMoment;
 }
@@ -43,6 +45,7 @@ interface Row {
   created_at: string;
   status: 'uploading' | 'ready';
   moment_photos: { position: number; width: number; height: number; view_path: string; small_path: string }[];
+  reactions: { count: number }[];
 }
 
 function fromQueue(q: QueuedMoment): TrailMoment {
@@ -56,6 +59,7 @@ function fromQueue(q: QueuedMoment): TrailMoment {
     happenedOn: q.happenedOn,
     createdAt: q.createdAt,
     photos: q.photos.map((p) => ({ width: p.width, height: p.height, view: { local: p.view }, small: { local: p.small } })),
+    hugs: 0,
     queued: q,
   };
 }
@@ -102,7 +106,7 @@ export function useTrailMoments() {
   const refresh = useCallback(async () => {
     const { data, error } = await supabase
       .from('moments')
-      .select('id, client_id, trail_week, caption, is_first, first_label, happened_on, created_at, status, moment_photos(position, width, height, view_path, small_path)')
+      .select('id, client_id, trail_week, caption, is_first, first_label, happened_on, created_at, status, moment_photos(position, width, height, view_path, small_path), reactions(count)')
       .order('trail_week', { ascending: false })
       .order('created_at', { ascending: false });
     if (error || !data) {
@@ -156,6 +160,7 @@ export function useTrailMoments() {
       photos: [...row.moment_photos]
         .sort((a, b) => a.position - b.position)
         .map((p) => ({ width: p.width, height: p.height, view: { path: p.view_path }, small: { path: p.small_path } })),
+      hugs: row.reactions?.[0]?.count ?? 0,
       queued,
     });
   }

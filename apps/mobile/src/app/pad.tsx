@@ -73,6 +73,7 @@ function Card({ moment: m, tilt }: { moment: TrailMoment; tilt: number }) {
       alt={m.caption ?? title}
       firstBadge={m.isFirst ? 'Eerste keer!' : undefined}
       tilt={tilt}
+      hugs={m.hugs || undefined}
       onPress={m.momentId ? () => router.push(`/moment/${m.momentId}`) : undefined}
     />
   );

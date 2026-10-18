@@ -21,6 +21,7 @@ const url = lan ? apiUrl.replace('127.0.0.1', lan) : apiUrl;
 
 writeFileSync(
   `${root}apps/mobile/.env.local`,
-  `# Local development only, written by scripts/local-env.mjs. Not committed.\nEXPO_PUBLIC_SUPABASE_URL=${url}\nEXPO_PUBLIC_SUPABASE_KEY=${key}\n`,
+  // Invite links point at the local family page (npm run family:dev), reachable from a phone.
+  `# Local development only, written by scripts/local-env.mjs. Not committed.\nEXPO_PUBLIC_SUPABASE_URL=${url}\nEXPO_PUBLIC_SUPABASE_KEY=${key}\nEXPO_PUBLIC_FAMILY_URL=http://${lan ?? 'localhost'}:8090\n`,
 );
 console.log(`apps/mobile/.env.local now points at ${url}`);

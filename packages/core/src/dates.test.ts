@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { checkChildDates, formatDutchDate, longDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate } from './dates.ts';
+import { ageLine, checkChildDates, formatDutchDate, longDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate } from './dates.ts';
 
 test('reads Dutch dates and rejects impossible ones', () => {
   assert.equal(parseDutchDate('12-03-2026'), '2026-03-12');
@@ -42,4 +42,12 @@ test('today is the Dutch calendar day, also late at night elsewhere', () => {
 test('long Dutch dates', () => {
   assert.equal(longDutchDate('2026-09-22'), 'dinsdag 22 september');
   assert.equal(longDutchDate('2026-03-19', { weekday: false, year: true }), '19 maart 2026');
+});
+
+test('age line for the family page', () => {
+  assert.equal(ageLine('2026-03-19', '2026-10-19'), 'Vandaag 7 maanden!');
+  assert.equal(ageLine('2026-03-19', '2026-10-18'), '6 maanden');
+  assert.equal(ageLine('2026-10-01', '2026-10-22'), '3 weken');
+  assert.equal(ageLine('2026-10-01', '2026-10-08'), '1 week');
+  assert.equal(ageLine('2026-01-31', '2026-04-30'), 'Vandaag 3 maanden!');
 });

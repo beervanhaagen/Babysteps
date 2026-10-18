@@ -17,7 +17,8 @@ Status: decided, 17 Oct 2026, confirmed with the stack (Expo web on Vercel, Supa
 - **Generic link preview.** The Open Graph tags of `/j` never show the child's name or a photo ("Je bent uitgenodigd op TeddySteps", with The Hug), plus `noindex`. The child's name is only in the message text the parent sends.
 - **Personal and reusable.** A family member's link works on new devices (Oma's iPad) until the parent revokes it, up to 5 devices. M3 shows "op 2 apparaten" and revokes all sessions at once.
 - **E-mail buttons** carry their own sign-in code after the `#`, valid for 7 days and only for that recipient.
-- Failed claims are rate-limited per IP; POST requests check the Origin header.
+- Failed claims are rate-limited per IP (20 per 10 minutes); POST requests must come from the family page itself (`Sec-Fetch-Site: same-origin`, or an Origin on the allow-list).
+- **Built (step 4):** `supabase/functions/family-api` (routes `/claim`, `/page`, `/join`, `/hug`, `/book`) with the `family_*` database functions, which only the service role may call. Family gets signed links (15 minutes) to view and small versions of ready moments only. Locally `scripts/family-dev.mjs` plays the part of the Vercel rewrites.
 
 ## Image links (when the switch is on)
 

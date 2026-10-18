@@ -377,8 +377,19 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
-# [edge_runtime.secrets]
-# secret_key = "env(SECRET_VALUE)"
+# Local values only. On the hosted project: PUBLIC_SUPABASE_URL is not needed (SUPABASE_URL is
+# already public) and FAMILY_ORIGIN is https://familie.teddysteps.nl.
+[edge_runtime.secrets]
+# Inside Docker, SUPABASE_URL is http://kong:8000, which no browser can reach. "relative" means
+# photo links without a host ("/storage/v1/..."): scripts/family-dev.mjs passes those on, so
+# the local family page works on localhost and on a phone on the same Wi-Fi.
+PUBLIC_SUPABASE_URL = "relative"
+# The family page's own address (scripts/family-dev.mjs serves it locally on 8090).
+FAMILY_ORIGIN = "http://localhost:8090"
+
+# Family has no account and no JWT: family-api checks its own session cookie.
+[functions.family-api]
+verify_jwt = false
 
 [analytics]
 enabled = false

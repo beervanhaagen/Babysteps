@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { border, Button, Character, color, FirstBadge, fontFamily, IconButton, size, text } from '@teddysteps/ui';
+import { border, Button, Character, color, FirstBadge, fontFamily, Icon, IconButton, size, text } from '@teddysteps/ui';
 import { Photo } from '@/components/Photo';
 import { Tabs } from '@/components/Tabs';
 import { useTrailMoments } from '@/lib/trail';
@@ -74,6 +74,12 @@ export default function Moment() {
             <Text style={[text('meta'), styles.meta]}>{day}</Text>
           </View>
           {story ? <Text style={styles.story}>{story}</Text> : null}
+          {m.hugs ? (
+            <View style={styles.hugs}>
+              <Icon name="heart" size={18} weight={2.4} />
+              <Text style={styles.hugsText}>{m.hugs === 1 ? '1 knuffel' : `${m.hugs} knuffels`}</Text>
+            </View>
+          ) : null}
           <View style={styles.bizzy}>
             <Character name="bizzy" size={70} rotate={10} decorative />
           </View>
@@ -114,5 +120,18 @@ const styles = StyleSheet.create({
   meta: { color: color.inkMuted, fontSize: 14, marginTop: 4 },
   story: { fontFamily: fontFamily('sans', 400), fontSize: 16, lineHeight: 24, color: color.ink },
   bizzy: { alignSelf: 'flex-end', marginRight: -8 },
+  hugs: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 42,
+    paddingHorizontal: 14,
+    borderRadius: 21,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    backgroundColor: color.rose,
+  },
+  hugsText: { fontFamily: fontFamily('sans', 800), fontSize: 14, color: color.ink },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, paddingHorizontal: GUTTER },
 });
