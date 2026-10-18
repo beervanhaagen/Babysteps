@@ -386,9 +386,21 @@ deno_version = 2
 PUBLIC_SUPABASE_URL = "relative"
 # The family page's own address (scripts/family-dev.mjs serves it locally on 8090).
 FAMILY_ORIGIN = "http://localhost:8090"
+# Key for the HMAC of IP addresses in rate limits (supabase/functions/_shared/ip.ts). Local only;
+# the hosted project gets its own long random value.
+IP_HASH_KEY = "local-only-not-secret"
+# The landing page (apps/landing/serve.mjs serves it locally on 8095): sign-up form origin and
+# the address in confirmation mails. Hosted: https://teddysteps.nl.
+LANDING_ORIGIN = "http://localhost:8095"
+# Locally, confirmation mails go to Mailpit's send API; hosted, LETTERMINT_API_TOKEN is set instead.
+MAIL_DEV_URL = "http://host.docker.internal:55324"
 
 # Family has no account and no JWT: family-api checks its own session cookie.
 [functions.family-api]
+verify_jwt = false
+
+# The sign-up form on teddysteps.nl has no account either.
+[functions.waitlist]
 verify_jwt = false
 
 [analytics]

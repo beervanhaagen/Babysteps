@@ -4,6 +4,7 @@
 // Family only ever gets the view or small version of moments that are ready, 12 at a time,
 // through signed links that expire after 15 minutes; never a print version.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { ipHash } from '../_shared/ip.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 // Locally SUPABASE_URL is Docker-internal; there PUBLIC_SUPABASE_URL is "relative" and photo
@@ -123,12 +124,11 @@ Deno.serve(async (request) => {
     if (!/^[A-Za-z0-9_-]{20,100}$/.test(code)) return json(404, { error: 'unknown link' });
     const existing = cookie(request);
     const token = newToken();
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
     const { data } = await service.rpc('family_claim', {
       code_hash: await sha256(code),
       session_hash: await sha256(token),
       device: deviceHint(request.headers.get('user-agent') ?? ''),
-      ip,
+      ip: await ipHash(request),
       existing_session_hash: existing ? await sha256(existing) : null,
     });
     const result = (data as { member: string | null; status: string }[] | null)?.[0];
