@@ -5,7 +5,7 @@
 // through signed links that expire after 15 minutes; never a print version.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { ipHash } from '../_shared/ip.ts';
-import { button, COMPANY, frame, send, SIGN_OFF, unsubscribeMember } from '../_shared/mail.ts';
+import { button, C, COMPANY, frame, send, SERIF, SIGN_OFF, unsubscribeMember } from '../_shared/mail.ts';
 
 // Supabase's edge runtime: work that may finish after the response has gone out.
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
@@ -134,13 +134,14 @@ Liefs, TeddySteps
 ${COMPANY}`;
   const html = frame(
     'Bevestig je e-mailadres',
-    `<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#5E4D5C;">Nog één tik</p>
-<h1 style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:32px;font-weight:bold;color:#2D1E2F;">Klopt dit <i style="color:#7E2048;">adres?</i></h1>
+    `<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${C.inkMuted};">Nog één tik</p>
+<h1 style="margin:0 0 14px;font-family:${SERIF};font-size:28px;line-height:32px;font-weight:bold;color:${C.ink};">Klopt dit adres?</h1>
 <p style="margin:0 0 22px;">Iemand heeft dit adres opgegeven om elke zondag een kaartje van TeddySteps te krijgen. Was jij dat? Tik dan op de knop.</p>
 ${button(link, 'Ja, dit is mijn adres')}
-<p style="margin:22px 0 0;font-size:14px;line-height:21px;color:#5E4D5C;">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we het adres na 7 dagen.</p>
+<p style="margin:22px 0 0;font-size:14px;line-height:21px;color:${C.inkMuted};">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we het adres na 7 dagen.</p>
 ${SIGN_OFF}`,
     COMPANY,
+    'Eén tik, dan krijg je elke zondag een kaartje.',
   );
   return { subject: 'Bevestig je e-mailadres voor de kaartjes', text, html };
 }
@@ -211,7 +212,9 @@ Deno.serve(async (request) => {
     // A new address gets a confirmation mail first; postcards only go to confirmed addresses.
     const code = newToken();
     const { data: key } = await service.rpc('family_email_key', { member: who.member, code_hash: await sha256(code) });
-    if (key === 'ok') EdgeRuntime.waitUntil(send({ to: email.toLowerCase(), ...confirmMail(code) }).catch(() => false));
+    // Too many tries today: say so, instead of "kijk in je mail" for a mail that never comes.
+    if (key !== 'ok') return json(200, { ok: true, confirm: 'limited' });
+    EdgeRuntime.waitUntil(send({ to: email.toLowerCase(), ...confirmMail(code) }).catch(() => false));
     return json(200, { ok: true, confirm: true });
   }
 

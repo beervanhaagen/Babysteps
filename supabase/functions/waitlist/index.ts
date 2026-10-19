@@ -5,7 +5,7 @@
 // Codes travel in the path, never in a query string, and only their hash is stored.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { ipHash } from '../_shared/ip.ts';
-import { button, COMPANY, frame, newCode, send, sha256, SIGN_OFF } from '../_shared/mail.ts';
+import { button, C, COMPANY, frame, newCode, send, SERIF, sha256, SIGN_OFF } from '../_shared/mail.ts';
 
 // Supabase's edge runtime: work that may finish after the response has gone out.
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
@@ -45,15 +45,16 @@ Liefs, TeddySteps
 Haagen Trade · KvK 97569089 · hallo@teddysteps.nl`;
   const html = frame(
     'Bevestig je aanmelding',
-    `<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#5E4D5C;">Nog één tik</p>
-<h1 style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:32px;font-weight:bold;color:#2D1E2F;">Wat leuk dat je <i style="color:#7E2048;">erbij wilt zijn.</i></h1>
+    `<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${C.inkMuted};">Nog één tik</p>
+<h1 style="margin:0 0 14px;font-family:${SERIF};font-size:28px;line-height:32px;font-weight:bold;color:${C.ink};">Wat leuk dat je <i style="color:${C.plum};">erbij wilt zijn.</i></h1>
 <p style="margin:0 0 22px;">Heb jij je met dit adres aangemeld op teddysteps.nl? Tik dan op de knop, dan sta je op de lijst.</p>
 ${button(link, 'Ja, zet me op de lijst')}
-${wantsTest ? '<p style="margin:22px 0 0;padding:14px 16px;background:#D9CFF2;border:2px solid #2D1E2F;border-radius:16px;">Je wilt ook meetesten: wat fijn! We kiezen een klein groepje gezinnen. Zitten jullie erbij, dan mailen we je.</p>' : ''}
+${wantsTest ? `<p style="margin:22px 0 0;padding:14px 16px;background:${C.lilac};border:2px solid ${C.ink};border-radius:16px;">Je wilt ook meetesten: wat fijn! We kiezen een klein groepje gezinnen. Zitten jullie erbij, dan mailen we je.</p>` : ''}
 <p style="margin:22px 0 0;">Verder mailen we je alleen als de app er is. Geen nieuwsbrief, geen reclame. Uiterlijk na 12 maanden wissen we je adres.</p>
-<p style="margin:14px 0 0;font-size:14px;line-height:21px;color:#5E4D5C;">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we je adres na 7 dagen. Op de pagina achter de knop kun je je adres ook meteen wissen.</p>
+<p style="margin:14px 0 0;font-size:14px;line-height:21px;color:${C.inkMuted};">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we je adres na 7 dagen. Op de pagina achter de knop kun je je adres ook meteen wissen.</p>
 ${SIGN_OFF}`,
     `Het eerste jaar gaat zo snel. Hou elk moment vast.<br>${COMPANY}`,
+    'Eén tik, dan sta je op de lijst.',
   );
   return { subject: 'Bevestig je aanmelding bij TeddySteps', text, html };
 }

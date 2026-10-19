@@ -116,9 +116,9 @@ Family who give an address on the family page (F2) get a confirmation mail first
 
 **Locally:** `node scripts/check-family-mail.mjs` runs the whole path against the local stack with Mailpit (it passes a Sunday evening as "now", which only works locally: `FAMILY_MAIL_TEST_CLOCK`).
 
-**Going live** (after the family page is online, see "Deploying the family page"):
+**Going live** (after the family page is online, see "Deploying the family page": its `vercel.json` still needs the `/api/:path*` rewrite to `family-api`; test Gmail's one-click unsubscribe through it):
 
-1. Secrets (dashboard → Edge Functions → Secrets): `MAIL_LINK_KEY` (`openssl rand -hex 32`), `CRON_SECRET` (shared with push), `FAMILY_ORIGIN=https://familie.teddysteps.nl`, `IP_HASH_KEY` (already there). Optionally `LETTERMINT_ROUTE` for a separate route. Never `FAMILY_MAIL_TEST_CLOCK` online.
+1. Secrets (dashboard → Edge Functions → Secrets): `MAIL_LINK_KEY` (`openssl rand -hex 32`; keep it in the password manager and never change it, or every unsubscribe link in mails already sent stops working), `CRON_SECRET` (shared with push), `FAMILY_ORIGIN=https://familie.teddysteps.nl`, `IP_HASH_KEY` (already there). Optionally `LETTERMINT_ROUTE` for a separate route. Never `FAMILY_MAIL_TEST_CLOCK` online.
 2. `npx supabase functions deploy family-api family-mail` ("Enforce JWT" off for both).
 3. Vault, once: `select vault.create_secret('https://<ref>.supabase.co/functions/v1/family-mail', 'family_mail_url');` (and `cron_secret` if not yet set for push).
 4. On hallo@teddysteps.nl, an auto-reply: replies to family mails land there ("Knuffels stuur je via de familiepagina").

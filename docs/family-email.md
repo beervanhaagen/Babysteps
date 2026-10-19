@@ -53,7 +53,7 @@ Status: decided, 17 Oct 2026, confirmed with the stack (Expo web on Vercel, Supa
 
 - **Logs:** our own code never logs codes or tokens, and tokens are stored only as hashes. Supabase and Vercel log request paths themselves and we can't filter that: they keep them 1 day (Supabase Free) or 7 days (Supabase Pro, Vercel). That is why page codes sit after the `#` (never sent to a server); `/e/` image tokens do appear in platform logs, but only open the photos of one e-mail and expire after 30 days.
 - **Page loads:** the family page and the image endpoint send `Referrer-Policy: no-referrer` and load nothing from third parties. Fonts, scripts and images are self-hosted, so no Google Fonts.
-- **E-mail provider:** Lettermint B.V. (EU: OVH France, UpCloud Netherlands), with a signed processing agreement, sending from `post.teddysteps.nl`. Two routes: `transactional` (login codes) and `kaartjes` (postcards, Sunday e-mail). **Click and open tracking are off** (Lettermint's default); check this on every route.
+- **E-mail provider:** Lettermint B.V. (EU: OVH France, UpCloud Netherlands), with a signed processing agreement, sending from `post.teddysteps.nl`. At launch one route, the project's default `outgoing` (set `LETTERMINT_ROUTE` to change it); separate routes for login codes and postcards can come later. **Click and open tracking are off** (on the route, and per mail in `settings`); check this on every route. Lettermint keeps message history 28 days: ask what it stores, and turn on "Hide email content" on the route.
 - **No SDKs on the family page:** no crash or analytics SDK runs there; we log server-side errors only.
 - **Separate tokens:** the unsubscribe link is a sealed token (HMAC of the member id with `MAIL_LINK_KEY`, nothing stored, never expires) and can do nothing else; the "Bekijk en stuur een knuffel" button carries a 7-day `email_signin` key that a new link or revoking stops. Confirmation links (`/bevestig#<code>`) and page links keep the code after `#`, so it never reaches a server log. "Wijzig hoe vaak" is not in the mail at launch (one choice only).
 
@@ -69,10 +69,10 @@ The privacy statement says this in plain Dutch, and that is why photos in the ma
 ## Other rules
 
 - **No tracking pixels and no open tracking.** Family visits are counted as one daily number per trail. Per person we store only `last_seen_on` (a date), and per device `last_used_on` and a rough `device_hint` ("iPhone · Safari"). Wrong link codes are rate-limited by a hash of the IP address, kept one hour.
-- **One-click unsubscribe in every e-mail:** "Afmelden", plus the `List-Unsubscribe` and `List-Unsubscribe-Post` headers that Gmail and Yahoo require from bulk senders, and a "Wijzig hoe vaak" link to F2. Whether Dutch rules on commercial e-mail also apply depends on the content (for example a book prompt); the lawyer confirms.
-- **Confirm first.** A family member gets no postcards until they click "Bevestig je e-mailadres", so a typo never sends the child's name (or photos) to a stranger. Bounces and complaints stop all sending to that address.
+- **One-click unsubscribe in every e-mail:** "Afmelden", plus the `List-Unsubscribe` and `List-Unsubscribe-Post` headers that Gmail and Yahoo require from bulk senders, and (later, once there is more than one choice) a "Wijzig hoe vaak" link to F2. Whether Dutch rules on commercial e-mail also apply depends on the content (for example a book prompt); the lawyer confirms.
+- **Confirm first.** A family member gets no postcards until they click "Bevestig je e-mailadres", so a typo never sends the child's name (or photos) to a stranger. Hard bounces and complaints are suppressed by Lettermint; writing them back to our database ("stop") comes later.
 - **"Liever niet" means no e-mail address.** F2 then doesn't ask for one. The catch: a new device can only join through a new link from the parent.
 - **Revoked recipients get no e-mails at all.** Images in their old e-mails show the placeholder.
-- **The family page link is personal.** The e-mail says "stuur de mail liever niet door".
-- **Frequency** comes from F2: every moment, once a week (Sunday) or never. The default is once a week.
+- **The family page link is personal.** The e-mail says "stuur dit mailtje liever niet door", and the button's sign-in key works once, on one new device, within 7 days (a forwarded mail can't give someone months of access).
+- **Frequency** comes from F2: every Sunday or never (launch). "Every moment" comes later; `each` stays in the database and is treated as weekly.
 - **Sender:** "Lotte via TeddySteps", with a reply-to that bounces kindly. Hugs and voice notes go through the page.

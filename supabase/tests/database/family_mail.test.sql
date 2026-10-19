@@ -2,7 +2,7 @@
 -- Run: npx supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(27);
 
 create function pg_temp.h(text) returns text language sql as $$ select encode(extensions.digest($1, 'sha256'), 'hex') $$;
 grant execute on function pg_temp.h(text) to service_role;
@@ -62,6 +62,13 @@ select is((select child || ' ' || label from run), 'Noor Oma Ria', 'with the chi
 
 set local role service_role;
 select is((select count(*) from public.family_sunday_mail((select sunday from t) + interval '1 hour')), 1::bigint, 'an unsent mail comes back in the next run');
+reset role;
+update public.trails set paused_at = now() where id = (select trail_id from noor);
+set local role service_role;
+select is((select count(*) from public.family_sunday_mail((select sunday from t) + interval '90 minutes')), 0::bigint, 'but not once the trail is paused');
+reset role;
+update public.trails set paused_at = null where id = (select trail_id from noor);
+set local role service_role;
 select from public.family_mail_sent((select send_id from run));
 select is((select count(*) from public.family_sunday_mail((select sunday from t) + interval '2 hours')), 0::bigint, 'once sent, never twice');
 reset role;
@@ -70,10 +77,12 @@ reset role;
 set local role service_role;
 select from public.family_mail_key((select member_id from ria), pg_temp.h('mail-link'));
 select is((select status from public.family_claim(pg_temp.h('mail-link'), pg_temp.h('s-mail'), null, '1.2.3.4', null)), 'ok', 'the link in the mail opens the page');
+select is((select status from public.family_claim(pg_temp.h('mail-link'), pg_temp.h('s-mail-2'), null, '1.2.3.4', null)), 'unknown', 'once: a forwarded mail opens nothing on another device');
+select from public.family_mail_key((select member_id from ria), pg_temp.h('mail-link-2'));
 reset role;
-update private.access_keys set expires_at = now() - interval '1 minute' where token_hash = pg_temp.h('mail-link');
+update private.access_keys set expires_at = now() - interval '1 minute' where token_hash = pg_temp.h('mail-link-2');
 set local role service_role;
-select is((select status from public.family_claim(pg_temp.h('mail-link'), pg_temp.h('s-mail-2'), null, '1.2.3.4', null)), 'unknown', 'but not after 7 days');
+select is((select status from public.family_claim(pg_temp.h('mail-link-2'), pg_temp.h('s-mail-3'), null, '1.2.3.4', null)), 'unknown', 'and not after 7 days');
 reset role;
 
 -- Unsubscribing wipes the address and stops the mail; the page stays open.

@@ -53,14 +53,18 @@ begin
 end;
 $$;
 
--- A confirmation code for the current address: at most 3 per person a day, 200 a day in all.
+-- A confirmation code for the current address: at most 3 per person and 30 per trail a day,
+-- 1000 a day in all (a launch day with founding families inviting their circles fits).
 create function public.family_email_key(member uuid, code_hash text)
 returns text
 language plpgsql security definer set search_path = ''
 as $$
 begin
   if (select count(*) from private.access_keys k where k.circle_member_id = member and k.kind = 'email_confirm' and k.created_at > now() - interval '24 hours') >= 3
-     or (select count(*) from private.access_keys k where k.kind = 'email_confirm' and k.created_at > now() - interval '24 hours') >= 200 then
+     or (select count(*) from private.access_keys k join public.circle_members c on c.id = k.circle_member_id
+         where c.trail_id = (select c2.trail_id from public.circle_members c2 where c2.id = member)
+           and k.kind = 'email_confirm' and k.created_at > now() - interval '24 hours') >= 30
+     or (select count(*) from private.access_keys k where k.kind = 'email_confirm' and k.created_at > now() - interval '24 hours') >= 1000 then
     return 'limited';
   end if;
   insert into private.access_keys (circle_member_id, kind, token_hash, expires_at) values (member, 'email_confirm', code_hash, now() + interval '7 days');
@@ -91,12 +95,14 @@ begin
 end;
 $$;
 
--- The link in the Sunday mail: a 7-day key that opens the family page on a new device.
+-- The link in the Sunday mail: a key that opens the family page once, on one new device, within
+-- 7 days. The function derives the code from the send, so a retry reuses the same key and mail.
 create function public.family_mail_key(member uuid, code_hash text)
 returns void
 language sql security definer set search_path = ''
 as $$
-  insert into private.access_keys (circle_member_id, kind, token_hash, expires_at) values (member, 'email_signin', code_hash, now() + interval '7 days');
+  insert into private.access_keys (circle_member_id, kind, token_hash, expires_at) values (member, 'email_signin', code_hash, now() + interval '7 days')
+  on conflict (token_hash) do nothing;
 $$;
 
 -- Unsubscribing (one click from the mail app, or the page): the address is gone, the page stays open.
@@ -110,13 +116,16 @@ as $$
   update private.access_keys set revoked_at = now() where circle_member_id = member and kind = 'email_confirm' and revoked_at is null;
 $$;
 
--- The family link and the mail link both open the page; expired or revoked keys don't.
+-- The family link and the mail link both open the page; expired or revoked keys don't. The mail
+-- link works once: a forwarded Sunday mail can't give someone else months of access.
 create or replace function public.family_claim(code_hash text, session_hash text, device text, ip text, existing_session_hash text)
 returns table (member uuid, status text)
 language plpgsql security definer set search_path = ''
 as $$
 declare
   found_member uuid;
+  found_key uuid;
+  found_kind text;
   hashed_ip text := encode(extensions.digest(coalesce(ip, ''), 'sha256'), 'hex');
   today date := (now() at time zone 'Europe/Amsterdam')::date;
 begin
@@ -126,7 +135,7 @@ begin
     return query select null::uuid, 'blocked';
     return;
   end if;
-  select k.circle_member_id into found_member
+  select k.circle_member_id, k.id, k.kind into found_member, found_key, found_kind
   from private.access_keys k
   join public.circle_members c on c.id = k.circle_member_id
   join public.trails t on t.id = c.trail_id
@@ -152,6 +161,9 @@ begin
     return;
   end if;
   insert into private.family_sessions (circle_member_id, token_hash, device_hint) values (found_member, session_hash, left(device, 40));
+  if found_kind = 'email_signin' then
+    update private.access_keys set revoked_at = now() where id = found_key;
+  end if;
   return query select found_member, 'ok';
 end;
 $$;
@@ -187,6 +199,9 @@ declare
   local timestamp := at at time zone 'Europe/Amsterdam';
   sunday date := local::date;
   since timestamptz := ((local::date - 7) + time '20:00') at time zone 'Europe/Amsterdam';
+  -- Up to this Sunday 20:00, so a retry later that evening sends the same moments, and a moment
+  -- ready at 21:00 waits for next week instead of showing up twice.
+  until timestamptz := (local::date + time '20:00') at time zone 'Europe/Amsterdam';
 begin
   if extract(isodow from local) <> 7 or extract(hour from local) < 20 then
     return;
@@ -200,25 +215,32 @@ begin
     and t.paused_at is null and t.delete_requested_at is null and t.deleted_at is null
     and exists (
       select 1 from public.moments m
-      where m.trail_id = c.trail_id and m.status = 'ready' and m.deleted_at is null and m.ready_at > since and m.ready_at <= at
+      where m.trail_id = c.trail_id and m.status = 'ready' and m.deleted_at is null and m.ready_at > since and m.ready_at <= until
     )
   on conflict (circle_member_id, week) do nothing;
 
   return query
   select s.id, c.id, c.email, c.label, ch.first_name,
     (select count(*)::integer from public.moments m
-     where m.trail_id = c.trail_id and m.status = 'ready' and m.deleted_at is null and m.ready_at > since and m.ready_at <= at),
+     where m.trail_id = c.trail_id and m.status = 'ready' and m.deleted_at is null and m.ready_at > since and m.ready_at <= until),
     (select coalesce(jsonb_agg(jsonb_build_object('week', w.trail_week, 'first', w.is_first, 'label', w.first_label, 'caption', w.caption) order by w.ready_at), '[]'::jsonb)
      from (
        select m.trail_week, m.is_first, m.first_label, m.caption, m.ready_at from public.moments m
-       where m.trail_id = c.trail_id and m.status = 'ready' and m.deleted_at is null and m.ready_at > since and m.ready_at <= at
+       where m.trail_id = c.trail_id and m.status = 'ready' and m.deleted_at is null and m.ready_at > since and m.ready_at <= until
        order by m.ready_at desc limit 5
      ) w)
   from private.mail_sends s
   join public.circle_members c on c.id = s.circle_member_id
+  join public.trails t on t.id = c.trail_id
   join public.children ch on ch.trail_id = c.trail_id
   where s.week = sunday and s.sent_at is null
-    and c.email is not null and c.email_confirmed_at is not null and c.revoked_at is null;
+    -- Checked again for retries: paused, deleted or unsubscribed since the first run means no mail.
+    and c.email is not null and c.email_confirmed_at is not null and c.revoked_at is null
+    and c.email_frequency in ('weekly', 'each')
+    and t.paused_at is null and t.delete_requested_at is null and t.deleted_at is null
+  -- At most 300 per call; the job runs every 10 minutes on Sunday evening.
+  order by s.created_at, s.id
+  limit 300;
 end;
 $$;
 
@@ -249,9 +271,10 @@ grant execute on function public.family_join(uuid, text, text, text), public.fam
   to service_role;
 revoke all on function private.family_mail_cleanup() from public, anon, authenticated;
 
--- Hourly at :05, the function `family-mail` gets a nudge; family_sunday_mail decides whether it's
--- Sunday after 20:00. URL and shared secret in Vault ("family_mail_url", "cron_secret").
-select cron.schedule('family-mail', '5 * * * *', $job$
+-- Every 10 minutes on Sunday between 18:00 and 22:59 UTC (20:00 to midnight Amsterdam, summer and
+-- winter), the function `family-mail` gets a nudge; family_sunday_mail decides whether it's Sunday
+-- after 20:00 in Amsterdam. URL and shared secret in Vault ("family_mail_url", "cron_secret").
+select cron.schedule('family-mail', '*/10 18-22 * * 0', $job$
   select net.http_post(
     url := s.url,
     headers := jsonb_build_object('Content-Type', 'application/json', 'x-cron-secret', s.secret),

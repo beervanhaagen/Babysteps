@@ -75,7 +75,7 @@ export default function Pinned() {
           {moment.isFirst ? 'Een eerste keer! Tiggy kwam kijken.' : `Het staat op ${possessive(name)} pad.`}
           {online ? '' : ' Het wacht veilig op je telefoon tot je weer verbinding hebt.'}
         </Text>
-        {asking ? <Text style={[styles.body, styles.center]}>Zet meldingen aan, dan hoor je ’s avonds wie er knuffelde.</Text> : null}
+        {asking ? <Text style={[styles.body, styles.center]}>Zet meldingen aan, dan hoor je ’s avonds wie {name} een knuffel stuurde.</Text> : null}
       </View>
       <View style={[styles.footer, { paddingBottom: space.space6 + insets.bottom }]}>
         <Button block variant="dark" onPress={toTrail}>

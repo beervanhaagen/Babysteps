@@ -3,7 +3,7 @@
 // Text only: no photos until the parents' M6 switch exists (step 8), and nothing that loads.
 // One 7-day sign-in link per mail, one-click unsubscribe, sent once (row first, then the mail).
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { button, COMPANY, escapeHtml, frame, newCode, send, sha256, SIGN_OFF, unsubscribeToken } from '../_shared/mail.ts';
+import { button, C, COMPANY, escapeHtml, frame, send, SERIF, sha256, SIGN_OFF, signinCode, unsubscribeToken } from '../_shared/mail.ts';
 
 const service = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const CRON_SECRET = Deno.env.get('CRON_SECRET');
@@ -20,6 +20,7 @@ function sundayMail(row: Row, code: string, unsubscribe: string) {
   const open = `${FAMILY_URL}/m#${code}`;
   const stop = `${FAMILY_URL}/afmelden#${unsubscribe}`;
   const more = row.moment_count > SHOWN ? row.moment_count - SHOWN : 0;
+  const andMore = more === 1 ? 'En nog 1 moment.' : `En nog ${more} momenten.`;
   const title = (m: Moment) => (m.first ? m.label : m.caption) || 'Een moment';
   const eyebrow = (m: Moment) => `Week ${m.week}${m.first ? ' · eerste keer!' : ''}`;
 
@@ -27,22 +28,22 @@ function sundayMail(row: Row, code: string, unsubscribe: string) {
 
 Deze week bij ${row.child}: ${count}.
 
-${row.moments.map((m) => `${eyebrow(m)}\n${title(m)}`).join('\n\n')}${more ? `\n\nEn nog ${more}.` : ''}
+${row.moments.map((m) => `${eyebrow(m)}\n${title(m)}`).join('\n\n')}${more ? `\n\n${andMore}` : ''}
 
 Bekijk ze en stuur een knuffel:
 ${open}
 
 Liefs, TeddySteps
 
-Je krijgt dit kaartje omdat je meekijkt met ${row.child} op TeddySteps. De link is persoonlijk: stuur dit mailtje liever niet door. Afmelden: ${stop}
+Je krijgt dit mailtje omdat je meekijkt met ${row.child} op TeddySteps. De link is persoonlijk: stuur dit mailtje liever niet door. Afmelden: ${stop}
 ${COMPANY}`;
 
   const cards = row.moments
     .map(
       (m, i) => `<tr><td style="padding:${i ? '12px' : '0'} 0 0;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${m.first ? '#F7E3A3' : '#FBF8F2'};border:2px solid #2D1E2F;border-radius:16px;padding:12px 14px;">
-<p style="margin:0;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#5E4D5C;">${escapeHtml(eyebrow(m))}</p>
-<p style="margin:2px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:24px;font-weight:bold;color:#2D1E2F;">${escapeHtml(title(m))}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${m.first ? C.butter : C.card};border:2px solid ${C.ink};border-radius:16px;padding:12px 14px;">
+<p style="margin:0;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${C.inkMuted};">${escapeHtml(eyebrow(m))}</p>
+<p style="margin:2px 0 0;font-family:${SERIF};font-size:18px;line-height:24px;font-weight:bold;color:${C.ink};">${escapeHtml(title(m))}</p>
 </td></tr></table>
 </td></tr>`,
     )
@@ -51,13 +52,14 @@ ${COMPANY}`;
   const html = frame(
     `Deze week bij ${escapeHtml(row.child)}`,
     `<p style="margin:0 0 10px;font-size:18px;line-height:26px;">Hoi ${escapeHtml(row.label)},</p>
-<h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:32px;font-weight:bold;color:#2D1E2F;">Deze week bij ${escapeHtml(row.child)}: <i style="color:#7E2048;">${count}.</i></h1>
+<h1 style="margin:0 0 18px;font-family:${SERIF};font-size:28px;line-height:32px;font-weight:bold;color:${C.ink};">Deze week bij ${escapeHtml(row.child)}: ${count}</h1>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${cards}</table>
-${more ? `<p style="margin:12px 0 0;color:#5E4D5C;">En nog ${more}.</p>` : ''}
-<p style="margin:22px 0 18px;">Bekijk ze op de familiepagina en stuur een knuffel.</p>
+${more ? `<p style="margin:12px 0 0;color:${C.inkMuted};">${andMore}</p>` : ''}
+<div style="height:22px;line-height:22px;font-size:0;">&nbsp;</div>
 ${button(open, 'Bekijk en stuur een knuffel')}
 ${SIGN_OFF}`,
-    `Je krijgt dit kaartje omdat je meekijkt met ${escapeHtml(row.child)} op TeddySteps. De knop is persoonlijk: stuur dit mailtje liever niet door. <a href="${stop}" style="color:#5E4D5C;">Afmelden</a><br>Geen reclame, nooit. ${COMPANY}`,
+    `Je krijgt dit mailtje omdat je meekijkt met ${escapeHtml(row.child)} op TeddySteps. De knop is persoonlijk: stuur dit mailtje liever niet door. <a href="${stop}" style="color:${C.inkMuted};">Afmelden</a><br>Geen reclame, nooit. ${COMPANY}`,
+    `Stuur ${escapeHtml(row.child)} een knuffel.`,
   );
   return { subject: `Deze week bij ${row.child}: ${count}`, text, html };
 }
@@ -72,8 +74,10 @@ Deno.serve(async (request) => {
   }
   const counts = { sent: 0, failed: 0 };
   const deliver = async (row: Row) => {
-    const code = newCode();
-    await service.rpc('family_mail_key', { member: row.member, code_hash: await sha256(code) });
+    const code = await signinCode(row.send_id);
+    const { error } = await service.rpc('family_mail_key', { member: row.member, code_hash: await sha256(code) });
+    // Never a mail with a link that doesn't work.
+    if (error) throw new Error('mail key');
     const token = await unsubscribeToken(row.member);
     const sent = await send({
       to: row.email,

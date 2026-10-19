@@ -25,7 +25,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
   const [leaving, setLeaving] = useState(false);
   const bob = useLoop('bob');
   useView(editing ? 'Je kaartjes' : `Uitnodiging voor ${possessive(name)} pad`);
-  useAnnounce(error);
+  useAnnounce(checkMail ? `We hebben een mailtje gestuurd naar ${email.trim()}. Kijk even in je mail.` : error);
 
   async function save() {
     if (frequency !== 'never' && !EMAIL.test(email.trim())) return setError('Dit e-mailadres klopt nog niet helemaal.');
@@ -33,7 +33,14 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
     setBusy(true);
     try {
       const { confirm } = await api.join(label, email, frequency);
-      if (confirm) return setCheckMail(true);
+      if (confirm === 'limited') {
+        setBusy(false);
+        return setError('We hebben vandaag al een paar mailtjes naar dit adres gestuurd. Probeer het morgen nog eens.');
+      }
+      if (confirm) {
+        setBusy(false);
+        return setCheckMail(true);
+      }
       onSaved();
       navigate('/', true);
     } catch {
@@ -61,8 +68,9 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
         </Animated.View>
         <Heading>Kijk even in je mail</Heading>
         <Text style={styles.lead}>
-          We hebben je een mailtje gestuurd. Tik op de knop erin om je adres te bevestigen, dan krijg je elke zondag een kaartje. Staat het niet in je inbox? Kijk dan even in je spam.
+          We hebben een mailtje gestuurd naar {email.trim()}. Tik op de knop erin om je adres te bevestigen, dan krijg je elke zondag een kaartje. Staat het niet in je inbox? Kijk dan even in je spam.
         </Text>
+        <TextLink onPress={() => setCheckMail(false)}>Ander adres? Pas het aan</TextLink>
         <View style={styles.action}>
           <Button
             block
@@ -95,6 +103,9 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
         </ChoiceChip>
       </ChoiceGroup>
       {/* "Liever niet" asks for no address at all (docs/family-email.md). */}
+      {editing && frequency === 'never' && page.me.email ? (
+        <Text style={styles.small}>Dan wissen we je e-mailadres. De familiepagina blijft open.</Text>
+      ) : null}
       {frequency !== 'never' ? (
         <TextField
           size="lg"
