@@ -1,0 +1,39 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://rzckkognfzjxlvymmgrr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_KEY": "sb_publishable_dm_BrmhhBH2pMYgUDp8Tsg_-S4ZaS6J",
+        "EXPO_PUBLIC_FAMILY_URL": "https://familie.teddysteps.nl"
+      },
+      "ios": {
+        "resourceClass": "default"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://rzckkognfzjxlvymmgrr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_KEY": "sb_publishable_dm_BrmhhBH2pMYgUDp8Tsg_-S4ZaS6J",
+        "EXPO_PUBLIC_FAMILY_URL": "https://familie.teddysteps.nl"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://rzckkognfzjxlvymmgrr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_KEY": "sb_publishable_dm_BrmhhBH2pMYgUDp8Tsg_-S4ZaS6J",
+        "EXPO_PUBLIC_FAMILY_URL": "https://familie.teddysteps.nl"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
