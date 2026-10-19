@@ -3,6 +3,7 @@
   "buildCommand": "npm run export",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/api/:path*", "destination": "https://rzckkognfzjxlvymmgrr.supabase.co/functions/v1/family-api/:path*" },
     { "source": "/((?!api/|e/|_expo/).*)", "destination": "/index.html" }
   ],
   "headers": [
@@ -11,7 +12,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://rzckkognfzjxlvymmgrr.supabase.co; font-src 'self'; connect-src 'self'; media-src 'self' blob: https://rzckkognfzjxlvymmgrr.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
         },
         { "key": "Referrer-Policy", "value": "no-referrer" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
