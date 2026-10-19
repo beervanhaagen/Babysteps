@@ -1,5 +1,7 @@
+import * as Application from 'expo-application';
 import * as Notifications from 'expo-notifications';
 import { AndroidImportance } from 'expo-notifications';
+import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { Platform } from 'react-native';
 import { supabase } from './supabase';
@@ -19,6 +21,9 @@ async function channel() {
   }
 }
 
+// The registered token, so signing out works offline and never waits for Apple or Google.
+const STORED = 'push-token';
+
 async function deviceToken(): Promise<string | null> {
   try {
     return (await Notifications.getDevicePushTokenAsync()).data as string;
@@ -36,8 +41,10 @@ export async function registerDevice() {
   await channel();
   const token = await deviceToken();
   if (!token) return;
-  // Development builds talk to Apple's sandbox server.
-  await supabase.rpc('register_push_token', { platform: Platform.OS, token, sandbox: Platform.OS === 'ios' && __DEV__ });
+  // Development builds talk to Apple's sandbox server; the app's own profile says which it is.
+  const sandbox = Platform.OS === 'ios' && (await Application.getIosPushNotificationServiceEnvironmentAsync()) === 'development';
+  await supabase.rpc('register_push_token', { platform: Platform.OS, token, sandbox });
+  await SecureStore.setItemAsync(STORED, token);
 }
 
 /** Right after a pinned moment (A4): the system question, once. iOS never asks a second time. */
@@ -57,19 +64,25 @@ export async function willAsk(): Promise<boolean> {
   return current.status === 'undetermined' && current.canAskAgain;
 }
 
-/** Before signing out: this device gets nothing more for this account. */
+/** Before signing out: this device gets nothing more for this account. Gives up after 3 seconds. */
 export async function unregisterDevice() {
   if (Platform.OS === 'web') return;
-  const { status } = await Notifications.getPermissionsAsync();
-  const token = status === 'granted' ? await deviceToken() : null;
-  if (token) await supabase.rpc('unregister_push_token', { token }).then(undefined, () => undefined);
+  const token = await SecureStore.getItemAsync(STORED);
+  if (token) {
+    const done = supabase.rpc('unregister_push_token', { token }).then(undefined, () => undefined);
+    await Promise.race([done, new Promise((resolve) => setTimeout(resolve, 3000))]);
+    await SecureStore.deleteItemAsync(STORED);
+  }
   await Notifications.dismissAllNotificationsAsync();
 }
 
 /** A tapped push (also one that opened the app) shows who sent hugs. */
 export function listenForTaps(): () => void {
   const open = (response: Notifications.NotificationResponse | null) => {
-    if (response?.notification.request.content.data?.kind === 'daily') router.push('/activiteit');
+    if (response?.notification.request.content.data?.kind !== 'daily') return;
+    // Handled once: a later sign-in doesn't open an old push again.
+    Notifications.clearLastNotificationResponse();
+    router.push('/activiteit');
   };
   open(Notifications.getLastNotificationResponse());
   const subscription = Notifications.addNotificationResponseReceivedListener(open);

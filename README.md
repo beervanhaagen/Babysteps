@@ -105,7 +105,7 @@ At most one push per parent per day: at 19:00 Amsterdam time, only when family s
 
 **Going live:**
 
-1. Secrets on the hosted project (dashboard → Edge Functions → Secrets, so `config.toml` values aren't uploaded): `PUSH_CRON_SECRET` (`openssl rand -hex 32`), and once the accounts exist `APNS_KEY_P8` (the whole .p8 file), `APNS_KEY_ID`, `APNS_TEAM_ID`, `FCM_SERVICE_ACCOUNT` (the service-account JSON, role "Firebase Cloud Messaging API Admin" only).
+1. Secrets on the hosted project (dashboard → Edge Functions → Secrets, so `config.toml` values aren't uploaded): `CRON_SECRET` (`openssl rand -hex 32`), and once the accounts exist `APNS_KEY_P8` (the whole .p8 file), `APNS_KEY_ID`, `APNS_TEAM_ID`, `FCM_SERVICE_ACCOUNT` (the service-account JSON, role "Firebase Cloud Messaging API Admin" only).
 2. `npx supabase functions deploy push` ("Enforce JWT" off).
-3. Vault, once (SQL editor): `select vault.create_secret('https://<ref>.supabase.co/functions/v1/push', 'push_function_url'); select vault.create_secret('<the same PUSH_CRON_SECRET>', 'push_cron_secret');`. Without these the hourly job does nothing.
+3. Vault, once (SQL editor): `select vault.create_secret('https://<ref>.supabase.co/functions/v1/push', 'push_function_url'); select vault.create_secret('<the same CRON_SECRET>', 'cron_secret');`. Without these the hourly job does nothing.
 4. Test on a real phone with a development build: allow notifications on A4, let family hug, and at 19:00 one push arrives; tapping it opens Activiteit.

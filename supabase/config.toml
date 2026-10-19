@@ -394,8 +394,8 @@ IP_HASH_KEY = "local-only-not-secret"
 LANDING_ORIGIN = "http://localhost:8095"
 # Locally, confirmation mails go to Mailpit's send API; hosted, LETTERMINT_API_TOKEN is set instead.
 MAIL_DEV_URL = "http://host.docker.internal:55324"
-# Shared secret between pg_cron (Vault "push_cron_secret") and the function `push`. Local only.
-PUSH_CRON_SECRET = "local-push-secret"
+# Shared secret between pg_cron (Vault "cron_secret") and the scheduled functions (push, family-mail). Local only.
+CRON_SECRET = "local-push-secret"
 
 # Family has no account and no JWT: family-api checks its own session cookie.
 [functions.family-api]

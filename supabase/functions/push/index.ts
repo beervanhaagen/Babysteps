@@ -6,7 +6,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const service = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
-const CRON_SECRET = Deno.env.get('PUSH_CRON_SECRET');
+const CRON_SECRET = Deno.env.get('CRON_SECRET');
 const APNS_KEY = Deno.env.get('APNS_KEY_P8');
 const APNS_KEY_ID = Deno.env.get('APNS_KEY_ID');
 const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID');
@@ -14,6 +14,8 @@ const APNS_TOPIC = Deno.env.get('APNS_TOPIC') ?? 'nl.teddysteps.app';
 const FCM_ACCOUNT = Deno.env.get('FCM_SERVICE_ACCOUNT');
 
 type Push = { token: string; platform: 'ios' | 'android'; apns_sandbox: boolean; body: string };
+// Error reasons per run, for the logs (never tokens or sentences).
+const reasons: Record<string, number> = {};
 
 const base64url = (bytes: Uint8Array | string) =>
   btoa(typeof bytes === 'string' ? bytes : String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -68,10 +70,12 @@ async function toApple(push: Push, bearer: string): Promise<string> {
       'apns-expiration': String(Math.floor(Date.now() / 1000) + 24 * 3600),
       'apns-collapse-id': 'daily',
     },
-    body: JSON.stringify({ aps: { alert: { body: push.body }, sound: 'default' }, kind: 'daily' }),
+    // expo-notifications on iOS reads the extra data from "body" (what a tap opens).
+    body: JSON.stringify({ aps: { alert: { body: push.body }, sound: 'default' }, body: { kind: 'daily' } }),
   });
   if (response.ok) return 'sent';
   const reason = (await response.json().catch(() => ({}))).reason;
+  if (reason) reasons[`apns:${reason}`] = (reasons[`apns:${reason}`] ?? 0) + 1;
   return response.status === 410 || reason === 'BadDeviceToken' || reason === 'Unregistered' ? 'invalid' : 'failed';
 }
 
@@ -90,11 +94,13 @@ async function toGoogle(push: Push, access: { token: string; project: string }):
   });
   if (response.ok) return 'sent';
   const status = (await response.json().catch(() => ({}))).error?.status;
-  return response.status === 404 || status === 'UNREGISTERED' ? 'invalid' : 'failed';
+  if (status) reasons[`fcm:${status}`] = (reasons[`fcm:${status}`] ?? 0) + 1;
+  return response.status === 404 || status === 'UNREGISTERED' || status === 'SENDER_ID_MISMATCH' ? 'invalid' : 'failed';
 }
 
 Deno.serve(async (request) => {
-  if (!CRON_SECRET || request.headers.get('x-push-secret') !== CRON_SECRET) return new Response(null, { status: 403 });
+  if (!CRON_SECRET || request.headers.get('x-cron-secret') !== CRON_SECRET) return new Response(null, { status: 403 });
+  for (const reason in reasons) delete reasons[reason];
   const { data, error } = await service.rpc('push_digest');
   if (error) {
     console.error('push: digest failed');
@@ -102,14 +108,18 @@ Deno.serve(async (request) => {
   }
   const pushes = (data ?? []) as Push[];
   const counts = { sent: 0, invalid: 0, failed: 0, skipped: 0 };
-  const apple = APNS_KEY && APNS_KEY_ID && APNS_TEAM_ID && pushes.some((p) => p.platform === 'ios') ? await apnsToken() : null;
-  const google = FCM_ACCOUNT && pushes.some((p) => p.platform === 'android') ? await fcmAccess() : null;
-  for (const push of pushes) {
-    const result = push.platform === 'ios' ? (apple ? await toApple(push, apple) : 'skipped') : google ? await toGoogle(push, google) : 'skipped';
+  // A broken key on one platform must not stop the other.
+  const apple = APNS_KEY && APNS_KEY_ID && APNS_TEAM_ID && pushes.some((p) => p.platform === 'ios') ? await apnsToken().catch(() => 'broken' as const) : null;
+  const google = FCM_ACCOUNT && pushes.some((p) => p.platform === 'android') ? await fcmAccess().catch(() => 'broken' as const) : null;
+  const deliver = async (push: Push) => {
+    const key = push.platform === 'ios' ? apple : google;
+    const result = key === 'broken' ? 'failed' : !key ? 'skipped' : push.platform === 'ios' ? await toApple(push, key as string) : await toGoogle(push, key as { token: string; project: string });
     counts[result as keyof typeof counts]++;
     if (result === 'invalid') await service.rpc('push_token_invalid', { token: push.token });
-  }
-  // Counts only: never tokens or sentences in the logs.
-  console.log(`push: ${JSON.stringify(counts)}`);
+  };
+  // Twenty at a time, so a few hundred parents fit well within one run.
+  for (let i = 0; i < pushes.length; i += 20) await Promise.all(pushes.slice(i, i + 20).map((push) => deliver(push).catch(() => counts.failed++)));
+  // Counts and error reasons only: never tokens or sentences in the logs.
+  console.log(`push: ${JSON.stringify({ ...counts, apple: apple === 'broken' ? 'key broken' : undefined, google: google === 'broken' ? 'key broken' : undefined, reasons })}`);
   return Response.json(counts);
 });

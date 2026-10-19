@@ -33,6 +33,9 @@ grant select on t, lotte to service_role;
 insert into public.reactions (moment_id, trail_id, circle_member_id, kind, created_at)
 values ('a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa', (select trail_id from lotte), (select member_id from ria), 'hug', (select seven_pm from t) - interval '2 hours');
 
+-- A parent's own hug never makes a push.
+insert into public.reactions (moment_id, trail_id, user_id, kind, created_at)
+values ('a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa', (select trail_id from lotte), '31111111-1111-1111-1111-111111111111', 'hug', (select seven_pm from t) - interval '3 hours');
 set local role service_role;
 select is((select count(*) from public.push_digest((select seven_pm from t) - interval '1 hour')), 0::bigint, 'nothing outside the 19:00 hour');
 select is((select body from public.push_digest((select seven_pm from t))), 'Oma Ria stuurde Lotte een knuffel', 'one hug: who sent it');

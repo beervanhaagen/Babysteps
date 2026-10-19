@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button, ChoiceChip, ChoiceGroup, color, TextField, text, useAnnounce } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
 import { TextLink } from '@/components/TextLink';
-import { useAuth } from '@/lib/auth';
+import { signOut, useAuth } from '@/lib/auth';
 import { PROBLEMS } from '@/lib/childDates';
 import { friendlyError } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
@@ -115,7 +115,7 @@ export default function YourLittleOne() {
         </Text>
       ) : null}
       {/* A way out for a second parent who used the wrong address, so no duplicate trail. */}
-      <TextLink onPress={() => supabase.auth.signOut()}>Ander e-mailadres? Uitloggen</TextLink>
+      <TextLink onPress={() => signOut()}>Ander e-mailadres? Uitloggen</TextLink>
     </Screen>
   );
 }

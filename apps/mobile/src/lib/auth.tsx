@@ -1,6 +1,7 @@
 import type { CalendarDate } from '@teddysteps/core';
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { unregisterDevice } from './push';
 import { supabase } from './supabase';
 
 export interface Trail {
@@ -35,6 +36,12 @@ async function findTrail(): Promise<Trail | null> {
   return data ? { id: data.trail_id, childName: data.first_name, birthDate: data.birth_date, dueDate: data.due_date } : null;
 }
 
+/** Every sign-out goes through here: first this device stops getting pushes for this account. */
+export async function signOut() {
+  await unregisterDevice().catch(() => undefined);
+  await supabase.auth.signOut();
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading' });
 
@@ -47,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // No connection at start-up: stay signed in and offer to try again,
       // rather than guessing whether this parent already has a trail.
       if (isNetworkError(error as { message?: string; code?: string })) return setState({ status: 'offline', session });
-      await supabase.auth.signOut();
+      await signOut();
     }
   }, []);
 

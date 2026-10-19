@@ -65,7 +65,7 @@ as $$
   end;
 $$;
 
--- What to send now: only in the 19:00 hour in Amsterdam, once per parent per day, for parents
+-- What to send now: only in the 19:00 hour in Amsterdam (hugs since yesterday 19:00), once per parent per day, for parents
 -- who did not switch hug notifications off, on trails that are not paused or being deleted.
 -- Claiming happens here, so a second run in the same day returns nothing.
 create function public.push_digest(at timestamptz default now())
@@ -74,6 +74,9 @@ language plpgsql security definer set search_path = ''
 as $$
 declare
   local timestamp := at at time zone 'Europe/Amsterdam';
+  -- Pinned to the clock, so a summer/winter time change neither skips nor doubles an hour.
+  vanaf timestamptz := ((local::date - 1) + time '19:00') at time zone 'Europe/Amsterdam';
+  tot timestamptz := (local::date + time '19:00') at time zone 'Europe/Amsterdam';
 begin
   if extract(hour from local) <> 19 then
     return;
@@ -89,7 +92,7 @@ begin
     join public.circle_members m on m.id = r.circle_member_id
     join public.profiles pr on pr.id = p.user_id
     where r.kind = 'hug' and r.circle_member_id is not null
-      and r.created_at > at - interval '24 hours' and r.created_at <= at
+      and r.created_at > vanaf and r.created_at <= tot
       and t.paused_at is null and t.delete_requested_at is null and t.deleted_at is null
       and mo.deleted_at is null and pr.notify_reactions
     group by p.user_id, c.first_name, m.label
@@ -134,18 +137,19 @@ grant execute on function public.push_digest(timestamptz), public.push_token_inv
 revoke all on function private.push_sentence(text, text[], integer), private.push_cleanup() from public, anon, authenticated;
 
 -- Every hour, the function `push` gets a nudge; push_digest decides whether it's 19:00.
--- The function's URL and shared secret live in Vault ("push_function_url", "push_cron_secret"),
+-- The function's URL and shared secret live in Vault ("push_function_url", "cron_secret"),
 -- set once per environment (README). Without them the job does nothing.
-create extension if not exists pg_net;
+create extension if not exists pg_net with schema extensions;
 select cron.schedule('push-digest', '0 * * * *', $job$
   select net.http_post(
     url := s.url,
-    headers := jsonb_build_object('Content-Type', 'application/json', 'x-push-secret', s.secret),
-    body := '{}'::jsonb
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-cron-secret', s.secret),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 120000
   )
   from (
     select max(decrypted_secret) filter (where name = 'push_function_url') as url,
-           max(decrypted_secret) filter (where name = 'push_cron_secret') as secret
+           max(decrypted_secret) filter (where name = 'cron_secret') as secret
     from vault.decrypted_secrets
   ) s
   where s.url is not null and s.secret is not null
