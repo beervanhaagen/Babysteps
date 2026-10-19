@@ -104,7 +104,7 @@ export function useActivity() {
     const [hugs, joined] = await Promise.all([
       supabase
         .from('reactions')
-        .select('id, created_at, seen_at, circle_members(label), moments(id, trail_week, caption, first_label, is_first)')
+        .select('id, created_at, seen_at, circle_members(label), moments!inner(id, trail_week, caption, first_label, is_first)')
         .eq('kind', 'hug')
         .order('created_at', { ascending: false })
         .limit(100),
@@ -157,7 +157,7 @@ export function useUnseenHugs() {
       let alive = true;
       supabase
         .from('reactions')
-        .select('id', { count: 'exact', head: true })
+        .select('id, moments!inner(id)', { count: 'exact', head: true })
         .is('seen_at', null)
         .then(({ count: n }) => alive && setCount(n ?? 0));
       return () => {

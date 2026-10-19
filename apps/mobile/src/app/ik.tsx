@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Text } from 'react-native';
-import { Button, color, text } from '@teddysteps/ui';
+import { router } from 'expo-router';
+import { Text, View } from 'react-native';
+import { Button, color, ListRow, text } from '@teddysteps/ui';
 import { ComingSoon } from '@/components/ComingSoon';
 import { signOut as endSession } from '@/lib/auth';
 import { clearQueue } from '@/lib/queue';
@@ -23,6 +24,9 @@ export default function Me() {
   }
   return (
     <ComingSoon title="Ik" tab="me" tone="lilac" character="tiggy" step="stap 8">
+      <View>
+        <ListRow icon="trash" title="Onlangs verwijderd" subtitle="Momenten terugzetten, tot 30 dagen" onPress={() => router.push('/verwijderd')} />
+      </View>
       {sure ? (
         <Text role="alert" style={[text('rowTitle'), { color: color.plum }]}>
           {waiting === 1

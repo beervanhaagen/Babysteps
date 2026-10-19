@@ -417,6 +417,10 @@ verify_jwt = false
 [functions.family-mail]
 verify_jwt = false
 
+# The nightly purge of moments deleted more than 30 days ago.
+[functions.purge]
+verify_jwt = false
+
 [analytics]
 enabled = false
 port = 55327

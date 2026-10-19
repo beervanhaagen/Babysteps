@@ -398,7 +398,7 @@ Gebruik één bedrijfsadres (bijv. `apps@teddysteps.nl`), een wachtwoordmanager,
 | **Stap 2** | 8. Lettermint: domein `post.teddysteps.nl`, routes, DPA. 9. TransIP DNS voor `post`: DKIM, SPF, return-path en `_dmarc.post` (`p=none`, na 4 schone weken `p=quarantine`). 10. Apple: App ID `nl.teddysteps.app`, Sign in with Apple, Push, APNs-sleutel (.p8, maar één keer te downloaden), App Store Connect, TestFlight. 11. Google Cloud-project: OAuth-clients voor iOS, Android en web. 12. Firebase: Google Analytics uit, Android-app, serviceaccount voor FCM. |
 | **Stap 2–3** | 13. Google Play Console als organisatie ($25). Plan voor de zekerheid een gesloten test van 14 dagen met 12 testers in. |
 | **Stap 10** | 14. Sentry met EU-regio bij het aanmaken. 15. Aptabase EU; bewaartermijn en DPA navragen. 16. Afspraak met testgezinnen; back-upscript elke zondag. |
-| **Voor de launch** | 17. Jurist: privacyverklaring, voorwaarden, DPIA, register van verwerkers. 18. Supabase Pro, Vercel Pro, Lettermint Starter, budgetwaarschuwingen; testfase-back-ups wissen. 19. Privacylabels in App Store Connect en Google Play. |
+| **Voor de launch** | 17. Jurist: privacyverklaring, voorwaarden, DPIA, register van verwerkers. 18. Supabase Pro, Vercel Pro, Lettermint Starter, budgetwaarschuwingen; testfase-back-ups wissen. 19. Privacylabels in App Store Connect en Google Play. 20. Opruimtaak controleren (anders blijven verwijderde foto's stilletjes staan): functie `purge` gedeployd, `CRON_SECRET` gezet, Vault-geheim `purge_function_url` aanwezig, en `select count(*) from public.moments where deleted_at < now() - interval '32 days'` geeft 0. |
 
 ## 10. Bevindingen, open vragen en juristpunten
 

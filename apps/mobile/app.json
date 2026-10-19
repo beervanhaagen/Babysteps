@@ -13,7 +13,10 @@
     ],
     "ios": {
       "bundleIdentifier": "nl.teddysteps.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "nl.teddysteps.app",
@@ -51,6 +54,13 @@
         "expo-notifications",
         {
           "defaultChannel": "knuffels"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Zo kan TeddySteps foto’s van je pad in je fotobibliotheek zetten.",
+          "isAccessMediaLocationEnabled": false
         }
       ]
     ],

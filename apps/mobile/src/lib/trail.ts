@@ -27,6 +27,8 @@ export interface TrailMoment {
   firstLabel: string | null;
   happenedOn: CalendarDate | null;
   createdAt: string;
+  /** T8 "In het jaarboek"; the book (B1) counts only these. */
+  inBook: boolean;
   photos: MomentPhoto[];
   /** Hugs from family (T1, T2). */
   hugs: number;
@@ -43,6 +45,8 @@ interface Row {
   first_label: string | null;
   happened_on: CalendarDate | null;
   created_at: string;
+  /** Missing in copies cached before T8 existed. */
+  in_book?: boolean;
   status: 'uploading' | 'ready';
   moment_photos: { position: number; width: number; height: number; view_path: string; small_path: string }[];
   reactions: { count: number }[];
@@ -58,6 +62,7 @@ function fromQueue(q: QueuedMoment): TrailMoment {
     firstLabel: q.firstLabel || null,
     happenedOn: q.happenedOn,
     createdAt: q.createdAt,
+    inBook: true,
     photos: q.photos.map((p) => ({ width: p.width, height: p.height, view: { local: p.view }, small: { local: p.small } })),
     hugs: 0,
     queued: q,
@@ -106,7 +111,7 @@ export function useTrailMoments() {
   const refresh = useCallback(async () => {
     const { data, error } = await supabase
       .from('moments')
-      .select('id, client_id, trail_week, caption, is_first, first_label, happened_on, created_at, status, moment_photos(position, width, height, view_path, small_path), reactions(count)')
+      .select('id, client_id, trail_week, caption, is_first, first_label, happened_on, created_at, in_book, status, moment_photos(position, width, height, view_path, small_path), reactions(count)')
       .order('trail_week', { ascending: false })
       .order('created_at', { ascending: false });
     if (error || !data) {
@@ -157,6 +162,7 @@ export function useTrailMoments() {
       firstLabel: row.first_label,
       happenedOn: row.happened_on,
       createdAt: row.created_at,
+      inBook: row.in_book ?? true,
       photos: [...row.moment_photos]
         .sort((a, b) => a.position - b.position)
         .map((p) => ({ width: p.width, height: p.height, view: { path: p.view_path }, small: { path: p.small_path } })),

@@ -10,9 +10,9 @@ import { useTrailMoments } from '@/lib/trail';
 
 const GUTTER = 22;
 
-// T2 Moment. Hugs and voice notes come with family (steps 4 and 6), the options menu (T8) in
-// step 9. No "Gezien door …" line (decided 17 October 2026). "Toegevoegd door" needs the
-// parent's first name, which isn't asked yet.
+// T2 Moment, with the options (T8) behind "⋯". Voice notes come with step 6. No "Gezien door …"
+// line (decided 17 October 2026). "Toegevoegd door" needs the parent's first name, which isn't
+// asked yet.
 export default function Moment() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
@@ -34,7 +34,11 @@ export default function Moment() {
       <View style={styles.bar}>
         <IconButton icon="back" label="Terug" onPress={router.back} />
         <Text style={styles.week}>{m ? `Week ${m.trailWeek}` : ''}</Text>
-        <View style={{ width: size.tapMin }} />
+        {m?.momentId ? (
+          <IconButton icon="more" label="Opties voor dit moment" onPress={() => router.push(`/opties/${m.momentId}`)} />
+        ) : (
+          <View style={{ width: size.tapMin }} />
+        )}
       </View>
       {m ? (
         <ScrollView contentContainerStyle={styles.content}>

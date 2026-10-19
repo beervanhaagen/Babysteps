@@ -55,6 +55,10 @@ function Routes() {
         <Stack.Screen name="details" />
         <Stack.Screen name="vastgepind" options={{ gestureEnabled: false }} />
         <Stack.Screen name="moment/[id]" />
+        <Stack.Screen name="opties/[id]" />
+        <Stack.Screen name="bewerken/[id]" />
+        <Stack.Screen name="week/[id]" />
+        <Stack.Screen name="verwijderd" />
         <Stack.Screen name="geboren" />
         <Stack.Screen name="uitnodigen" />
         <Stack.Screen name="iemand" />

@@ -7,6 +7,8 @@ import { supabase } from './supabase';
 export interface Trail {
   id: string;
   childName: string;
+  /** "Wat komt eraan" on T1; the switch comes in M6 (step 8). */
+  leapCardsOn: boolean;
   /** Null while the baby is still on the way. */
   birthDate: CalendarDate | null;
   dueDate: CalendarDate;
@@ -31,9 +33,9 @@ function isNetworkError(error: { message?: string; code?: string }) {
 
 async function findTrail(): Promise<Trail | null> {
   // RLS only returns the trail this parent belongs to.
-  const { data, error } = await supabase.from('children').select('trail_id, first_name, birth_date, due_date').limit(1).maybeSingle();
+  const { data, error } = await supabase.from('children').select('trail_id, first_name, birth_date, due_date, leap_cards_on').limit(1).maybeSingle();
   if (error) throw error;
-  return data ? { id: data.trail_id, childName: data.first_name, birthDate: data.birth_date, dueDate: data.due_date } : null;
+  return data ? { id: data.trail_id, childName: data.first_name, birthDate: data.birth_date, dueDate: data.due_date, leapCardsOn: data.leap_cards_on } : null;
 }
 
 /** Every sign-out goes through here: first this device stops getting pushes for this account. */

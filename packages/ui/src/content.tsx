@@ -179,6 +179,90 @@ export function Callout({ title, children, tone = 'lilac', tilt = -1 }: CalloutP
   );
 }
 
+export interface ListRowProps {
+  title: string;
+  subtitle?: string;
+  icon?: IconName;
+  onPress?: () => void;
+  /** Destructive actions ("Moment verwijderen") in plum. */
+  danger?: boolean;
+  chevron?: boolean;
+  /** Something on the right instead of the chevron, such as a Switch. */
+  accessory?: ReactNode;
+}
+
+/** A settings or options row (T8, the Ik screens): icon, title, a muted line, a chevron. */
+export function ListRow({ title, subtitle, icon, onPress, danger, chevron = true, accessory }: ListRowProps) {
+  const focus = useFocusRing();
+  const tint = danger ? color.plum : color.ink;
+  const body = (
+    <>
+      {icon ? <Icon name={icon} size={22} color={tint} /> : null}
+      <View style={styles.grow}>
+        <Text style={[text('rowTitle'), { color: tint }]}>{title}</Text>
+        {subtitle ? <Text style={[text('meta'), styles.muted]}>{subtitle}</Text> : null}
+      </View>
+      {accessory ?? (onPress && chevron ? <Icon name="chevron-right" size={20} color={color.inkMuted} /> : null)}
+    </>
+  );
+  if (!onPress) return <View style={styles.listRow}>{body}</View>;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
+      onPress={onPress}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={({ pressed }) => [styles.listRow, pressed && { opacity: 0.6 }, focus.ring]}
+    >
+      {body}
+    </Pressable>
+  );
+}
+
+export interface NextUpProps {
+  title: string;
+  /** "Rond week 26 · over zo'n 2 weken". */
+  when?: string;
+  eyebrow?: string;
+  items?: string[];
+  character?: CharacterName;
+  tone?: SoftBlock | 'white';
+  /** A small line under the list, e.g. the reminder that leaps are a rough guide. */
+  children?: string;
+}
+
+/** What's coming next (the leap card on T1): eyebrow, title, when, a few lines and a character. */
+export function NextUp({ title, when, eyebrow = 'Wat komt eraan', items, character, tone = 'white', children }: NextUpProps) {
+  return (
+    <View style={[styles.nextUp, { backgroundColor: color[tone] }]}>
+      <View style={styles.nextUpHead}>
+        <View style={styles.shrink}>
+          <Text style={styles.eyebrow}>{eyebrow}</Text>
+          <Text accessibilityRole="header" style={[text('titleS'), { fontSize: 22, lineHeight: 26, marginTop: 2 }]}>
+            {title}
+          </Text>
+          {when ? <Text style={[text('meta'), styles.muted, { marginTop: 2 }]}>{when}</Text> : null}
+        </View>
+        {character ? <Character name={character} size={74} decorative /> : null}
+      </View>
+      {items?.length ? (
+        <View style={styles.nextUpList}>
+          {items.map((item) => (
+            <View key={item} style={styles.nextUpItem}>
+              <Text style={styles.nextUpBullet} accessibilityElementsHidden importantForAccessibility="no">
+                •
+              </Text>
+              <Text style={[text('body'), styles.grow]}>{item}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+      {children ? <Text style={[text('meta'), styles.muted]}>{children}</Text> : null}
+    </View>
+  );
+}
+
 export interface BannerProps {
   title: string;
   children?: string;
@@ -332,6 +416,30 @@ const styles = StyleSheet.create({
     boxShadow: shadow.shadowMd,
   },
   bannerTitle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  listRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    minHeight: 60,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: color.line,
+  },
+  nextUp: {
+    width: '100%',
+    maxWidth: 342,
+    borderWidth: border.edgeBold,
+    borderColor: color.ink,
+    borderRadius: radius.radiusL,
+    boxShadow: shadow.shadowMd,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    gap: 10,
+  },
+  nextUpHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
+  nextUpList: { gap: 3 },
+  nextUpItem: { flexDirection: 'row', gap: 8 },
+  nextUpBullet: { ...text('body'), width: 10 },
   callout: {
     gap: space.space1,
     maxWidth: 342,
