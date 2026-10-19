@@ -185,6 +185,14 @@ Nog te doen:
 - **Jurist:** de uitgerekende maand verraadt een zwangerschap (mogelijk een gezondheidsgegeven), de grondslag (toestemming), de bewaartermijn.
 - **Later:** foto's in de app-schermen in plaats van de dieren (groei-advies; besluit eigenaar), een deelknop op `/bevestigd`.
 
+**Stap 7 bij de launch (19 oktober 2026): de zondagmail F8, alleen tekst**
+
+Gebouwd (plan tech-architect): bevestigen van het familieadres (mail zonder kindnaam of label, knop op `familie.teddysteps.nl/bevestig#<code>`, eenmalig, 7 dagen, alleen voor het adres waarvoor hij gemaakt is, 3 per persoon en 200 per dag), de zondagmail (zondag vanaf 20:00, alleen bevestigde adressen, alleen als er die week momenten klaar zijn, één per persoon per week, rij eerst en dan de mail met een Idempotency-Key, herkansing elk uur tot middernacht), "Noor via TeddySteps" met "Hoi Oma Ria,", hooguit 5 momenten als tekst (bijschriften veilig), een persoonlijke 7-dagenlink (`/m#<code>`, opent pas na een tik), afmelden met één klik (`List-Unsubscribe` met verzegelde token), en het opruimen van onbevestigde adressen na 7 dagen. "Bij elk moment" is weg uit F2; wie dat had, krijgt de zondagmail. Mailcode gedeeld in `supabase/functions/_shared/mail.ts`. 25 databasetests en een eindtest (`scripts/check-family-mail.mjs`, 20 controles).
+
+Bewust later: foto's in de mail (met de M6-schakelaar, stap 8), mail bij elk moment, "Wijzig hoe vaak", maandverjaardag, namen van ouders, boekprompt, bounces in onze database.
+
+Nog te doen (eigenaar): de familiepagina online zetten (Vercel-project `apps/family`, DNS `familie` bij TransIP), secrets en Vault-regels (README, "Family mail"), een automatisch antwoord op hallo@ ("Knuffels stuur je via de familiepagina"), en zelf testen in Gmail en Apple Mail.
+
 **Stap 5 (19 oktober 2026): push, minimaal**
 
 Besluit eigenaar: pushmeldingen zijn bij de launch het absolute minimum, hooguit één per dag, niet bij elke interactie. Gebouwd: `private.push_tokens` (één rij per toestel; een gedeelde telefoon gaat over naar het account dat inlogt), `public.push_digest` (alleen om 19:00 Amsterdamse tijd, één per ouder per dag, knuffels van familie uit de laatste 24 uur, niet bij gepauzeerde paden, verwijderde momenten of als de ouder het uit heeft gezet), de functie `push` (APNs en FCM rechtstreeks, zonder Expo-pushdienst, tokens die Apple of Google afwijzen worden gewist), elk uur aangeroepen door pg_cron via pg_net met URL en geheim uit Vault. App: toestemming vragen op A4 na het eerste moment met één zin uitleg, toestel aanmelden bij elke start, afmelden bij uitloggen, tikken opent T6. 18 databasetests.
@@ -230,7 +238,7 @@ Alle tabellen hebben RLS aan; de rol `anon` mag niets. Tabellen met geheime code
 | `children` | `trail_id`, `first_name`, `birth_date` (leeg bij "Nog onderweg"), `due_date` (verplicht), `avatar_path`, `leap_cards_on` | |
 | `trail_parents` | `trail_id`, `user_id`, `joined_at` | Rol "ouder". |
 | `parent_invites` | `trail_id`, `email`, `sent_at`, `accepted_at` | Medeouder via e-mail; inloggen met dat adres = lid. |
-| `circle_members` (familie) | `id`, `trail_id`, `label` ("Oma Ria"), `relation` (oma, opa, oom, tante, vriend, vriendin, peetoom, peettante, anders; mag leeg), `email` (leeg bij "Liever niet"), `email_confirmed_at`, `email_frequency` (each/weekly/never, standaard weekly), `invited_at`, `joined_at`, `revoked_at`, `last_seen_at`, `book_list_at` | Relatie bij O3 (ouder) of F2 (familie). |
+| `circle_members` (familie) | `id`, `trail_id`, `label` ("Oma Ria"), `relation` (oma, opa, oom, tante, vriend, vriendin, peetoom, peettante, anders; mag leeg), `email` (leeg bij "Liever niet"), `email_confirmed_at`, `email_frequency` (weekly/never bij de launch; each bestaat voor later), `invited_at`, `joined_at`, `revoked_at`, `last_seen_at`, `book_list_at` | Relatie bij O3 (ouder) of F2 (familie). |
 | `private.access_keys` | `circle_member_id`, `kind` (invite, email_signin, image, unsubscribe), `token_hash`, `expires_at`, `revoked_at`, `email_id` | 32 willekeurige bytes, alleen de hash bewaard. |
 | `private.family_sessions` | `circle_member_id`, `token_hash`, `device_hint`, `created_at`, `last_used_on` (alleen datum), `revoked_at` | Max. 5 per persoon; "op 2 apparaten" in M3. |
 | `moments` | `id`, `trail_id`, `created_by`, `client_id` (uniek, tegen dubbelen), `trail_week`, `happened_on`, `caption`, `story`, `is_first`, `milestone_key`, `status`, `ready_at`, `deleted_at` | |
@@ -281,7 +289,7 @@ Alle tabellen hebben RLS aan; de rol `anon` mag niets. Tabellen met geheime code
 - Kaartjes via route `kaartjes`, tracking uit.
 - Familie krijgt pas kaartjes na "Bevestig je e-mailadres".
 - Per moment: 15 minuten nadat het moment klaar is.
-- Zondag (F8): versturen op zondagochtend Amsterdamse tijd; geen nieuwe momenten, geen mail.
+- Zondag (F8): versturen op zondag vanaf 20:00 Amsterdamse tijd (na het ouderseintje van 19:00); geen nieuwe momenten, geen mail.
 - Afmelden met één klik (`List-Unsubscribe`). Bounces en klachten zetten het adres op stop.
 - Foto's alleen als `family_may_keep_photos` aan staat, via `/e/<beeldcode>/<moment-id>.jpg`.
 

@@ -395,7 +395,11 @@ LANDING_ORIGIN = "http://localhost:8095"
 # Locally, confirmation mails go to Mailpit's send API; hosted, LETTERMINT_API_TOKEN is set instead.
 MAIL_DEV_URL = "http://host.docker.internal:55324"
 # Shared secret between pg_cron (Vault "cron_secret") and the scheduled functions (push, family-mail). Local only.
-CRON_SECRET = "local-push-secret"
+CRON_SECRET = "local-cron-secret"
+# Seals unsubscribe links in family mails (supabase/functions/_shared/mail.ts). Local only.
+MAIL_LINK_KEY = "local-mail-link-key"
+# Lets scripts/check-family-mail.mjs run the Sunday mail with a chosen "now". Never online.
+FAMILY_MAIL_TEST_CLOCK = "1"
 
 # Family has no account and no JWT: family-api checks its own session cookie.
 [functions.family-api]
@@ -407,6 +411,10 @@ verify_jwt = false
 
 # Called by pg_cron with its own secret header (supabase/functions/push).
 [functions.push]
+verify_jwt = false
+
+# The Sunday mail for family, called by pg_cron with the same secret header.
+[functions.family-mail]
 verify_jwt = false
 
 [analytics]

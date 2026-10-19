@@ -17,7 +17,9 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
   const name = page.child.firstName;
   const [label, setLabel] = useState(page.me.label);
   const [email, setEmail] = useState(page.me.email ?? '');
-  const [frequency, setFrequency] = useState<Frequency>(page.me.joined ? page.me.frequency : 'weekly');
+  // "Bij elk moment" isn't offered at launch: everyone gets the Sunday mail (F8).
+  const [frequency, setFrequency] = useState<Frequency>(page.me.joined && page.me.frequency === 'never' ? 'never' : 'weekly');
+  const [checkMail, setCheckMail] = useState(false);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -30,7 +32,8 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
     setError(undefined);
     setBusy(true);
     try {
-      await api.join(label, email, frequency);
+      const { confirm } = await api.join(label, email, frequency);
+      if (confirm) return setCheckMail(true);
       onSaved();
       navigate('/', true);
     } catch {
@@ -49,6 +52,32 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
     }
   }
 
+  // A new address: postcards only start after "Ja, dit is mijn adres" in the mail.
+  if (checkMail) {
+    return (
+      <Page background={color.butter}>
+        <Animated.View style={[styles.hug, { transform: bob }]}>
+          <Hug size={150} />
+        </Animated.View>
+        <Heading>Kijk even in je mail</Heading>
+        <Text style={styles.lead}>
+          We hebben je een mailtje gestuurd. Tik op de knop erin om je adres te bevestigen, dan krijg je elke zondag een kaartje. Staat het niet in je inbox? Kijk dan even in je spam.
+        </Text>
+        <View style={styles.action}>
+          <Button
+            block
+            onPress={() => {
+              onSaved();
+              navigate('/', true);
+            }}
+          >
+            {editing ? 'Terug naar de kaartjes' : `Open ${possessive(name)} pad`}
+          </Button>
+        </View>
+      </Page>
+    );
+  }
+
   return (
     <Page background={color.butter}>
       <Animated.View style={[styles.hug, { transform: bob }]}>
@@ -58,11 +87,8 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
       {editing ? null : <Text style={styles.lead}>Kijk mee met elk nieuw moment. Geen app, geen wachtwoord.</Text>}
       <TextField size="lg" label={`Hoe noemt ${name} jou?`} value={label} onChangeText={setLabel} maxLength={40} autoComplete="off" />
       <ChoiceGroup size="lg" label="Hoe vaak wil je een kaartje in je mail?">
-        <ChoiceChip selected={frequency === 'each'} onPress={() => setFrequency('each')}>
-          Bij elk moment
-        </ChoiceChip>
         <ChoiceChip selected={frequency === 'weekly'} onPress={() => setFrequency('weekly')}>
-          Eén keer per week
+          Elke zondag
         </ChoiceChip>
         <ChoiceChip selected={frequency === 'never'} onPress={() => setFrequency('never')}>
           Liever niet

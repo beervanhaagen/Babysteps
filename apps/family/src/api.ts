@@ -49,7 +49,9 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
 export const api = {
   claim: (code: string) => call<{ ok: true }>('/claim', { code }),
   page: (wide: boolean, skip = 0) => call<FamilyPage>(`/page?wide=${wide ? 1 : 0}${skip ? `&skip=${skip}` : ''}`),
-  join: (label: string, email: string, frequency: string) => call<{ ok: true }>('/join', { label, email, frequency }),
+  join: (label: string, email: string, frequency: string) => call<{ ok: true; confirm: boolean }>('/join', { label, email, frequency }),
+  confirm: (code: string) => call<{ ok: true }>('/confirm', { code }),
+  unsubscribe: (token: string) => call<{ ok: true }>(`/afmelden/${token}`, {}),
   hug: (moment: string) => call<{ mine: number; total: number }>('/hug', { moment }),
   bookList: () => call<{ ok: true }>('/book', {}),
   leave: () => call<{ ok: true }>('/leave', {}),

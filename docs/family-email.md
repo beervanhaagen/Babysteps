@@ -55,7 +55,7 @@ Status: decided, 17 Oct 2026, confirmed with the stack (Expo web on Vercel, Supa
 - **Page loads:** the family page and the image endpoint send `Referrer-Policy: no-referrer` and load nothing from third parties. Fonts, scripts and images are self-hosted, so no Google Fonts.
 - **E-mail provider:** Lettermint B.V. (EU: OVH France, UpCloud Netherlands), with a signed processing agreement, sending from `post.teddysteps.nl`. Two routes: `transactional` (login codes) and `kaartjes` (postcards, Sunday e-mail). **Click and open tracking are off** (Lettermint's default); check this on every route.
 - **No SDKs on the family page:** no crash or analytics SDK runs there; we log server-side errors only.
-- **Separate tokens:** unsubscribe and "Wijzig hoe vaak" links use their own single-purpose tokens, never the page token.
+- **Separate tokens:** the unsubscribe link is a sealed token (HMAC of the member id with `MAIL_LINK_KEY`, nothing stored, never expires) and can do nothing else; the "Bekijk en stuur een knuffel" button carries a 7-day `email_signin` key that a new link or revoking stops. Confirmation links (`/bevestig#<code>`) and page links keep the code after `#`, so it never reaches a server log. "Wijzig hoe vaak" is not in the mail at launch (one choice only).
 
 ## Honest limits
 

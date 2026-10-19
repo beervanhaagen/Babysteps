@@ -109,3 +109,17 @@ At most one push per parent per day: at 19:00 Amsterdam time, only when family s
 2. `npx supabase functions deploy push` ("Enforce JWT" off).
 3. Vault, once (SQL editor): `select vault.create_secret('https://<ref>.supabase.co/functions/v1/push', 'push_function_url'); select vault.create_secret('<the same CRON_SECRET>', 'cron_secret');`. Without these the hourly job does nothing.
 4. Test on a real phone with a development build: allow notifications on A4, let family hug, and at 19:00 one push arrives; tapping it opens Activiteit.
+
+## Family mail (step 7 at launch)
+
+Family who give an address on the family page (F2) get a confirmation mail first (`/bevestig#<code>`); after that, every Sunday from 20:00 Amsterdam time one text-only mail with the week's new moments, a personal 7-day link (`/m#<code>`, opens the trail after a tap) and one-click unsubscribe. No mail when nothing new was pinned. pg_cron calls the edge function `family-mail` hourly at :05; `public.family_sunday_mail` picks who and makes sure nobody gets two. Photos in the mail come with the parents' M6 switch (step 8).
+
+**Locally:** `node scripts/check-family-mail.mjs` runs the whole path against the local stack with Mailpit (it passes a Sunday evening as "now", which only works locally: `FAMILY_MAIL_TEST_CLOCK`).
+
+**Going live** (after the family page is online, see "Deploying the family page"):
+
+1. Secrets (dashboard → Edge Functions → Secrets): `MAIL_LINK_KEY` (`openssl rand -hex 32`), `CRON_SECRET` (shared with push), `FAMILY_ORIGIN=https://familie.teddysteps.nl`, `IP_HASH_KEY` (already there). Optionally `LETTERMINT_ROUTE` for a separate route. Never `FAMILY_MAIL_TEST_CLOCK` online.
+2. `npx supabase functions deploy family-api family-mail` ("Enforce JWT" off for both).
+3. Vault, once: `select vault.create_secret('https://<ref>.supabase.co/functions/v1/family-mail', 'family_mail_url');` (and `cron_secret` if not yet set for push).
+4. On hallo@teddysteps.nl, an auto-reply: replies to family mails land there ("Knuffels stuur je via de familiepagina").
+5. Test once in Gmail and Apple Mail: confirm an address, pin a moment, and on Sunday after 20:00 the mail arrives with working links.

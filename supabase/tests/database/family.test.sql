@@ -1,7 +1,7 @@
 -- Privacy tests for step 4: the circle, links, sessions and hugs. Run: npx supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(36);
+select plan(38);
 
 -- The same SHA-256 the edge function uses, for the steps that stand in for it.
 create function pg_temp.h(text) returns text language sql as $$ select encode(extensions.digest($1, 'sha256'), 'hex') $$;
@@ -75,7 +75,7 @@ select throws_ok(
   $$select * from public.family_hug((select member_id from invite), 'cccccccc-cccc-cccc-cccc-cccccccccccc')$$, '42501', null,
   'family cannot hug a moment of another trail'
 );
-select public.family_join((select member_id from invite), 'Oma Ria', 'ria@voorbeeld.nl', 'never');
+select is(public.family_join((select member_id from invite), 'Oma Ria', 'ria@voorbeeld.nl', 'never'), 'ok', '"Liever niet" needs no confirmation mail');
 select is((select email from public.circle_members where id = (select member_id from invite)), null, '"Liever niet" keeps no e-mail address');
 
 -- A session not used for more than 180 days has expired.
@@ -115,7 +115,7 @@ select is((select count(*) from public.family_member(pg_temp.h('s1'))), 0::bigin
 select is((select status from public.family_claim(pg_temp.h((select code from fresh)), pg_temp.h('s9'), null, '1.2.3.4', null)), 'ok', 'the new link works');
 
 -- Oma stops herself: out, and her address is gone.
-select public.family_join((select member_id from invite), 'Oma Ria', 'ria@voorbeeld.nl', 'weekly');
+select is(public.family_join((select member_id from invite), 'Oma Ria', 'ria@voorbeeld.nl', 'weekly'), 'confirm', 'a new address asks for a confirmation mail');
 select public.family_leave((select member_id from invite));
 select is((select count(*) from public.family_member(pg_temp.h('s9'))), 0::bigint, 'after leaving, the page is closed');
 select is((select email from public.circle_members where id = (select member_id from invite)), null, 'and no e-mail address stays behind');

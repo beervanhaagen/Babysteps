@@ -4,12 +4,17 @@ import { api, NoAccess as NoAccessError, TooManyDevices, type FamilyMoment, type
 import { usePath } from './route';
 import { Cards } from './views/Cards';
 import { Join } from './views/Join';
+import { ConfirmEmail, OpenFromMail, Unsubscribe } from './views/MailLinks';
 import { NoAccess, type Problem } from './views/NoAccess';
 import { Sent } from './views/Sent';
 import { Loading } from './views/shared';
 
 // The family page (F1 to F7) is one light web page without a router package: every
-// kilobyte counts on Oma's old phone. /j#<code> signs in once; then:
+// kilobyte counts on Oma's old phone. /j#<code> signs in once. Links in mails (step 7):
+//   /m#<code>          from the Sunday mail: opens the trail, after a tap on a new device
+//   /bevestig#<code>   "Ja, dit is mijn adres"
+//   /afmelden#<token>  no more Sunday mails
+// Then:
 //   /             F3 Kaartjes (or F2 first, until Oma has said who she is)
 //   /instellingen F2 again, to change name, e-mail or how often, or to stop
 //   /verstuurd    F4 after a hug
@@ -17,12 +22,18 @@ import { Loading } from './views/shared';
 // The code is read and removed from the address bar before React renders anything, so it
 // never ends up in history, screenshots or a forwarded link (docs/family-email.md). It stays
 // in memory until the claim worked, so "Probeer opnieuw" can use it after a dropped connection.
-let linkCode = (() => {
-  if (window.location.pathname !== '/j') return undefined;
+const startPath = window.location.pathname;
+const hashCode = (() => {
+  if (!['/j', '/m', '/bevestig', '/afmelden'].includes(startPath)) return undefined;
   const code = window.location.hash.slice(1);
-  window.history.replaceState(null, '', '/');
+  window.history.replaceState(null, '', startPath === '/j' || startPath === '/m' ? '/' : startPath);
   return code;
 })();
+let linkCode = startPath === '/j' ? hashCode : undefined;
+// The Sunday mail's code waits for a tap, so a mail scanner never takes one of the 5 device places.
+const mailCode = startPath === '/m' ? hashCode : undefined;
+// These pages need no session at all.
+const mailPage = startPath === '/bevestig' || startPath === '/afmelden';
 
 const WIDE = 900;
 const isWide = () => window.innerWidth >= WIDE;
@@ -52,7 +63,7 @@ function problemOf(error: unknown): Problem {
 }
 
 // Starts before fonts and React are ready.
-const first = linkCode === '' ? null : open();
+const first = linkCode === '' || mailPage ? null : open();
 
 export default function App() {
   const fontsReady = useTeddyFonts();
@@ -106,6 +117,19 @@ export default function App() {
   const onBookList = useCallback(() => setPage((current) => current && { ...current, me: { ...current.me, onBookList: true } }), []);
 
   if (!fontsReady) return <Loading />;
+  if (startPath === '/bevestig') return <ConfirmEmail code={hashCode ?? ''} />;
+  if (startPath === '/afmelden') return <Unsubscribe token={hashCode ?? ''} />;
+  // From the Sunday mail on a device that isn't in yet: one tap, then the trail.
+  if (problem && mailCode && !page) {
+    return (
+      <OpenFromMail
+        onOpen={async () => {
+          await api.claim(mailCode);
+          show(await api.page(isWide()));
+        }}
+      />
+    );
+  }
   if (problem) return <NoAccess reason={problem} onRetry={problem === 'offline' ? reload : undefined} />;
   if (!page) return <Loading />;
   if (!page.me.joined || path === '/instellingen') {

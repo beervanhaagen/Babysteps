@@ -5,6 +5,10 @@
 // through signed links that expire after 15 minutes; never a print version.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { ipHash } from '../_shared/ip.ts';
+import { button, COMPANY, frame, send, SIGN_OFF, unsubscribeMember } from '../_shared/mail.ts';
+
+// Supabase's edge runtime: work that may finish after the response has gone out.
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 // Locally SUPABASE_URL is Docker-internal; there PUBLIC_SUPABASE_URL is "relative" and photo
@@ -13,6 +17,8 @@ const PUBLIC_URL = Deno.env.get('PUBLIC_SUPABASE_URL') ?? SUPABASE_URL;
 const publicLink = (url: string) => (PUBLIC_URL === 'relative' ? url.slice(SUPABASE_URL.length) : url.replace(SUPABASE_URL, PUBLIC_URL));
 const ORIGINS = (Deno.env.get('FAMILY_ORIGIN') ?? '').split(',').map((o) => o.trim()).filter(Boolean);
 const service = createClient(SUPABASE_URL, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+// Links in mails go to the family page itself.
+const FAMILY_URL = ORIGINS[0] ?? 'https://familie.teddysteps.nl';
 
 const COOKIE = '__Host-ts';
 const SESSION_DAYS = 180;
@@ -112,12 +118,57 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
   };
 }
 
+/** F2: "Klopt dit adres?" Names no child and no label, so a typo in the address leaks nothing. */
+function confirmMail(code: string) {
+  const link = `${FAMILY_URL}/bevestig#${code}`;
+  const text = `Hoi!
+
+Iemand heeft dit adres opgegeven om elke zondag een kaartje van TeddySteps te krijgen. Was jij dat? Bevestig het hier:
+
+${link}
+
+Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we het adres na 7 dagen.
+
+Liefs, TeddySteps
+
+${COMPANY}`;
+  const html = frame(
+    'Bevestig je e-mailadres',
+    `<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#5E4D5C;">Nog één tik</p>
+<h1 style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:32px;font-weight:bold;color:#2D1E2F;">Klopt dit <i style="color:#7E2048;">adres?</i></h1>
+<p style="margin:0 0 22px;">Iemand heeft dit adres opgegeven om elke zondag een kaartje van TeddySteps te krijgen. Was jij dat? Tik dan op de knop.</p>
+${button(link, 'Ja, dit is mijn adres')}
+<p style="margin:22px 0 0;font-size:14px;line-height:21px;color:#5E4D5C;">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we het adres na 7 dagen.</p>
+${SIGN_OFF}`,
+    COMPANY,
+  );
+  return { subject: 'Bevestig je e-mailadres voor de kaartjes', text, html };
+}
+
 const sessionCookie = (token: string) => `${COOKIE}=${token}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`;
 
 Deno.serve(async (request) => {
   const route = new URL(request.url).pathname.split('/family-api')[1] || '/';
+  // One-click unsubscribe (RFC 8058): the mail app posts here itself, so no origin check, and the
+  // sealed token is all it takes. The family page's own button posts here too.
+  const unsubscribe = route.match(/^\/afmelden\/([0-9a-f-]{36}\.[0-9a-f]{32})$/);
+  if (unsubscribe && request.method === 'POST') {
+    const member = await unsubscribeMember(unsubscribe[1]);
+    if (!member) return json(404, { error: 'unknown link' });
+    await service.rpc('family_unsubscribe', { member });
+    return json(200, { ok: true });
+  }
+
   const body = request.method === 'POST' ? await request.json().catch(() => ({})) : {};
   if (request.method === 'POST' && !fromFamilyPage(request)) return json(403, { error: 'not from the family page' });
+
+  // "Ja, dit is mijn adres": works on any device, also without having opened the family link there.
+  if (route === '/confirm' && request.method === 'POST') {
+    const code = typeof body.code === 'string' ? body.code : '';
+    if (!/^[A-Za-z0-9_-]{20,100}$/.test(code)) return json(404, { error: 'unknown link' });
+    const { data } = await service.rpc('family_confirm_email', { code_hash: await sha256(code) });
+    return data === 'ok' ? json(200, { ok: true }) : json(404, { error: 'unknown link' });
+  }
 
   if (route === '/claim' && request.method === 'POST') {
     const code = typeof body.code === 'string' ? body.code : '';
@@ -155,8 +206,13 @@ Deno.serve(async (request) => {
     const email = typeof body.email === 'string' ? body.email.trim() : '';
     if (frequency !== 'never' && email && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) return json(422, { error: 'email' });
     const label = typeof body.label === 'string' ? body.label.trim().slice(0, 40) : '';
-    await service.rpc('family_join', { member: who.member, member_label: label, member_email: email, frequency });
-    return json(200, { ok: true });
+    const { data } = await service.rpc('family_join', { member: who.member, member_label: label, member_email: email, frequency });
+    if (data !== 'confirm') return json(200, { ok: true, confirm: false });
+    // A new address gets a confirmation mail first; postcards only go to confirmed addresses.
+    const code = newToken();
+    const { data: key } = await service.rpc('family_email_key', { member: who.member, code_hash: await sha256(code) });
+    if (key === 'ok') EdgeRuntime.waitUntil(send({ to: email.toLowerCase(), ...confirmMail(code) }).catch(() => false));
+    return json(200, { ok: true, confirm: true });
   }
 
   if (route === '/hug' && request.method === 'POST') {
