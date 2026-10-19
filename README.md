@@ -61,7 +61,7 @@ Vercel Hobby allows no commercial use. The owner keeps the page on Hobby while i
 
 ## Pre-registration (teddysteps.nl)
 
-"Hou me op de hoogte" and "Ik wil meetesten" are one plain form, without any script: it posts to `/api/aanmelden`, Vercel passes that to the edge function `supabase/functions/waitlist` (Frankfurt), and every answer is a redirect to a static page (`/aangemeld`, `/bevestigd`, …). Double opt-in: the mail links to `teddysteps.nl/bevestig/<code>` (the code in the path, only its hash stored), and that page has a "Ja" and a "wis" button, so a mail scanner opening the link confirms nothing. The link from the mail keeps working as a "wis mijn adres" link after confirming.
+"Hou me op de hoogte" and "Ik wil meetesten" are one plain form, without any script: it posts to `/api/aanmelden`, Vercel passes that to the edge function `supabase/functions/waitlist` (Supabase, Ireland), and every answer is a redirect to a static page (`/aangemeld`, `/bevestigd`, …). Double opt-in: the mail links to `teddysteps.nl/bevestig/<code>` (the code in the path, only its hash stored), and that page has a "Ja" and a "wis" button, so a mail scanner opening the link confirms nothing. The link from the mail keeps working as a "wis mijn adres" link after confirming.
 
 Stored in `private.waitlist` (not reachable through the Data API): the address, whether someone wants to test, and optionally the month the baby was born or is due (only for testers). Unconfirmed addresses go 7 days after the last mail, everyone after 12 months at the latest (`private.waitlist_cleanup`, daily via pg_cron). Limits: 5 attempts per IP per 10 minutes (IP only as an HMAC, kept an hour; it can be faked by calling the function directly), 300 attempts an hour, 150 confirmation mails a day, 3 mails per address.
 
@@ -78,8 +78,8 @@ npx supabase test db
 
 **Going live** (needs the hosted Supabase project and Lettermint):
 
-1. Supabase project in Frankfurt (Haagen Trade, two-factor). `npx supabase link`, `npx supabase db push`. Check `select jobname, schedule from cron.job;`.
-2. Secrets: `npx supabase secrets set IP_HASH_KEY=$(openssl rand -hex 32) LANDING_ORIGIN=https://teddysteps.nl LETTERMINT_API_TOKEN=… MAIL_FROM="TeddySteps <hallo@post.teddysteps.nl>"`. Never set `MAIL_DEV_URL` online. `family-api` needs `IP_HASH_KEY` too.
+1. Supabase project `TeddySteps` (ref `rzckkognfzjxlvymmgrr`, eu-west-1 Ireland; done 19 October). `npx supabase link`, `npx supabase db push`. Check `select jobname, schedule from cron.job;`.
+2. Secrets `IP_HASH_KEY` (`openssl rand -hex 32`), `LANDING_ORIGIN=https://teddysteps.nl`, `MAIL_FROM=TeddySteps <hallo@post.teddysteps.nl>` and `LETTERMINT_API_TOKEN`. **Careful:** `npx supabase secrets set` also uploads the local values under `[edge_runtime.secrets]` in `config.toml`; afterwards run `npx supabase secrets unset MAIL_DEV_URL PUBLIC_SUPABASE_URL FAMILY_ORIGIN` (or set tokens in the dashboard under Edge Functions → Secrets). Never leave `MAIL_DEV_URL` online. `family-api` needs `IP_HASH_KEY` too.
 3. `npx supabase functions deploy waitlist` (and `family-api`); in the dashboard "Enforce JWT" stays off for both.
 4. Lettermint: `post.teddysteps.nl` verified (SPF, DKIM, DMARC, return-path at TransIP), the project's default transactional route (slug `outgoing`; set `LETTERMINT_ROUTE` for another) with open and click tracking off (otherwise the confirmation link is rewritten) and "Hide email content" on, a token for this project only.
 5. Processing agreements with Supabase, Vercel and Lettermint.

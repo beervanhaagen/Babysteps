@@ -179,7 +179,8 @@ Besluiten:
 - Migraties: nieuwe bestanden krijgen een naam ná `20261021120000` (de bestaande namen liggen in de toekomst; anders weigert `db push`).
 
 Nog te doen:
-- **Online zetten** (eigenaar, zie README): Supabase-project in Frankfurt, Lettermint met `post.teddysteps.nl`, secrets, rewrites in `vercel.json`. Tot dan toont teddysteps.nl de mailknoppen.
+- **Regio (besluit eigenaar, 19 oktober):** het Supabase-project staat in Ierland (eu-west-1), niet in Frankfurt; ook EU. Teksten op teddysteps.nl zeggen "in de EU, in Ierland". Waar dit plan Frankfurt noemt, geldt nu Ierland.
+- **Online zetten** (eigenaar, zie README): Supabase-project (gekoppeld, database en functie `waitlist` staan online sinds 19 oktober), Lettermint met `post.teddysteps.nl`, secrets, rewrites in `vercel.json`. Tot dan toont teddysteps.nl de mailknoppen.
 - **Vercel Hobby:** met een aanmeldformulier wordt de pagina duidelijker commercieel (tech-architect); besluit eigenaar of dat het moment is voor Pro. Supabase Free pauzeert een project na een week zonder activiteit, en dan werkt het formulier stil niet meer.
 - **Jurist:** de uitgerekende maand verraadt een zwangerschap (mogelijk een gezondheidsgegeven), de grondslag (toestemming), de bewaartermijn.
 - **Later:** foto's in de app-schermen in plaats van de dieren (groei-advies; besluit eigenaar), een deelknop op `/bevestigd`.

@@ -104,7 +104,7 @@ Paper ground (`paper`), aubergine ink (`ink`) for all text and outlines, **blueb
 
 ## Working agreements
 
-- Stack chosen (2026-10-17): **Expo (React Native) for iOS, Android and the family web view, Supabase in Frankfurt, Lettermint for app mail**, push straight to APNs/FCM (not Expo's push service). The build plan in `docs/bouwplan.md` is approved, including all its advice and the decisions in its §10; build in its step order.
+- Stack chosen (2026-10-17): **Expo (React Native) for iOS, Android and the family web view, Supabase in the EU (project in Ireland, eu-west-1, chosen by the owner on 2026-10-19), Lettermint for app mail**, push straight to APNs/FCM (not Expo's push service). The build plan in `docs/bouwplan.md` is approved, including all its advice and the decisions in its §10; build in its step order.
 - Expo changes with every SDK (we're on SDK 58): check the versioned docs at docs.expo.dev instead of memory, add packages with `npx expo install`, and run the checks in `README.md` before calling a step done.
 - **Keep running costs as low as possible until the idea has traction**: use free tiers where they are safe and move to paid plans only when usage or safety (backups of real photos) needs it. Agreed: free tiers during the build and test phase; from the official launch Supabase Pro and Vercel Pro (about €39 a month together) are fine.
 - Photos: keep a print-quality version (about 3600px) by default; special moments may be stored larger.
