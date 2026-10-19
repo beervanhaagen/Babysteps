@@ -1,5 +1,5 @@
 import NetInfo from '@react-native-community/netinfo';
-import type { CalendarDate } from '@teddysteps/core';
+import { stripMetadata, type CalendarDate } from '@teddysteps/core';
 import { randomUUID } from 'expo-crypto';
 import { Directory, File, Paths } from 'expo-file-system';
 import { AppState } from 'react-native';
@@ -43,6 +43,8 @@ export interface QueuedMoment {
   nextTryAt?: string;
   /** Will never work (moment deleted elsewhere, refused by the server): X4 offers to remove it. */
   stuck?: boolean;
+  /** Stuck before the app stripped metadata itself (19 October 2026); gets one more try. */
+  retriedAfterMetadataFix?: boolean;
 }
 
 // Waits after failed attempts: 1, 2, 5, 15 minutes, then every hour.
@@ -91,6 +93,16 @@ function load(userId: string): Promise<void> {
     try {
       const index = indexOf(userId);
       items = index.exists ? (JSON.parse(await index.text()) as QueuedMoment[]).filter((q) => q.userId === userId) : [];
+      // The server refused iPhone photos for their small EXIF block until the app removed it
+      // before sending; those moments try once more, sending every file again.
+      for (const item of items) {
+        if (item.stuck && !item.retriedAfterMetadataFix) {
+          item.stuck = false;
+          item.retriedAfterMetadataFix = true;
+          item.attempts = 0;
+          for (const photo of item.photos) photo.sent = {};
+        }
+      }
       // Folders left behind by a crash while pinning, or by a moment that finished.
       const root = rootOf(userId);
       if (root.exists) {
@@ -170,8 +182,9 @@ const CONTENT: Record<Part, { bucket: 'view' | 'print'; type: string }> = {
 
 async function send(photo: QueuedPhoto, part: Part) {
   if (photo.sent?.[part]) return;
-  const body = await new File(photo[part]).arrayBuffer();
   const { bucket, type } = CONTENT[part];
+  // Metadata never leaves the phone (privacy promise); the server checks again.
+  const body = stripMetadata(new Uint8Array(await new File(photo[part]).arrayBuffer()), type);
   const { error } = await supabase.storage.from(bucket).upload(photo.paths![part], body, { contentType: type, upsert: true });
   if (error) throw classify(error);
   photo.sent = { ...photo.sent, [part]: true };

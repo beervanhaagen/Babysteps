@@ -100,6 +100,10 @@ npx supabase test db
 
 **Day to day:** export confirmed addresses (and testers by `baby_month`) from the table editor. Wipe someone by hand after a mail to hallo@: `delete from private.waitlist where email = lower(btrim('…'));`. After the launch mail (one per person, with a way to unsubscribe, no tracking), wipe the list. "limit reached" in the function logs means the limits are being hit.
 
+## Edge functions online
+
+All five must be deployed to the hosted project (`npx supabase functions deploy <name>`): `finish-upload` (without it no moment ever becomes visible), `family-api`, `family-mail`, `push` and `waitlist`. Check with `npx supabase functions list --project-ref rzckkognfzjxlvymmgrr`.
+
 ## Push (step 5, minimal)
 
 At most one push per parent per day: at 19:00 Amsterdam time, only when family sent hugs in the last 24 hours ("Oma Ria stuurde Lotte een knuffel", "Lotte kreeg vandaag 5 knuffels van Oma Ria en 2 anderen"). pg_cron calls the edge function `push` every hour; `public.push_digest` decides whether it's 19:00, writes the sentence and makes sure nobody gets two a day. The function delivers straight to Apple (APNs) and Google (FCM) and skips a platform whose keys aren't set. The app asks permission once, right after a pinned moment (A4), registers its own device token (`private.push_tokens`, unreadable from the app), unregisters on sign-out, and opens T6 when a push is tapped. Expo Go can't receive these pushes: test with an EAS development build.
