@@ -54,7 +54,7 @@ ${test}Verder mailen we je alleen als de app er is. Geen nieuwsbrief, geen recla
 
 Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we je adres na 7 dagen. Via dezelfde link kun je het ook meteen wissen.
 
-Liefs, Bo, Tiggy, Bizzy en Puddle
+Liefs, TeddySteps
 
 Haagen Trade · KvK 97569089 · hallo@teddysteps.nl`;
   // The TeddySteps look in what mail apps can show: tables and inline styles, no web fonts and
@@ -76,7 +76,7 @@ Haagen Trade · KvK 97569089 · hallo@teddysteps.nl`;
 ${wantsTest ? '<p style="margin:22px 0 0;padding:14px 16px;background:#D9CFF2;border:2px solid #2D1E2F;border-radius:16px;">Je wilt ook meetesten: wat fijn! We kiezen een klein groepje gezinnen. Zitten jullie erbij, dan mailen we je.</p>' : ''}
 <p style="margin:22px 0 0;">Verder mailen we je alleen als de app er is. Geen nieuwsbrief, geen reclame. Uiterlijk na 12 maanden wissen we je adres.</p>
 <p style="margin:14px 0 0;font-size:14px;line-height:21px;color:#5E4D5C;">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we je adres na 7 dagen. Op de pagina achter de knop kun je je adres ook meteen wissen.</p>
-<p style="margin:22px 0 0;font-family:'Comic Sans MS','Chalkboard SE',cursive;font-size:18px;color:#7E2048;">Liefs, Bo, Tiggy, Bizzy en Puddle</p>
+<p style="margin:22px 0 0;font-family:'Comic Sans MS','Chalkboard SE',cursive;font-size:18px;color:#7E2048;">Liefs, TeddySteps</p>
 </td></tr>
 <tr><td style="padding:18px 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5E4D5C;">Het eerste jaar gaat zo snel. Hou elk moment vast.<br>Haagen Trade · KvK 97569089 · hallo@teddysteps.nl</td></tr>
 </table>
