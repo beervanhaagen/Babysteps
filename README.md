@@ -81,7 +81,7 @@ npx supabase test db
 1. Supabase project in Frankfurt (Haagen Trade, two-factor). `npx supabase link`, `npx supabase db push`. Check `select jobname, schedule from cron.job;`.
 2. Secrets: `npx supabase secrets set IP_HASH_KEY=$(openssl rand -hex 32) LANDING_ORIGIN=https://teddysteps.nl LETTERMINT_API_TOKEN=… MAIL_FROM="TeddySteps <hallo@post.teddysteps.nl>"`. Never set `MAIL_DEV_URL` online. `family-api` needs `IP_HASH_KEY` too.
 3. `npx supabase functions deploy waitlist` (and `family-api`); in the dashboard "Enforce JWT" stays off for both.
-4. Lettermint: `post.teddysteps.nl` verified (SPF, DKIM, DMARC, return-path at TransIP), a route with slug `transactional`, open and click tracking off (otherwise the confirmation link is rewritten), a token for this project only.
+4. Lettermint: `post.teddysteps.nl` verified (SPF, DKIM, DMARC, return-path at TransIP), the project's default transactional route (slug `outgoing`; set `LETTERMINT_ROUTE` for another) with open and click tracking off (otherwise the confirmation link is rewritten) and "Hide email content" on, a token for this project only.
 5. Processing agreements with Supabase, Vercel and Lettermint.
 6. In `apps/landing/vercel.json`: add the rewrites below (with the project ref) and change `form-action 'none'` to `form-action 'self'` in the CSP. `npm run landing:build && npm run check:landing` must pass.
 

@@ -14,6 +14,8 @@ const LANDING = Deno.env.get('LANDING_ORIGIN') ?? 'https://teddysteps.nl';
 const LETTERMINT_TOKEN = Deno.env.get('LETTERMINT_API_TOKEN');
 const MAIL_DEV_URL = Deno.env.get('MAIL_DEV_URL');
 const FROM = Deno.env.get('MAIL_FROM') ?? 'TeddySteps <hallo@post.teddysteps.nl>';
+// The project's default transactional route in Lettermint (tracking off).
+const ROUTE = Deno.env.get('LETTERMINT_ROUTE') ?? 'outgoing';
 
 // Always a relative Location, so the browser stays on teddysteps.nl.
 const go = (page: string) => new Response(null, { status: 303, headers: { Location: page, 'Cache-Control': 'no-store' } });
@@ -76,7 +78,7 @@ async function send(to: string, mail: { subject: string; text: string; html: str
     const response = await fetch('https://api.lettermint.co/v1/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-lettermint-token': LETTERMINT_TOKEN },
-      body: JSON.stringify({ route: 'transactional', from: FROM, to: [to], reply_to: ['hallo@teddysteps.nl'], subject: mail.subject, text: mail.text, html: mail.html }),
+      body: JSON.stringify({ route: ROUTE, from: FROM, to: [to], reply_to: ['hallo@teddysteps.nl'], subject: mail.subject, text: mail.text, html: mail.html }),
     });
     return response.ok;
   }
