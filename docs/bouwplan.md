@@ -185,6 +185,13 @@ Nog te doen:
 - **Jurist:** de uitgerekende maand verraadt een zwangerschap (mogelijk een gezondheidsgegeven), de grondslag (toestemming), de bewaartermijn.
 - **Later:** foto's in de app-schermen in plaats van de dieren (groei-advies; besluit eigenaar), een deelknop op `/bevestigd`.
 
+**Echte omgeving ingericht (19 oktober 2026)**
+
+- Supabase `TeddySteps` (Ierland, ref `rzckkognfzjxlvymmgrr`): alle migraties, functies `waitlist`, `family-api`, `family-mail`, `push`, secrets en Vault-regels. Inloggen met een 6-cijferige code (10 minuten), Nederlandse codemail, Data API alleen `public` (`supabase config push`). Mail van Supabase Auth via Lettermint-SMTP (`smtp.lettermint.co:587`, gebruiker `lettermint`, token als wachtwoord), getest met een echte code.
+- Online: teddysteps.nl (landing en aanmelden) en familie.teddysteps.nl (familiepagina, `/api` naar `family-api`), beide getest op productie.
+- Apple: APNs-sleutel (sandbox en productie) in Supabase. Expo-project `@beervanhaagen/teddysteps` met `eas.json`; het distributiecertificaat wordt gedeeld met een ander project van de eigenaar en verloopt op 15 december 2026. "Sign In with Apple" staat uit tot het inlogscherm met Apple er is (dan `ios.usesAppleSignIn` aan).
+- Nog niet: Firebase (Android-push), een betaald Lettermint-plan (vóór de launch), automatisch antwoord op hallo@.
+
 **Stap 7 bij de launch (19 oktober 2026): de zondagmail F8, alleen tekst**
 
 Gebouwd (plan tech-architect): bevestigen van het familieadres (mail zonder kindnaam of label, knop op `familie.teddysteps.nl/bevestig#<code>`, eenmalig, 7 dagen, alleen voor het adres waarvoor hij gemaakt is, 3 per persoon en 200 per dag), de zondagmail (zondag vanaf 20:00, alleen bevestigde adressen, alleen als er die week momenten klaar zijn, één per persoon per week, rij eerst en dan de mail met een Idempotency-Key, herkansing elk uur tot middernacht), "Noor via TeddySteps" met "Hoi Oma Ria,", hooguit 5 momenten als tekst (bijschriften veilig), een persoonlijke 7-dagenlink (`/m#<code>`, opent pas na een tik), afmelden met één klik (`List-Unsubscribe` met verzegelde token), en het opruimen van onbevestigde adressen na 7 dagen. "Bij elk moment" is weg uit F2; wie dat had, krijgt de zondagmail. Mailcode gedeeld in `supabase/functions/_shared/mail.ts`. 25 databasetests en een eindtest (`scripts/check-family-mail.mjs`, 20 controles).
