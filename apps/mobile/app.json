@@ -46,6 +46,12 @@
           "cameraPermission": "Met de camera maak je meteen een foto voor een moment op het pad.",
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "knuffels"
+        }
       ]
     ],
     "experiments": {

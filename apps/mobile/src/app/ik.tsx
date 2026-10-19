@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Text } from 'react-native';
 import { Button, color, text } from '@teddysteps/ui';
 import { ComingSoon } from '@/components/ComingSoon';
+import { unregisterDevice } from '@/lib/push';
 import { clearQueue } from '@/lib/queue';
 import { supabase } from '@/lib/supabase';
 import { forgetPhotos, useQueue } from '@/lib/trail';
@@ -18,6 +19,7 @@ export default function Me() {
     const { data } = await supabase.auth.getSession();
     await clearQueue();
     if (data.session) await forgetPhotos(data.session.user.id);
+    await unregisterDevice();
     await supabase.auth.signOut();
   }
   return (

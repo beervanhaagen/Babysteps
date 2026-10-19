@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { color, useTeddyFonts } from '@teddysteps/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { listenForTaps, registerDevice } from '@/lib/push';
 import { startQueue } from '@/lib/queue';
 
 export default function RootLayout() {
@@ -25,6 +26,12 @@ function Routes() {
   const userId = state.status === 'ready' ? state.session.user.id : null;
   const trailId = state.status === 'ready' ? state.trail.id : null;
   useEffect(() => (userId && trailId ? startQueue(userId, trailId) : undefined), [userId, trailId]);
+  // The daily push (step 5): this device stays registered for this parent, and a tap opens T6.
+  useEffect(() => {
+    if (!userId) return undefined;
+    registerDevice().catch(() => undefined);
+    return listenForTaps();
+  }, [userId]);
   // Wait until we know who this is, so a link into the app isn't bounced while loading.
   if (status === 'loading') return null;
   return (

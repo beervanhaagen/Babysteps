@@ -98,3 +98,14 @@ npx supabase test db
 **Switching it off:** remove the rewrites and set `form-action` back to `'none'`; the form disappears and the mailto buttons return.
 
 **Day to day:** export confirmed addresses (and testers by `baby_month`) from the table editor. Wipe someone by hand after a mail to hallo@: `delete from private.waitlist where email = lower(btrim('…'));`. After the launch mail (one per person, with a way to unsubscribe, no tracking), wipe the list. "limit reached" in the function logs means the limits are being hit.
+
+## Push (step 5, minimal)
+
+At most one push per parent per day: at 19:00 Amsterdam time, only when family sent hugs in the last 24 hours ("Oma Ria stuurde Lotte een knuffel", "Lotte kreeg vandaag 5 knuffels van Oma Ria en 2 anderen"). pg_cron calls the edge function `push` every hour; `public.push_digest` decides whether it's 19:00, writes the sentence and makes sure nobody gets two a day. The function delivers straight to Apple (APNs) and Google (FCM) and skips a platform whose keys aren't set. The app asks permission once, right after a pinned moment (A4), registers its own device token (`private.push_tokens`, unreadable from the app), unregisters on sign-out, and opens T6 when a push is tapped. Expo Go can't receive these pushes: test with an EAS development build.
+
+**Going live:**
+
+1. Secrets on the hosted project (dashboard → Edge Functions → Secrets, so `config.toml` values aren't uploaded): `PUSH_CRON_SECRET` (`openssl rand -hex 32`), and once the accounts exist `APNS_KEY_P8` (the whole .p8 file), `APNS_KEY_ID`, `APNS_TEAM_ID`, `FCM_SERVICE_ACCOUNT` (the service-account JSON, role "Firebase Cloud Messaging API Admin" only).
+2. `npx supabase functions deploy push` ("Enforce JWT" off).
+3. Vault, once (SQL editor): `select vault.create_secret('https://<ref>.supabase.co/functions/v1/push', 'push_function_url'); select vault.create_secret('<the same PUSH_CRON_SECRET>', 'push_cron_secret');`. Without these the hourly job does nothing.
+4. Test on a real phone with a development build: allow notifications on A4, let family hug, and at 19:00 one push arrives; tapping it opens Activiteit.

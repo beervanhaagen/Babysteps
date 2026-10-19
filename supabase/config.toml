@@ -394,6 +394,8 @@ IP_HASH_KEY = "local-only-not-secret"
 LANDING_ORIGIN = "http://localhost:8095"
 # Locally, confirmation mails go to Mailpit's send API; hosted, LETTERMINT_API_TOKEN is set instead.
 MAIL_DEV_URL = "http://host.docker.internal:55324"
+# Shared secret between pg_cron (Vault "push_cron_secret") and the function `push`. Local only.
+PUSH_CRON_SECRET = "local-push-secret"
 
 # Family has no account and no JWT: family-api checks its own session cookie.
 [functions.family-api]
@@ -401,6 +403,10 @@ verify_jwt = false
 
 # The sign-up form on teddysteps.nl has no account either.
 [functions.waitlist]
+verify_jwt = false
+
+# Called by pg_cron with its own secret header (supabase/functions/push).
+[functions.push]
 verify_jwt = false
 
 [analytics]

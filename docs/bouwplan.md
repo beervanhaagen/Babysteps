@@ -185,6 +185,14 @@ Nog te doen:
 - **Jurist:** de uitgerekende maand verraadt een zwangerschap (mogelijk een gezondheidsgegeven), de grondslag (toestemming), de bewaartermijn.
 - **Later:** foto's in de app-schermen in plaats van de dieren (groei-advies; besluit eigenaar), een deelknop op `/bevestigd`.
 
+**Stap 5 (19 oktober 2026): push, minimaal**
+
+Besluit eigenaar: pushmeldingen zijn bij de launch het absolute minimum, hooguit één per dag, niet bij elke interactie. Gebouwd: `private.push_tokens` (één rij per toestel; een gedeelde telefoon gaat over naar het account dat inlogt), `public.push_digest` (alleen om 19:00 Amsterdamse tijd, één per ouder per dag, knuffels van familie uit de laatste 24 uur, niet bij gepauzeerde paden, verwijderde momenten of als de ouder het uit heeft gezet), de functie `push` (APNs en FCM rechtstreeks, zonder Expo-pushdienst, tokens die Apple of Google afwijzen worden gewist), elk uur aangeroepen door pg_cron via pg_net met URL en geheim uit Vault. App: toestemming vragen op A4 na het eerste moment met één zin uitleg, toestel aanmelden bij elke start, afmelden bij uitloggen, tikken opent T6. 18 databasetests.
+
+Bewust niet bij de launch: een melding per knuffel of bundelen per 10 minuten, de ochtendsamenvatting, het zondagseintje voor ouders (komt met M5 in stap 8), opnieuw proberen binnen de dag, de events `notification_permission` en `nudge_opened` (stap 10).
+
+Nog te doen (eigenaar): Apple Developer (App ID `nl.teddysteps.app` met Push en Sign in with Apple, APNs-sleutel .p8 met Key ID en Team ID), Firebase-project voor Android (Analytics uit, serviceaccount met alleen FCM), een Expo-account voor een development build, en de secrets en Vault-regels uit de README, "Push".
+
 **Toestemming wachtlijst**
 
 Bij bevestigen bewaart `private.waitlist` het tijdstip (`confirmed_at`) en de versie van de tekst (`consent_version`). Verandert een van de teksten hieronder inhoudelijk, dan krijgt de nieuwe tekst een nieuwe versie (in `waitlist_confirm`) en komt hij hier bij.

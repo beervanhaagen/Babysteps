@@ -1,18 +1,20 @@
 import { possessive } from '@teddysteps/core';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { border, Button, Character, color, fontFamily, IconButton, shadow, space, text } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 import { Photo } from '@/components/Photo';
 import { useAuth } from '@/lib/auth';
+import { askOnce, willAsk } from '@/lib/push';
 import { getQueue } from '@/lib/queue';
 import { useQueue } from '@/lib/trail';
 
 // A4 Vastgepind! A full-colour delight screen. It shows at once, also offline: the moment is
-// safe on the phone and the queue takes it from here. Sharing outside TeddySteps (SH2) and
-// the notification question come in later steps; who gets a postcard comes with family (step 4).
+// safe on the phone and the queue takes it from here. After the first moment, one line says what
+// notifications are for and the system question follows a second later (CLAUDE.md: no separate
+// permission screen). Sharing outside TeddySteps (SH2) comes in a later step.
 export default function Pinned() {
   const insets = useSafeAreaInsets();
   const { client } = useLocalSearchParams<{ client: string }>();
@@ -20,6 +22,20 @@ export default function Pinned() {
   const { online } = useQueue();
   // A snapshot: the queue may finish (and forget) this moment while we celebrate.
   const [moment] = useState(() => getQueue().find((q) => q.clientId === client));
+  const [asking, setAsking] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    willAsk().then((ask) => {
+      if (!alive || !ask) return;
+      setAsking(true);
+      timer = setTimeout(() => askOnce().catch(() => undefined), 1000);
+    });
+    return () => {
+      alive = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
   if (!moment || state.status !== 'ready') return <Redirect href="/pad" />;
 
   const name = state.trail.childName;
@@ -59,6 +75,7 @@ export default function Pinned() {
           {moment.isFirst ? 'Een eerste keer! Tiggy kwam kijken.' : `Het staat op ${possessive(name)} pad.`}
           {online ? '' : ' Het wacht veilig op je telefoon tot je weer verbinding hebt.'}
         </Text>
+        {asking ? <Text style={[styles.body, styles.center]}>Zet meldingen aan, dan hoor je ’s avonds wie er knuffelde.</Text> : null}
       </View>
       <View style={[styles.footer, { paddingBottom: space.space6 + insets.bottom }]}>
         <Button block variant="dark" onPress={toTrail}>
