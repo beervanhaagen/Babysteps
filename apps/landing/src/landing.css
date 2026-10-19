@@ -193,6 +193,10 @@ details.lp-faq p { margin: 0 0 14px; font-size: 16px; line-height: 25px; color: 
 /* For bots only: out of sight, out of the tab order, ignored by screen readers. */
 .lp-honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
+/* A note that must not be missed (the spam tip after signing up). */
+.lp-tip { background: var(--butter); border: var(--edge-bold) solid var(--ink); border-radius: var(--radius-l); box-shadow: var(--shadow-md); padding: var(--space-5) var(--space-6); display: flex; flex-direction: column; gap: var(--space-2); max-width: 560px; transform: rotate(-0.5deg); }
+.lp-tip p { font-size: 16px; line-height: 24px; }
+
 /* ---- 404 ---- */
 .lp-notfound { display: flex; flex-direction: column; gap: var(--space-6); padding-top: var(--space-7); padding-bottom: var(--lp-section); max-width: 840px; }
 

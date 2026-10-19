@@ -1,7 +1,7 @@
 -- Privacy tests for the pre-registration on teddysteps.nl. Run: npx supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(32);
+select plan(33);
 
 -- Nobody but the edge function (service role) gets in.
 set local role anon;
@@ -40,6 +40,9 @@ set local role service_role;
 select is(public.waitlist_signup('geen-adres', false, null, 'ip-5', 'code-5'), 'invalid', 'a broken address is refused');
 select is(public.waitlist_confirm('wrong'), 'invalid', 'a wrong code confirms nothing');
 select is(public.waitlist_confirm('code-1'), 'ok', 'the right code confirms');
+reset role;
+select is((select consent_version from private.waitlist where email = 'ria@voorbeeld.nl'), 'wachtlijst-v1', 'and records which wording was agreed to');
+set local role service_role;
 select is(public.waitlist_confirm('code-1'), 'invalid', 'and works only once');
 select is(public.waitlist_signup('ria@voorbeeld.nl', false, '2025-01-01', 'ip-6', 'code-6'), 'quiet', 'signing up a confirmed address again sends nothing');
 reset role;

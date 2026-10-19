@@ -185,6 +185,12 @@ Nog te doen:
 - **Jurist:** de uitgerekende maand verraadt een zwangerschap (mogelijk een gezondheidsgegeven), de grondslag (toestemming), de bewaartermijn.
 - **Later:** foto's in de app-schermen in plaats van de dieren (groei-advies; besluit eigenaar), een deelknop op `/bevestigd`.
 
+**Toestemming wachtlijst**
+
+Bij bevestigen bewaart `private.waitlist` het tijdstip (`confirmed_at`) en de versie van de tekst (`consent_version`). Verandert een van de teksten hieronder inhoudelijk, dan krijgt de nieuwe tekst een nieuwe versie (in `waitlist_confirm`) en komt hij hier bij.
+
+- **wachtlijst-v1** (19 oktober 2026). Formulier: "Je krijgt eerst een mailtje om te bevestigen. Daarna mailen we je alleen als de app er is, of om je te vragen voor een test. Geen nieuwsbrief, geen reclame. Uiterlijk na 12 maanden wissen we je adres." Knoppen "Hou me op de hoogte" of "Ik wil meetesten", met optioneel de maand van geboorte of uitgerekende datum. Mail: "Verder mailen we je alleen als de app er is. Geen nieuwsbrief, geen reclame. Uiterlijk na 12 maanden wissen we je adres." Bevestigingspagina: "Dan zet je jezelf op de lijst en hoor je het als eerste als TeddySteps er is." Knop "Ja, zet me op de lijst". Privacybelofte: teddysteps.nl/privacy#site.
+
 **Repo-indeling**
 
 ```

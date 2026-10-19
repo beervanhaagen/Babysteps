@@ -61,8 +61,12 @@ export const SIGNUP_PAGES = {
     character: 'bizzy',
     eyebrow: 'Nog één stap',
     heading: 'Kijk even in je <em>mailbox.</em>',
-    text: `<p class="lp-lead">We hebben je een mailtje gestuurd. Tik op de knop in het mailtje om je aanmelding te bevestigen. Zonder bevestiging wissen we je adres na 7 dagen.</p>
-<p class="lp-small">Niets gekregen? Kijk ook bij je ongewenste mail, of mail naar <a href="mailto:${CONTACT}">${CONTACT}</a>.</p>`,
+    text: `<p class="lp-lead">We hebben je een mailtje gestuurd. Tik op de knop in het mailtje om je aanmelding te bevestigen.</p>
+<div class="lp-tip">
+<p class="lp-h lp-h4">Niets in je inbox? Kijk even in je spam.</p>
+<p>We zijn nieuw, dus mailprogramma's kennen ons nog niet. Staat het mailtje bij je spam of ongewenste mail? Markeer het als "geen spam", dan komen we voortaan gewoon binnen.</p>
+</div>
+<p class="lp-small">Zonder bevestiging wissen we je adres na 7 dagen. Nog steeds niets? Mail naar <a href="mailto:${CONTACT}">${CONTACT}</a>.</p>`,
     actions: home,
   },
   bevestig: {

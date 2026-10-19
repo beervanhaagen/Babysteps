@@ -50,25 +50,38 @@ Wat leuk dat je erbij wilt zijn. Heb jij je met dit adres aangemeld? Open dan de
 
 ${link}
 
-${test}Verder mailen we je alleen als de app er is. Uiterlijk na 12 maanden wissen we je adres.
+${test}Verder mailen we je alleen als de app er is. Geen nieuwsbrief, geen reclame. Uiterlijk na 12 maanden wissen we je adres.
 
 Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we je adres na 7 dagen. Via dezelfde link kun je het ook meteen wissen.
 
-Groetjes,
-TeddySteps
+Liefs, Bo, Tiggy, Bizzy en Puddle
 
 Haagen Trade · KvK 97569089 · hallo@teddysteps.nl`;
-  const html = `<!doctype html><html lang="nl"><body style="margin:0;padding:24px;background:#F2ECE1;color:#2D1E2F;font:16px/1.5 system-ui,sans-serif">
-<div style="max-width:480px;margin:0 auto">
-<p style="font-size:20px;font-weight:800;margin:0 0 16px">Hoi!</p>
-<p>Wat leuk dat je erbij wilt zijn. Heb jij je met dit adres aangemeld? Tik dan op de knop, dan sta je op de lijst.</p>
-<p style="margin:24px 0"><a href="${link}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#3D6AE0;color:#FFFFFF;font-weight:800;text-decoration:none;border:2.5px solid #2D1E2F">Bevestig mijn aanmelding</a></p>
-${wantsTest ? '<p>Je wilt ook meetesten: wat fijn! We kiezen een klein groepje gezinnen. Zitten jullie erbij, dan mailen we je.</p>' : ''}
-<p>Verder mailen we je alleen als de app er is. Uiterlijk na 12 maanden wissen we je adres.</p>
-<p style="color:#5E4D5C;font-size:14px">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we je adres na 7 dagen. Via dezelfde link kun je het ook meteen wissen.</p>
-<p>Groetjes,<br>TeddySteps</p>
-<p style="color:#5E4D5C;font-size:12px">Haagen Trade · KvK 97569089 · hallo@teddysteps.nl</p>
-</div></body></html>`;
+  // The TeddySteps look in what mail apps can show: tables and inline styles, no web fonts and
+  // no images (an image loads from our server on every open, which is close to tracking).
+  // Colours are the design tokens: paper, ink, ink-muted, bluebird, lilac, rose, cornflower.
+  const html = `<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>Bevestig je aanmelding</title></head>
+<body style="margin:0;padding:0;background:#F2ECE1;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2ECE1;"><tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+<tr><td style="padding:0 4px 20px;font-family:'Arial Black',Arial,sans-serif;font-size:30px;line-height:1;font-weight:900;color:#FF6B8E;text-shadow:2px 2px 0 #7393E6;letter-spacing:-0.5px;">teddysteps</td></tr>
+<tr><td style="background:#FFFFFF;border:2px solid #2D1E2F;border-bottom-width:6px;border-radius:22px;padding:28px 24px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:#2D1E2F;">
+<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#5E4D5C;">Nog één tik</p>
+<h1 style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:32px;font-weight:bold;color:#2D1E2F;">Wat leuk dat je <i style="color:#7E2048;">erbij wilt zijn.</i></h1>
+<p style="margin:0 0 22px;">Heb jij je met dit adres aangemeld op teddysteps.nl? Tik dan op de knop, dan sta je op de lijst.</p>
+<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#3D6AE0;border:2.5px solid #2D1E2F;border-bottom-width:6px;border-radius:999px;">
+<a href="${link}" style="display:inline-block;padding:14px 28px;font-family:'Arial Black',Arial,sans-serif;font-size:17px;font-weight:900;color:#FFFFFF;text-decoration:none;">Ja, zet me op de lijst</a>
+</td></tr></table>
+${wantsTest ? '<p style="margin:22px 0 0;padding:14px 16px;background:#D9CFF2;border:2px solid #2D1E2F;border-radius:16px;">Je wilt ook meetesten: wat fijn! We kiezen een klein groepje gezinnen. Zitten jullie erbij, dan mailen we je.</p>' : ''}
+<p style="margin:22px 0 0;">Verder mailen we je alleen als de app er is. Geen nieuwsbrief, geen reclame. Uiterlijk na 12 maanden wissen we je adres.</p>
+<p style="margin:14px 0 0;font-size:14px;line-height:21px;color:#5E4D5C;">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we je adres na 7 dagen. Op de pagina achter de knop kun je je adres ook meteen wissen.</p>
+<p style="margin:22px 0 0;font-family:'Comic Sans MS','Chalkboard SE',cursive;font-size:18px;color:#7E2048;">Liefs, Bo, Tiggy, Bizzy en Puddle</p>
+</td></tr>
+<tr><td style="padding:18px 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5E4D5C;">Het eerste jaar gaat zo snel. Hou elk moment vast.<br>Haagen Trade · KvK 97569089 · hallo@teddysteps.nl</td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
   return { subject: 'Bevestig je aanmelding bij TeddySteps', text, html };
 }
 
