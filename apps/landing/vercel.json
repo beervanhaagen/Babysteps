@@ -4,13 +4,33 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/aanmelden",
+      "destination": "https://rzckkognfzjxlvymmgrr.supabase.co/functions/v1/waitlist/aanmelden"
+    },
+    {
+      "source": "/bevestig/:code",
+      "has": [
+        {
+          "type": "header",
+          "key": "content-type"
+        }
+      ],
+      "destination": "https://rzckkognfzjxlvymmgrr.supabase.co/functions/v1/waitlist/bevestig/:code"
+    },
+    {
+      "source": "/bevestig/:code",
+      "destination": "/bevestig"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
         },
         {
           "key": "Referrer-Policy",
