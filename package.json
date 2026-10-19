@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "mobile": "npm run start -w @teddysteps/mobile",
+    "mobile:live": "npm run live -w @teddysteps/mobile",
     "family": "npm run start -w @teddysteps/family",
     "family:dev": "node scripts/family-dev.mjs",
     "landing": "npm run start -w @teddysteps/landing",

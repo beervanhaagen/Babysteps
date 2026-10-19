@@ -23,6 +23,7 @@ npm install
 npx supabase start      # local database, auth and mail catcher (Docker Desktop must be running)
 npm run local-env       # points the app at it (writes apps/mobile/.env.local, not committed)
 npm run mobile          # parent app: scan the QR code with Expo Go on a phone on the same Wi-Fi
+npm run mobile:live     # the TeddySteps development build (not Expo Go) against the real Supabase in Ireland; no Docker needed
 npm run family          # family page (Expo web dev server on 8081)
 npm run family:dev      # the family page with its API on http://localhost:8090, as on familie.teddysteps.nl
 npm run landing         # builds teddysteps.nl and serves it on http://localhost:8095

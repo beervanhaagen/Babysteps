@@ -7,7 +7,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "live": "EXPO_PUBLIC_SUPABASE_URL=https://rzckkognfzjxlvymmgrr.supabase.co EXPO_PUBLIC_SUPABASE_KEY=sb_publishable_dm_BrmhhBH2pMYgUDp8Tsg_-S4ZaS6J EXPO_PUBLIC_FAMILY_URL=https://familie.teddysteps.nl expo start --dev-client"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
