@@ -1,8 +1,8 @@
-import { leapCard, longDutchDate, todayInAmsterdam, TRAIL_WEEKS, trailWeek } from '@teddysteps/core';
+import { firstLook, leapCard, longDutchDate, shortDutchDate, todayInAmsterdam, TRAIL_WEEKS, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Banner, Button, Character, color, EmptySlot, fontFamily, MomentCard, NextUp, space, text, useAnnounce } from '@teddysteps/ui';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Banner, border, Button, Character, color, FirstIcon, fontFamily, Icon, MomentCard, NextUp, radius, Segmented, space, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 import { Photo } from '@/components/Photo';
 import { TextLink } from '@/components/TextLink';
@@ -15,23 +15,28 @@ import { friendlyError } from '@/lib/errors';
 import { restoreMoment } from '@/lib/moments';
 import { useQueue, useTrailMoments, type TrailMoment } from '@/lib/trail';
 
-// T1 Pad, with X1 (empty trail), X2/X4 (uploads waiting or failed), the "Wat komt eraan" leap
-// card (copy in packages/core/src/leaps.ts, checked by child-development-reviewer) and, right
-// after T8 "Moment verwijderen", a way to bring it back.
+// T1 Pad (board "T1 · Trail home 2.0", spec "Pad 2.0"), with X1 (empty trail), X2/X4 (uploads
+// waiting or failed), the folded "Wat komt eraan" leap card (copy in packages/core/src/leaps.ts,
+// checked by child-development-reviewer) and, right after T8 "Moment verwijderen", a way back.
+// Two views: the timeline (weeks with straight cards) and the grid (every photo, by week).
 export default function Trail() {
   const { state } = useAuth();
   const { moments, source, refresh } = useTrailMoments();
   const { queue, online } = useQueue();
+  const [view, setView] = useState<'tijdlijn' | 'raster'>('tijdlijn');
+  const [leapOpen, setLeapOpen] = useState(false);
   if (state.status !== 'ready') return null;
   const { trail } = state;
   const today = todayInAmsterdam();
   const week = trail.birthDate ? trailWeek(trail.birthDate, today) : null;
   const leap = trail.birthDate && trail.leapCardsOn ? leapCard(trail.childName, trail.dueDate, trail.birthDate, today) : null;
+  // A moment still uploading shows in the upload status above, not twice.
+  const shown = moments.filter((m) => !m.queued || m.queued.stage === 'visible');
 
   return (
     <View style={styles.screen}>
       <TrailHeader childName={trail.childName} week={week ? `Week ${week} van ${TRAIL_WEEKS}` : null} />
-      {!week ? (
+      {!week || !trail.birthDate ? (
         <OnTheWay dueDate={longDutchDate(trail.dueDate, { weekday: false, year: true })} />
       ) : source === 'server' && !moments.length ? (
         <EmptyTrail week={week} />
@@ -46,34 +51,31 @@ export default function Trail() {
           ) : null}
           <Undo onRestored={refresh} />
           <UploadStatus queue={queue} online={online && source !== 'failed'} />
-          <View style={styles.timeline}>
-            <View style={styles.rail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-              <View style={styles.now} />
-              <View style={styles.line} />
-            </View>
-            <View style={styles.cards}>
-              {!moments.some((m) => m.trailWeek === week) ? (
-                <EmptySlot subtitle={`Week ${week} · voeg een moment toe`} onPress={() => router.push('/toevoegen')} />
-              ) : null}
-              {leap ? (
-                <NextUp
-                  title={leap.title}
-                  when={leap.when}
-                  items={[leap.notice, leap.capture]}
-                  tone="lilac"
-                  character={leap.kind === 'leap' ? 'tiggy' : undefined}
-                >
-                  {[leap.disclaimer, leap.safety].filter(Boolean).join(' ')}
-                </NextUp>
-              ) : null}
-              {/* A moment still uploading shows in the upload status above, not twice. */}
-              {moments
-                .filter((m) => !m.queued || m.queued.stage === 'visible')
-                .map((m, i) => (
-                  <Card key={m.key} moment={m} tilt={i % 2 ? 1 : -1.5} />
-                ))}
-            </View>
-          </View>
+          <Segmented
+            label="Weergave"
+            options={[
+              { value: 'tijdlijn', label: 'Tijdlijn', icon: 'timeline' },
+              { value: 'raster', label: 'Raster', icon: 'grid' },
+            ]}
+            value={view}
+            onChange={setView}
+          />
+          {leap ? (
+            <NextUp
+              title={leap.title}
+              when={leap.when}
+              summary={leap.kind === 'leap' && !leapOpen ? LEAP_SUMMARY : undefined}
+              items={[leap.notice, leap.capture]}
+              tone="lilac"
+              // The huisarts line stays visible, folded or not.
+              footnote={leap.safety ?? undefined}
+              open={leapOpen}
+              onToggle={() => setLeapOpen(!leapOpen)}
+            >
+              {leap.disclaimer}
+            </NextUp>
+          ) : null}
+          {view === 'tijdlijn' ? <Timeline moments={shown} week={week} birthDate={trail.birthDate} /> : <Grid moments={shown} birthDate={trail.birthDate} />}
         </ScrollView>
       )}
       <Tabs active="trail" />
@@ -81,20 +83,148 @@ export default function Trail() {
   );
 }
 
-function Card({ moment: m, tilt }: { moment: TrailMoment; tilt: number }) {
-  const title = (m.isFirst ? m.firstLabel : m.caption) ?? 'Een moment';
+/** The folded leap card's one line (board Trail-2-0, wording child-development-reviewer). Only on a
+ *  real leap, and hidden once open, where the disclaimer says the same. */
+const LEAP_SUMMARY = 'Een ruwe schatting, geen deadline. Het kan ook eerder, later of nauwelijks merkbaar zijn.';
+
+/** Moments by week, newest first. */
+function byWeek(moments: TrailMoment[]): [number, TrailMoment[]][] {
+  const weeks = new Map<number, TrailMoment[]>();
+  for (const m of moments) weeks.set(m.trailWeek, [...(weeks.get(m.trailWeek) ?? []), m]);
+  return [...weeks.entries()].sort((a, b) => b[0] - a[0]);
+}
+
+const countLine = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` : `${n} ${many}`);
+
+/** The day of the photo, or else the Dutch day it was pinned. */
+const dayOf = (m: TrailMoment) => shortDutchDate(m.happenedOn ?? todayInAmsterdam(new Date(m.createdAt)));
+
+function WeekHeading({ week, now, meta }: { week: number; now?: boolean; meta: string }) {
+  return (
+    <View style={styles.weekHeading}>
+      <View style={[styles.weekDot, now && styles.weekDotNow]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
+      <Text accessibilityRole="header" style={styles.weekLabel}>
+        {now ? `Week ${week} · nu` : `Week ${week}`}
+      </Text>
+      <Text style={styles.weekMeta}>{meta}</Text>
+    </View>
+  );
+}
+
+/** Tijdlijn: this week first (with a slot if it's still empty), then every week with moments. */
+function Timeline({ moments, week, birthDate }: { moments: TrailMoment[]; week: number; birthDate: CalendarDate }) {
+  const weeks = byWeek(moments);
+  if (!weeks.some(([w]) => w === week)) weeks.unshift([week, []]);
+  return (
+    <View style={styles.timeline}>
+      <View style={styles.rail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
+      {weeks.map(([w, list]) => (
+        <View key={w} style={styles.week}>
+          <WeekHeading week={w} now={w === week} meta={list.length ? `${weekSpan(birthDate, w)} · ${countLine(list.length, 'moment', 'momenten')}` : weekSpan(birthDate, w)} />
+          {list.length ? (
+            list.map((m, i) => <Card key={m.key} moment={m} layout={i === 0 || m.isFirst || m.photos.length > 1 ? 'large' : 'compact'} />)
+          ) : (
+            <EmptyWeek />
+          )}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** "Deze week is nog leeg!": a dashed slot that opens A1. */
+function EmptyWeek() {
+  const focus = useFocusRing();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Deze week is nog leeg. Moment toevoegen"
+      onPress={() => router.push('/toevoegen')}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={[styles.emptyWeek, focus.ring]}
+    >
+      <View style={styles.emptyPlus}>
+        <Icon name="plus" size={16} weight={3.2} color={color.onBluebird} />
+      </View>
+      <Text style={styles.emptyText}>Deze week is nog leeg!</Text>
+      <Text style={styles.emptyAction}>Toevoegen</Text>
+    </Pressable>
+  );
+}
+
+function Card({ moment: m, layout }: { moment: TrailMoment; layout: 'large' | 'compact' }) {
+  const first = m.isFirst && m.firstLabel ? { label: m.firstLabel, ...firstLook(m.firstLabel) } : undefined;
+  const photos = layout === 'large' ? m.photos.slice(0, 3) : m.photos.slice(0, 1);
   return (
     <MomentCard
-      week={`Week ${m.trailWeek}`}
-      caption={title}
-      note={m.isFirst && m.caption ? m.caption : undefined}
-      photo={<Photo source={m.photos[0]?.small} />}
-      alt={m.caption ?? title}
-      firstBadge={m.isFirst ? 'Eerste keer!' : undefined}
-      tilt={tilt}
+      layout={layout}
+      // The large first photo fills the card's width, so it takes the sharper view version.
+      photos={photos.map((p, i) => (
+        <Photo key={i} source={layout === 'large' && i === 0 ? p.view : p.small} />
+      ))}
+      photoCount={m.photos.length}
+      alt={m.photos.length === 1 ? 'Foto' : `${m.photos.length} foto’s`}
+      caption={m.caption ?? (first ? null : 'Een moment')}
+      first={first}
+      date={dayOf(m)}
       hugs={m.hugs || undefined}
+      context={`Week ${m.trailWeek}`}
       onPress={m.momentId ? () => router.push(`/moment/${m.momentId}`) : undefined}
     />
+  );
+}
+
+/** Raster: every photo by week, three in a row; a first shows its icon on its first photo. */
+function Grid({ moments, birthDate }: { moments: TrailMoment[]; birthDate: CalendarDate }) {
+  const { width } = useWindowDimensions();
+  const cell = Math.floor((Math.min(width - space.space5 * 2, 342) - border.edge * 2 - 6) / 3);
+  return (
+    <View style={styles.grid}>
+      {byWeek(moments).map(([w, list]) => {
+        const count = list.reduce((n, m) => n + m.photos.length, 0);
+        return (
+          <View key={w} style={styles.gridWeek}>
+            <View style={styles.gridHeading}>
+              <Text accessibilityRole="header" style={styles.weekLabel}>
+                Week {w}
+              </Text>
+              <Text style={styles.weekMeta}>{`${weekSpan(birthDate, w)} · ${countLine(count, 'foto', 'foto’s')}`}</Text>
+            </View>
+            <View style={styles.gridPhotos}>
+              {list.flatMap((m) =>
+                m.photos.map((p, i) => (
+                  <GridPhoto key={`${m.key}-${i}`} moment={m} index={i} source={p.small} size={cell} />
+                )),
+              )}
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function GridPhoto({ moment: m, index, source, size: side }: { moment: TrailMoment; index: number; source: TrailMoment['photos'][number]['small']; size: number }) {
+  const focus = useFocusRing();
+  const first = m.isFirst && m.firstLabel && index === 0 ? firstLook(m.firstLabel) : null;
+  const label = [first ? `Eerste keer: ${m.firstLabel}` : null, m.caption, `foto ${index + 1} van ${m.photos.length}`].filter(Boolean).join(', ');
+  return (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={label}
+      onPress={m.momentId ? () => router.push(`/moment/${m.momentId}`) : undefined}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={[{ width: side, height: side }, styles.gridPhoto, focus.ring]}
+    >
+      <Photo source={source} />
+      {first ? (
+        <View style={styles.gridFirst}>
+          <FirstIcon icon={first.icon} tone={first.tone} size={26} iconSize={16} />
+        </View>
+      ) : null}
+    </Pressable>
   );
 }
 
@@ -180,12 +310,46 @@ function OnTheWay({ dueDate }: { dueDate: string }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
   content: { paddingTop: 2, paddingHorizontal: space.space5, paddingBottom: space.space6, gap: space.space4 },
-  timeline: { flexDirection: 'row', gap: 14 },
-  rail: { width: 18, alignItems: 'center' },
-  now: { width: 18, height: 18, borderRadius: 9, borderWidth: 2.5, borderColor: color.ink, backgroundColor: color.tangerine },
-  // A 0-wide box with a dotted border all round: one-sided dotted borders draw unreliably on phones.
-  line: { flex: 1, width: 0, borderWidth: 1.5, borderStyle: 'dotted', borderColor: color.ink },
-  cards: { flex: 1, gap: 14 },
+  // The dotted line down the weeks: a 0-wide box with a dotted border all round, because one-sided
+  // dotted borders draw unreliably on phones.
+  timeline: { position: 'relative', paddingLeft: 26, gap: 18 },
+  rail: { position: 'absolute', left: 6, top: 10, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink },
+  week: { gap: 14 },
+  weekHeading: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  weekDot: { position: 'absolute', left: -26, top: 2, width: 14, height: 14, borderRadius: 7, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.white },
+  weekDotNow: { backgroundColor: color.tangerine },
+  weekLabel: { ...text('eyebrow'), fontSize: 12, textTransform: 'uppercase' },
+  weekMeta: { ...text('meta'), fontSize: 13, color: color.inkMuted },
+  emptyWeek: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 52,
+    paddingHorizontal: 12,
+    borderRadius: radius.radiusM,
+    borderWidth: border.edge,
+    borderStyle: 'dashed',
+    borderColor: color.ink,
+  },
+  emptyPlus: { width: 32, height: 32, borderRadius: 16, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.bluebird, alignItems: 'center', justifyContent: 'center' },
+  emptyText: { flex: 1, fontFamily: fontFamily('sans', 800), fontSize: 14, color: color.ink },
+  emptyAction: { ...text('meta'), fontSize: 13, color: color.inkMuted },
+  grid: { gap: 10 },
+  gridWeek: { gap: 10, marginTop: 6 },
+  gridHeading: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  gridPhotos: {
+    maxWidth: 342,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 3,
+    borderRadius: radius.radiusM,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    overflow: 'hidden',
+    backgroundColor: color.white,
+  },
+  gridPhoto: { backgroundColor: color.lilac },
+  gridFirst: { position: 'absolute', left: 6, bottom: 6 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, paddingHorizontal: space.space6, paddingBottom: 12 },
   centerText: { textAlign: 'center' },
   body: { fontFamily: fontFamily('sans', 400), fontSize: 16, lineHeight: 24, color: color.ink },

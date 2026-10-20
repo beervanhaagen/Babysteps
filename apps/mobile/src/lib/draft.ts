@@ -9,9 +9,11 @@ export interface Draft {
   isFirst: boolean;
   /** Chosen via "Oudere weken": A3 starts at the week of the photos. */
   olderWeek: boolean;
+  /** Picked or typed on A3b "Welke eerste keer?". */
+  firstLabel: string;
 }
 
-const EMPTY: Draft = { photos: [], isFirst: false, olderWeek: false };
+const EMPTY: Draft = { photos: [], isFirst: false, olderWeek: false, firstLabel: '' };
 let draft = EMPTY;
 const listeners = new Set<() => void>();
 
@@ -41,7 +43,32 @@ export function useDraft(): Draft {
 export async function startMoment(kind: 'photos' | 'first' | 'older', how: 'push' | 'replace' = 'push'): Promise<boolean> {
   const photos = await pickPhotos(MAX_PHOTOS);
   if (!photos.length) return false;
-  setDraft({ photos, isFirst: kind === 'first', olderWeek: kind === 'older' });
+  setDraft({ photos, isFirst: kind === 'first', olderWeek: kind === 'older', firstLabel: '' });
   router[how]('/fotos');
   return true;
+}
+
+// A3b while editing a moment that is already on the trail (T8 → Bijschrift): the choice, by moment.
+let editPick: { momentId: string; label: string } | null = null;
+const pickListeners = new Set<() => void>();
+
+export function pickFirstFor(momentId: string, label: string) {
+  editPick = { momentId, label };
+  pickListeners.forEach((listener) => listener());
+}
+
+/** The first picked on A3b for this moment since the edit screen opened, if any. */
+export function usePickedFirst(momentId: string): string | undefined {
+  const pick = useSyncExternalStore(
+    (listener) => {
+      pickListeners.add(listener);
+      return () => pickListeners.delete(listener);
+    },
+    () => editPick,
+  );
+  return pick?.momentId === momentId ? pick.label : undefined;
+}
+
+export function forgetPickedFirst() {
+  editPick = null;
 }

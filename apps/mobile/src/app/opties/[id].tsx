@@ -1,25 +1,24 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
-import { border, color, ListRow, radius, Switch, text, useAnnounce } from '@teddysteps/ui';
+import { border, color, ListRow, radius, text, useAnnounce } from '@teddysteps/ui';
 import { Photo } from '@/components/Photo';
 import { Screen } from '@/components/Screen';
 import { friendlyError } from '@/lib/errors';
 import { useCircle } from '@/lib/family';
-import { deleteMoment, saveToPhone, updateMoment } from '@/lib/moments';
+import { deleteMoment, saveToPhone } from '@/lib/moments';
 import { useTrailMoments } from '@/lib/trail';
 
-// T8 Moment-opties (board Trail-8): change the words or the week, keep it out of the book, see who
-// can see it, keep the photo on the phone, or delete it (back within 30 days, on the trail's banner
+// T8 Moment-opties (board Trail-8): change the words or the week, see who can see it, keep the
+// photo on the phone, or delete it (back within 30 days, on the trail's banner
 // or under Ik → Onlangs verwijderd). No visibility per moment at launch: the whole circle sees
-// every moment. A full page rather than the board's sheet, because edit and week open from here.
+// every moment. No "In het jaarboek" while the book is out of the MVP. A full page rather than the board's sheet, because edit and week open from here.
 export default function MomentOptions() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { moments, refresh } = useTrailMoments();
+  const { moments } = useTrailMoments();
   const { members } = useCircle();
   const m = moments.find((x) => x.momentId === id);
-  const [inBook, setInBook] = useState<boolean>();
-  const [busy, setBusy] = useState<'book' | 'save' | 'delete' | null>(null);
+  const [busy, setBusy] = useState<'save' | 'delete' | null>(null);
   const [message, setMessage] = useState<string>();
   useAnnounce(message);
   if (!m) {
@@ -33,23 +32,6 @@ export default function MomentOptions() {
   const watching = (members ?? []).filter((c) => c.joinedAt).length;
   const title = (m.isFirst ? m.firstLabel : m.caption) || 'Een moment';
   const short = title.length > 40 ? `${title.slice(0, 38).trimEnd()}…` : title;
-  const bookValue = inBook ?? m.inBook;
-
-  // The switch flips at once; if saving fails, it flips back.
-  async function toggleBook(next: boolean) {
-    if (busy) return;
-    setBusy('book');
-    setInBook(next);
-    setMessage(undefined);
-    try {
-      await updateMoment(m!, { caption: m!.caption ?? '', trailWeek: m!.trailWeek, isFirst: m!.isFirst, firstLabel: m!.firstLabel ?? '', inBook: next });
-      await refresh();
-    } catch (e) {
-      setInBook(!next);
-      setMessage(friendlyError(e));
-    }
-    setBusy(null);
-  }
 
   async function save() {
     if (busy) return;
@@ -99,12 +81,6 @@ export default function MomentOptions() {
       <View>
         <ListRow icon="edit" title="Bijschrift aanpassen" onPress={() => router.push(`/bewerken/${id}`)} />
         <ListRow icon="trail" title="Naar een andere week" subtitle={`Staat nu bij week ${m.trailWeek}`} onPress={() => router.push(`/week/${id}`)} />
-        <Switch
-          label="In het jaarboek"
-          hint={bookValue ? 'Dit moment komt in het boek.' : 'Dit moment blijft op het pad, maar niet in het boek.'}
-          value={bookValue}
-          onValueChange={toggleBook}
-        />
         <ListRow
           icon="family"
           title="Wie dit kan zien"

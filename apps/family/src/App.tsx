@@ -114,7 +114,6 @@ export default function App() {
     );
   }, [page]);
 
-  const onBookList = useCallback(() => setPage((current) => current && { ...current, me: { ...current.me, onBookList: true } }), []);
 
   if (!fontsReady) return <Loading />;
   if (startPath === '/bevestig') return <ConfirmEmail code={hashCode ?? ''} />;
@@ -135,6 +134,6 @@ export default function App() {
   if (!page.me.joined || path === '/instellingen') {
     return <Join page={page} editing={page.me.joined} onSaved={reload} onLeft={() => setProblem('left')} />;
   }
-  if (path === '/verstuurd') return <Sent page={page} onBookList={onBookList} />;
-  return <Cards page={page} onHugged={hugged} onOlder={older} onBookList={onBookList} />;
+  if (path === '/verstuurd') return <Sent />;
+  return <Cards page={page} onHugged={hugged} onOlder={older} />;
 }

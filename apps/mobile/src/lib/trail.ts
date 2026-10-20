@@ -27,7 +27,7 @@ export interface TrailMoment {
   firstLabel: string | null;
   happenedOn: CalendarDate | null;
   createdAt: string;
-  /** T8 "In het jaarboek"; the book (B1) counts only these. */
+  /** "In het jaarboek" (kept in the database; the switch returns with the book, after the MVP). */
   inBook: boolean;
   photos: MomentPhoto[];
   /** Hugs from family (T1, T2). */

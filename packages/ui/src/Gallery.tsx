@@ -141,8 +141,8 @@ export function Gallery({ topInset = 0, bottomInset = 0 }: { topInset?: number; 
               <PersonRow name="Oma Ria" role="Familie · kijkt, knuffelt, spreekt in" action="Wijzig" />
               <PersonRow name="Opa Henk" role="Uitnodiging 2 dagen geleden verstuurd" tone="butter" action="Opnieuw sturen" />
             </View>
-            <MomentCard week="Week 28" caption="Zelf rechtop gezeten" note="Heel trots op zichzelf." hugs={4} />
-            <MomentCard week="Week 31" caption="Geklapt. Nergens om." tint="pistachio" character="tiggy" hugs={9} tilt={1.5} peek="bizzy" onPress={() => {}} />
+            <MomentCard photos={[]} caption="Drie hele seconden lang. Toen omgerold, met stijl." date="za 17 okt" hugs={9} />
+            <MomentCard photos={[]} layout="compact" caption="Klapte. Nergens om." date="wo 14 okt" hugs={6} onPress={() => {}} />
             <HugToast title="Oma Ria stuurde een knuffel">Bij week 31: geklapt</HugToast>
             <EmptySlot />
           </Section>

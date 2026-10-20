@@ -89,3 +89,26 @@ export function ageLine(birth: CalendarDate, today: CalendarDate): string {
   const birthday = td === birthdayThisMonth;
   return birthday ? `Vandaag ${months} maanden!` : `${months} maanden`;
 }
+
+// Short Dutch names, written out so every platform says the same (Intl adds dots on some).
+const MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+const WEEKDAYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+
+function addDays(date: CalendarDate, days: number): Date {
+  const [y, m, d] = date.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days));
+}
+
+/** "za 17 okt", under a moment on the trail. */
+export function shortDutchDate(date: CalendarDate): string {
+  const day = addDays(date, 0);
+  return `${WEEKDAYS[day.getUTCDay()]} ${day.getUTCDate()} ${MONTHS[day.getUTCMonth()]}`;
+}
+
+/** The days of a trail week: "12 – 18 okt", or "28 sep – 4 okt" across a month. */
+export function weekSpan(birthDate: CalendarDate, week: number): string {
+  const from = addDays(birthDate, (week - 1) * 7);
+  const to = addDays(birthDate, (week - 1) * 7 + 6);
+  const sameMonth = from.getUTCMonth() === to.getUTCMonth();
+  return `${from.getUTCDate()}${sameMonth ? '' : ` ${MONTHS[from.getUTCMonth()]}`} – ${to.getUTCDate()} ${MONTHS[to.getUTCMonth()]}`;
+}

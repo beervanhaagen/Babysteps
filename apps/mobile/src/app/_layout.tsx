@@ -53,6 +53,7 @@ function Routes() {
         <Stack.Screen name="toevoegen" options={{ presentation: 'transparentModal', animation: 'fade' }} />
         <Stack.Screen name="fotos" />
         <Stack.Screen name="details" />
+        <Stack.Screen name="eerste-keer" />
         <Stack.Screen name="vastgepind" options={{ gestureEnabled: false }} />
         <Stack.Screen name="moment/[id]" />
         <Stack.Screen name="opties/[id]" />
@@ -65,7 +66,6 @@ function Routes() {
         <Stack.Screen name="uitnodiging/[id]" />
         <Stack.Screen name="kring/[id]" />
         <Stack.Screen name="activiteit" />
-        <Stack.Screen name="boek" options={{ animation: 'none' }} />
         <Stack.Screen name="familie" options={{ animation: 'none' }} />
         <Stack.Screen name="ik" options={{ animation: 'none' }} />
       </Stack.Protected>

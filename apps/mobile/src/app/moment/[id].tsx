@@ -1,9 +1,9 @@
-import { longDutchDate, todayInAmsterdam } from '@teddysteps/core';
+import { firstLook, longDutchDate, todayInAmsterdam } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { border, Button, Character, color, FirstBadge, fontFamily, Icon, IconButton, size, text } from '@teddysteps/ui';
+import { border, Button, Character, color, FirstLabel, fontFamily, Icon, IconButton, size, text } from '@teddysteps/ui';
 import { Photo } from '@/components/Photo';
 import { Tabs } from '@/components/Tabs';
 import { useTrailMoments } from '@/lib/trail';
@@ -24,10 +24,11 @@ export default function Moment() {
 
   // The day of the photo, or else the Dutch day it was pinned.
   const day = m ? longDutchDate(m.happenedOn ?? todayInAmsterdam(new Date(m.createdAt))) : '';
-  // A short caption can be the heading; a long one reads better as text under a plain heading.
+  // The parent's line is the heading (Pad 2.0); a long one reads better as text under a plain
+  // heading. A first shows as a label above it.
   const longCaption = !!m?.caption && m.caption.length > 60;
-  const title = m ? (m.isFirst ? m.firstLabel : longCaption ? null : m.caption) ?? `Een moment uit week ${m.trailWeek}` : '';
-  const story = m?.caption && (m.isFirst || longCaption) ? m.caption : null;
+  const title = m ? ((longCaption ? null : m.caption) ?? (m.isFirst ? m.firstLabel : null) ?? `Een moment uit week ${m.trailWeek}`) : '';
+  const story = longCaption ? m!.caption : null;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -62,7 +63,6 @@ export default function Moment() {
                 </View>
               ))}
             </ScrollView>
-            {m.isFirst ? <FirstBadge size="lg" label="Eerste keer!" /> : null}
           </View>
           {m.photos.length > 1 ? (
             <View style={styles.dots} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
@@ -71,7 +71,8 @@ export default function Moment() {
               ))}
             </View>
           ) : null}
-          <View>
+          <View style={styles.heading}>
+            {m.isFirst && m.firstLabel && title !== m.firstLabel ? <FirstLabel label={m.firstLabel} {...firstLook(m.firstLabel)} /> : null}
             <Text accessibilityRole="header" style={text('titleL')}>
               {title}
             </Text>
@@ -112,6 +113,7 @@ export default function Moment() {
 }
 
 const styles = StyleSheet.create({
+  heading: { gap: 8 },
   screen: { flex: 1, backgroundColor: color.paper },
   bar: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, paddingHorizontal: 10 },
   week: { fontFamily: fontFamily('sans', 800), fontSize: 16, color: color.ink },

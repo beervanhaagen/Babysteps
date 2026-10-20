@@ -87,11 +87,12 @@ export function ScreenHeader({ title, subtitle, onBack, step, color: band = 'lil
   );
 }
 
-export type TabId = 'trail' | 'book' | 'family' | 'me';
+export type TabId = 'trail' | 'family' | 'me';
 
+// The year book is out of the MVP (owner, 20 October 2026), so its tab is too: the trail and
+// the family left of the +, you on the right.
 const TABS: { id: TabId; label: string; icon: IconName }[] = [
   { id: 'trail', label: 'Pad', icon: 'trail' },
-  { id: 'book', label: 'Boek', icon: 'book' },
   { id: 'family', label: 'Familie', icon: 'family' },
   { id: 'me', label: 'Ik', icon: 'me' },
 ];

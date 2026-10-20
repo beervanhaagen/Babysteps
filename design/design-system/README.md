@@ -8,7 +8,7 @@ The reference components here are DOM React. The app and the family page use a R
 
 Differences in the React Native version:
 
-- Events and state: `onPress` instead of `onClick` or `href`. `ChoiceChip` (`selected`) and `Switch` (`value`, `onValueChange`) are controlled. `ScreenHeader` takes `onBack` instead of `back`, plus `topInset`; `TabBar` takes `bottomInset`. `MomentCard` takes an image `source` instead of `src`.
+- Events and state: `onPress` instead of `onClick` or `href`. `ChoiceChip` (`selected`) and `Switch` (`value`, `onValueChange`) are controlled. `ScreenHeader` takes `onBack` instead of `back`, plus `topInset`; `TabBar` takes `bottomInset`. `MomentCard` takes rendered `photos` (expo-images) instead of `src`/`photos` urls, plus `layout` (`large` or `compact`), `first` and `date`.
 - Drawing: react-native-svg in the app, plain `<svg>` on the family page. Motion uses React Native's `Animated`, not CSS keyframes, and still stops under reduced motion.
 - The crayon-grain filter is not rendered yet (planned: on the web as an SVG filter, in the app as baked images).
 
@@ -57,7 +57,9 @@ One theme, **Paper**. Never hard-code a hex; use the tokens.
 ## Shape, edge and depth
 
 - **Stickers.** Anything you can press or collect has an ink edge (`edge-bold` on buttons, `edge` on cards and fields) and a hard drop: `shadow-lg` on 58px buttons, `shadow-md` on cards, `shadow-sm` on week stickers. Pressing moves it 3px down into its shadow. In React Native the hard drop is `boxShadow` with 0 blur (new architecture).
-- **Tilt.** Moment cards and callouts tilt a degree or two, alternating, like postcards on a fridge. Fields, rows and buttons never tilt.
+- **Straight, like a photo album (Pad 2.0, October 2026).** Moment cards stand straight in a neat column: one ink edge, the photos to the edge at a fixed height (196px) in fixed layouts for 1, 2, 3 or more photos ("+N" on the last tile), 3px of white between photos, `shadow-sm`. The parent's one line is the title; date and hugs sit at the bottom. The gang lives in the header, never in the photo. Only callouts and handwritten notes still tilt; fields, rows, buttons and cards never do.
+- **No Book tab for now.** The year book is in the backlog (owner, 20 October 2026): the tab bar is Pad, Familie, the +, Ik, and no screen links to a book until it returns.
+- **Firsts.** A first is a calm label, not a sticker: "Eerste keer · Zelf gezeten" with a small icon in the colour of its kind (Bewegen `apricot`, Eten en drinken `sunshine`, Geluidjes en gebaren `butter`, Samen `lilac`, Slapen en badderen `cornflower`, Groeien en uitjes `pistachio`; a first you type yourself gets a star on `butter`). The list of firsts lives in `packages/core/src/firsts.ts`; it has no ages or weeks, because it's a list to choose from, not a checklist.
 - **Scallops.** Every screen header is a soft-block band with a scalloped bottom edge (`ScreenHeader`), with a character peeking over it.
 - Corners: `radius-pill` for buttons, avatars and switches; `radius-l` for cards; `radius-m` for fields; `radius-s` for stickers.
 - Gutters: `space-6` (24px) on screens, `space-5` (20px) on the trail. Tap targets at least `tap-min` (44px).

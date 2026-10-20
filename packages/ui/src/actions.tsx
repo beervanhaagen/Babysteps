@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon, type IconName } from './brand';
 import { useFocusRing } from './focus';
-import { text } from './text';
+import { fontFamily, text } from './text';
 import { border, color, radius, shadow, size as sizes } from './tokens';
 
 const VARIANTS = {
@@ -162,7 +162,58 @@ export function Switch({ label, hint, value, onValueChange }: SwitchProps) {
   );
 }
 
+export interface SegmentedProps<T extends string> {
+  /** Spoken name of the group, e.g. "Weergave". */
+  label: string;
+  options: { value: T; label: string; icon?: IconName }[];
+  value: T;
+  onChange: (value: T) => void;
+}
+
+/** Two or three ways to look at the same thing (T1: Tijdlijn or Raster). The chosen one is a sunshine sticker. */
+export function Segmented<T extends string>({ label, options, value, onChange }: SegmentedProps<T>) {
+  return (
+    <View role="radiogroup" aria-label={label} style={styles.segmented}>
+      {options.map((o) => (
+        <Segment key={o.value} on={o.value === value} icon={o.icon} onPress={() => onChange(o.value)}>
+          {o.label}
+        </Segment>
+      ))}
+    </View>
+  );
+}
+
+function Segment({ on, icon, onPress, children }: { on: boolean; icon?: IconName; onPress: () => void; children: string }) {
+  const focus = useFocusRing();
+  return (
+    <Pressable
+      role="radio"
+      aria-checked={on}
+      onPress={onPress}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={[styles.segment, on && styles.segmentOn, focus.ring]}
+    >
+      {icon ? <Icon name={icon} size={18} weight={on ? 2.4 : 2.2} /> : null}
+      <Text style={[text('fieldLabel'), { fontSize: 14 }, !on && { fontFamily: fontFamily('sans', 700) }]}>{children}</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  segmented: { flexDirection: 'row', gap: 4, padding: 3, borderRadius: radius.radiusPill, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.card },
+  segment: {
+    flex: 1,
+    minHeight: sizes.tapMin,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderRadius: radius.radiusPill,
+    borderWidth: border.edge,
+    borderColor: 'transparent',
+  },
+  segmentOn: { borderColor: color.ink, backgroundColor: color.sunshine },
   button: {
     flexDirection: 'row',
     alignItems: 'center',

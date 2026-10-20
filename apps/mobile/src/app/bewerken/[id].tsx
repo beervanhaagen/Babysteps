@@ -1,8 +1,10 @@
+import { firstLook } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
-import { Button, color, Switch, text, TextField, useAnnounce } from '@teddysteps/ui';
+import { Button, color, FirstIcon, firstLabelText, ListRow, Switch, text, TextField, useAnnounce } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
+import { forgetPickedFirst, usePickedFirst } from '@/lib/draft';
 import { friendlyError } from '@/lib/errors';
 import { updateMoment } from '@/lib/moments';
 import { useTrailMoments } from '@/lib/trail';
@@ -15,7 +17,9 @@ export default function EditMoment() {
   // Until the parent types, the fields show the moment as it is (it may load a moment later).
   const [typedCaption, setCaption] = useState<string>();
   const [pickedFirst, setIsFirst] = useState<boolean>();
-  const [typedLabel, setLabel] = useState<string>();
+  const pickedLabel = usePickedFirst(id);
+  // A pick from A3b only counts for this visit of the screen.
+  useEffect(() => forgetPickedFirst, []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   useAnnounce(error);
@@ -29,10 +33,10 @@ export default function EditMoment() {
 
   const caption = typedCaption ?? m.caption ?? '';
   const isFirst = pickedFirst ?? m.isFirst;
-  const label = typedLabel ?? m.firstLabel ?? '';
+  const label = pickedLabel ?? m.firstLabel ?? '';
 
   async function save() {
-    if (isFirst && !label.trim()) return setError('Geef de eerste keer een naam, zoals “Eerste hapje”.');
+    if (isFirst && !label.trim()) return setError('Kies welke eerste keer het was, of typ hem zelf.');
     setBusy(true);
     setError(undefined);
     try {
@@ -55,8 +59,15 @@ export default function EditMoment() {
       }
     >
       <TextField label="Wat gebeurde er?" value={caption} onChangeText={setCaption} multiline maxLength={500} placeholder="Eén zin is genoeg" />
-      <Switch label="Een eerste keer" hint="Eerste keren krijgen een eigen plek in het boek." value={isFirst} onValueChange={setIsFirst} />
-      {isFirst ? <TextField label="Welke eerste keer?" value={label} onChangeText={setLabel} maxLength={60} placeholder="Eerste hapje" /> : null}
+      <Switch label="Een eerste keer" hint="Eerste keren krijgen een label op het pad." value={isFirst} onValueChange={setIsFirst} />
+      {isFirst ? (
+        <ListRow
+          title={label ? firstLabelText(label) : 'Welke eerste keer?'}
+          subtitle={label ? 'Een andere kiezen' : 'Kies er een uit de lijst of typ hem zelf'}
+          accessory={label ? <FirstIcon {...firstLook(label)} size={32} iconSize={20} /> : undefined}
+          onPress={() => router.push({ pathname: '/eerste-keer', params: { voor: id, huidig: label } })}
+        />
+      ) : null}
       {error ? (
         <Text role="alert" style={[text('meta'), { color: color.plum }]}>
           {error}

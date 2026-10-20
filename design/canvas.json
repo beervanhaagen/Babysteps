@@ -639,6 +639,32 @@
    "title": "F8 · Sunday email · Launch",
    "page": "journeys",
    "is_interactive": true
+  },
+  "Trail-2-0.dc.html": {
+   "x": 0,
+   "y": 13020,
+   "w": 390,
+   "h": 844,
+   "title": "T1 · Trail home 2.0 · Voorstel",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Add-first.dc.html": {
+   "x": 470,
+   "y": 13020,
+   "w": 390,
+   "h": 844,
+   "title": "A3b · Eerste keer kiezen · Voorstel",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Trail-2-0-spec.dc.html": {
+   "x": 940,
+   "y": 13020,
+   "w": 1280,
+   "h": 2240,
+   "title": "Pad 2.0: momentkaart en eerste keren",
+   "page": "journeys"
   }
  },
  "createdOnFiles": {
@@ -781,6 +807,14 @@
    "x": -1720,
    "y": -260,
    "maxW": 1600
+  },
+  "j9": {
+   "x": 0,
+   "y": 12770,
+   "text": "10 · Pad 2.0 en eerste keren · voorstel",
+   "kind": "title1",
+   "maxW": 2220,
+   "page": "journeys"
   }
  },
  "order": [
@@ -855,7 +889,10 @@
   "Share-2.dc.html",
   "State-4.dc.html",
   "Family-7.dc.html",
-  "Family-8.dc.html"
+  "Family-8.dc.html",
+  "Trail-2-0.dc.html",
+  "Add-first.dc.html",
+  "Trail-2-0-spec.dc.html"
  ],
  "pages": [
   {

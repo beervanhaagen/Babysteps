@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Character, Hug, Icon, type CharacterName, type IconName } from './brand';
+import { SvgMarkup } from './svg';
 import { useFocusRing } from './focus';
 import type { SoftBlock } from './navigation';
 import { fontFamily, text } from './text';
@@ -74,71 +75,147 @@ export function PersonRow({ name, role, tone, action, onAction }: PersonRowProps
   );
 }
 
+/** A first on a card: its label, line icon (24×24 path data) and the colour of its kind. */
+export interface FirstMark {
+  label: string;
+  icon: string;
+  tone: SoftBlock;
+}
+
 export interface MomentCardProps {
-  week: string;
-  caption: string;
-  note?: string;
-  /** The photo, filling the frame (the app passes an expo-image). Without it a character shows. */
-  photo?: ReactNode;
-  /** Spoken description of the photo. */
+  /** The photos, already rendered (the app passes expo-images); the first three show. */
+  photos: ReactNode[];
+  /** All photos of the moment; beyond three the last tile says "+N". */
+  photoCount?: number;
+  /** Spoken description of the photos. */
   alt?: string;
-  /** "EERSTE KEER!" sticker with Tiggy on the photo. */
-  firstBadge?: string;
-  tint?: SoftBlock;
-  character?: CharacterName;
+  /** The parent's one line: the card's title. */
+  caption?: string | null;
+  first?: FirstMark;
+  /** "za 17 okt". */
+  date: string;
   hugs?: number;
-  tilt?: number;
-  peek?: CharacterName;
+  /** 'large': photos on top at a fixed height. 'compact': one photo beside the words. */
+  layout?: 'large' | 'compact';
+  /** Spoken first, e.g. "Week 30". */
+  context?: string;
   onPress?: () => void;
 }
 
-/** A postcard on the fridge: photo, week, one line, and the hugs it got. */
-export function MomentCard({ week, caption, note, photo, alt, firstBadge, tint = 'lilac', character = 'bo', hugs, tilt = -1.5, peek, onPress }: MomentCardProps) {
+/** A page in a photo album (Pad 2.0): straight, one ink edge, the photos to the edge, your line under it. */
+export function MomentCard({ photos, photoCount = photos.length, alt, caption, first, date, hugs, layout = 'large', context, onPress }: MomentCardProps) {
   const focus = useFocusRing();
-  const body = (
-    <>
-      <View>
-        <View accessible={!!alt} accessibilityRole={alt ? 'image' : undefined} accessibilityLabel={alt} style={[styles.photo, !photo && { backgroundColor: color[tint] }]}>
-          {photo ?? <Character name={character} mood="happy" size={110} decorative motion={null} />}
-        </View>
-        {firstBadge ? <FirstBadge label={firstBadge} /> : null}
-      </View>
-      <View style={styles.foot}>
-        <View style={styles.grow}>
-          <Text style={styles.eyebrow}>{week}</Text>
-          <Text style={text('titleS')} numberOfLines={3}>
-            {caption}
-          </Text>
-          {note ? <Text style={[text('meta'), styles.muted, { fontSize: 14 }]}>{note}</Text> : null}
-        </View>
-        {hugs != null ? (
-          <View style={styles.hugs} accessible accessibilityLabel={hugs === 1 ? '1 knuffel' : `${hugs} knuffels`}>
-            <Icon name="heart" size={16} weight={2.4} />
-            <Text style={styles.hugsText}>{hugs}</Text>
+  const compact = layout === 'compact';
+  const hugText = hugs ? (hugs === 1 ? '1 knuffel' : `${hugs} knuffels`) : null;
+  const words = (
+    <View style={[styles.momentBody, !compact && styles.momentBodyLarge]}>
+      {first ? <FirstLabel {...first} /> : null}
+      {caption ? (
+        <Text style={[styles.momentTitle, compact && { fontSize: 17 }]} numberOfLines={compact ? 3 : 4}>
+          {caption}
+        </Text>
+      ) : null}
+      <View style={[styles.momentFoot, !compact && styles.momentFootRule]}>
+        <Text style={styles.momentDate}>{date}</Text>
+        {hugText ? (
+          <View style={styles.momentHugs}>
+            <Icon name="heart" size={16} weight={2.6} color={color.tomato} />
+            <Text style={styles.momentHugsText}>{hugs}</Text>
           </View>
         ) : null}
       </View>
-      {peek ? <Character name={peek} size={70} decorative rotate={14} peek={{ right: -24, top: -36 }} /> : null}
-    </>
+    </View>
   );
-  const card = [styles.moment, { transform: [{ rotate: `${tilt}deg` }] }];
-  const label = [week, firstBadge, caption, note, hugs == null ? null : hugs === 1 ? '1 knuffel' : `${hugs} knuffels`].filter(Boolean).join(', ');
-  if (!onPress) return <View style={card}>{body}</View>;
+  const pictures = (
+    <View accessible={!!alt} accessibilityRole={alt ? 'image' : undefined} accessibilityLabel={alt} style={compact ? styles.momentThumb : styles.momentPhotos}>
+      {compact ? <Tile>{photos[0]}</Tile> : <Mosaic photos={photos} count={photoCount} />}
+    </View>
+  );
+  const body = (
+    <View style={compact ? styles.momentRow : undefined}>
+      {pictures}
+      {words}
+    </View>
+  );
+  const label = [context, first ? `Eerste keer: ${first.label}` : null, caption, date, hugText].filter(Boolean).join(', ');
+  if (!onPress) return <View style={styles.moment}>{body}</View>;
   return (
-    <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[card, focus.ring]}>
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={label}
+      onPress={onPress}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={({ pressed }) => [styles.moment, pressed && styles.momentPressed, focus.ring]}
+    >
       {body}
     </Pressable>
   );
 }
 
-/** The "EERSTE KEER!" sticker with Tiggy, on a photo (T1, T2). */
-export function FirstBadge({ label, size = 'md' }: { label: string; size?: 'md' | 'lg' }) {
-  const lg = size === 'lg';
+/** One photo tile; without a photo, a soft block with Bo. */
+function Tile({ children, more }: { children?: ReactNode; more?: number }) {
   return (
-    <View style={[styles.firstBadge, lg && styles.firstBadgeLg]}>
-      <Character name="tiggy" mood="happy" size={lg ? 30 : 26} decorative motion={null} />
-      <Text numberOfLines={1} style={[styles.firstText, lg && { fontSize: 13 }]}>
-        {label}
+    <View style={styles.tile}>
+      {children ?? <Character name="bo" mood="happy" size={56} decorative motion={null} />}
+      {more ? (
+        <View style={styles.tileMore}>
+          <Text style={styles.tileMoreText}>+{more}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** Fixed layouts for one, two, three or more photos, 3px of white between them. */
+function Mosaic({ photos, count }: { photos: ReactNode[]; count: number }) {
+  if (photos.length <= 1) return <Tile>{photos[0]}</Tile>;
+  if (photos.length === 2) {
+    return (
+      <View style={styles.mosaicRow}>
+        <Tile>{photos[0]}</Tile>
+        <Tile>{photos[1]}</Tile>
+      </View>
+    );
+  }
+  return (
+    <View style={styles.mosaicRow}>
+      <View style={{ flex: 2 }}>
+        <Tile>{photos[0]}</Tile>
+      </View>
+      <View style={styles.mosaicColumn}>
+        <Tile>{photos[1]}</Tile>
+        <Tile more={count > 3 ? count - 3 : undefined}>{photos[2]}</Tile>
+      </View>
+    </View>
+  );
+}
+
+/** A first's icon in a circle of its kind's colour (cards, A3b's tiles, the grid). */
+export function FirstIcon({ icon, tone, size: box = 22, iconSize = 15 }: { icon: string; tone: SoftBlock; size?: number; iconSize?: number }) {
+  return (
+    <View style={[styles.firstIcon, { width: box, height: box, borderRadius: box / 2, backgroundColor: color[tone] }, box > 22 && styles.firstIconEdge]}>
+      <SvgMarkup
+        markup={`<path d="${icon}" fill="none" stroke="currentColor" stroke-width="${box > 22 ? 2.2 : 2.4}" stroke-linecap="round" stroke-linejoin="round"/>`}
+        viewBox="0 0 24 24"
+        width={iconSize}
+        height={iconSize}
+        color={color.ink}
+      />
+    </View>
+  );
+}
+
+/** "Eerste keer · Los gezeten", but just "Eerste hapje" when the label says it already. */
+export const firstLabelText = (label: string) => (/^eerste\b/i.test(label.trim()) ? label : `Eerste keer · ${label}`);
+
+/** "Eerste keer · Los gezeten": a calm label with the icon and colour of its kind. */
+export function FirstLabel({ label, icon, tone }: FirstMark) {
+  return (
+    <View style={styles.firstLabel}>
+      <FirstIcon icon={icon} tone={tone} />
+      <Text style={styles.firstLabelText} numberOfLines={1}>
+        {firstLabelText(label)}
       </Text>
     </View>
   );
@@ -222,30 +299,32 @@ export function ListRow({ title, subtitle, icon, onPress, danger, chevron = true
 
 export interface NextUpProps {
   title: string;
-  /** "Rond week 26 · over zo'n 2 weken". */
+  /** "over zo'n 6 weken". */
   when?: string;
   eyebrow?: string;
+  /** One short line under the title in the folded card. */
+  summary?: string;
   items?: string[];
   character?: CharacterName;
   tone?: SoftBlock | 'white';
   /** A small line under the list, e.g. the reminder that leaps are a rough guide. */
   children?: string;
+  /** A line that shows even when the card is folded, e.g. when to call the huisarts. */
+  footnote?: string;
+  /**
+   * With these, the card folds (Pad 2.0): eyebrow with when, title and summary, and a chevron.
+   * Tapping it opens the items and the small line.
+   */
+  open?: boolean;
+  onToggle?: () => void;
 }
 
 /** What's coming next (the leap card on T1): eyebrow, title, when, a few lines and a character. */
-export function NextUp({ title, when, eyebrow = 'Wat komt eraan', items, character, tone = 'white', children }: NextUpProps) {
-  return (
-    <View style={[styles.nextUp, { backgroundColor: color[tone] }]}>
-      <View style={styles.nextUpHead}>
-        <View style={styles.shrink}>
-          <Text style={styles.eyebrow}>{eyebrow}</Text>
-          <Text accessibilityRole="header" style={[text('titleS'), { fontSize: 22, lineHeight: 26, marginTop: 2 }]}>
-            {title}
-          </Text>
-          {when ? <Text style={[text('meta'), styles.muted, { marginTop: 2 }]}>{when}</Text> : null}
-        </View>
-        {character ? <Character name={character} size={74} decorative /> : null}
-      </View>
+export function NextUp({ title, when, eyebrow = 'Wat komt eraan', summary, items, character, tone = 'white', children, footnote, open = true, onToggle }: NextUpProps) {
+  const focus = useFocusRing();
+  const foldable = !!onToggle;
+  const details = open ? (
+    <>
       {items?.length ? (
         <View style={styles.nextUpList}>
           {items.map((item) => (
@@ -259,6 +338,49 @@ export function NextUp({ title, when, eyebrow = 'Wat komt eraan', items, charact
         </View>
       ) : null}
       {children ? <Text style={[text('meta'), styles.muted]}>{children}</Text> : null}
+    </>
+  ) : null;
+  const note = footnote ? <Text style={[text('meta'), styles.muted, { fontSize: 13, lineHeight: 18 }]}>{footnote}</Text> : null;
+  if (foldable) {
+    return (
+      <View role="region" aria-label={eyebrow} style={[styles.nextUp, styles.nextUpFolded, { backgroundColor: color[tone] }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: open }}
+          accessibilityLabel={[eyebrow, when, title, summary].filter(Boolean).join('. ')}
+          onPress={onToggle}
+          onFocus={focus.onFocus}
+          onBlur={focus.onBlur}
+          style={[styles.nextUpToggle, focus.ring]}
+        >
+          <View style={styles.shrink}>
+            <Text style={[styles.eyebrow, { fontSize: 11 }]}>{when ? `${eyebrow} · ${when}` : eyebrow}</Text>
+            <Text style={styles.nextUpFoldTitle}>{title}</Text>
+            {summary ? <Text style={[text('meta'), styles.muted, { fontSize: 13, lineHeight: 18 }]}>{summary}</Text> : null}
+          </View>
+          <View style={{ transform: [{ rotate: open ? '-90deg' : '90deg' }] }}>
+            <Icon name="chevron-right" size={20} weight={2.4} color={color.inkMuted} />
+          </View>
+        </Pressable>
+        {details}
+        {note}
+      </View>
+    );
+  }
+  return (
+    <View style={[styles.nextUp, { backgroundColor: color[tone] }]}>
+      <View style={styles.nextUpHead}>
+        <View style={styles.shrink}>
+          <Text style={styles.eyebrow}>{eyebrow}</Text>
+          <Text accessibilityRole="header" style={[text('titleS'), { fontSize: 22, lineHeight: 26, marginTop: 2 }]}>
+            {title}
+          </Text>
+          {when ? <Text style={[text('meta'), styles.muted, { marginTop: 2 }]}>{when}</Text> : null}
+        </View>
+        {character ? <Character name={character} size={74} decorative /> : null}
+      </View>
+      {details}
+      {note}
     </View>
   );
 }
@@ -338,45 +460,50 @@ const styles = StyleSheet.create({
   },
   textLink: { minHeight: size.tapMin, paddingHorizontal: 4, justifyContent: 'center' },
   moment: {
-    maxWidth: 340,
-    padding: 8,
+    width: '100%',
+    maxWidth: 342,
     backgroundColor: color.white,
     borderWidth: border.edge,
     borderColor: color.ink,
     borderRadius: radius.radiusL,
-    boxShadow: shadow.shadowMd,
-  },
-  photo: {
-    height: 140,
-    borderRadius: 18,
-    borderWidth: border.edge,
-    borderColor: color.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
+    boxShadow: shadow.shadowSm,
     overflow: 'hidden',
   },
-  foot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, paddingTop: 10, paddingHorizontal: 6, paddingBottom: 4 },
   eyebrow: { ...text('eyebrow'), textTransform: 'uppercase' },
-  firstBadge: {
-    position: 'absolute',
-    left: 10,
-    top: 10,
-    maxWidth: '80%',
+  momentPressed: { transform: [{ translateY: 2 }], boxShadow: `0 1px 0 0 ${color.ink}` },
+  momentRow: { flexDirection: 'row', alignItems: 'stretch' },
+  momentPhotos: { height: 196, backgroundColor: color.white, borderBottomWidth: border.edge, borderBottomColor: color.ink },
+  momentThumb: { width: 104, minHeight: 104, borderRightWidth: border.edge, borderRightColor: color.ink },
+  momentBody: { flex: 1, minWidth: 0, gap: 6, paddingVertical: 12, paddingHorizontal: 14 },
+  momentBodyLarge: { flex: 0 },
+  momentTitle: { fontFamily: fontFamily('display', 700), fontSize: 18, lineHeight: 23, color: color.ink },
+  momentFoot: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 'auto' },
+  momentFootRule: { paddingTop: 8, borderTopWidth: 1.5, borderTopColor: color.line },
+  momentDate: { ...text('meta'), fontSize: 13, color: color.inkMuted },
+  momentHugs: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 4 },
+  momentHugsText: { ...text('meta'), fontSize: 13, fontFamily: fontFamily('sans', 800) },
+  mosaicRow: { flex: 1, flexDirection: 'row', gap: 3 },
+  mosaicColumn: { flex: 1, gap: 3 },
+  tile: { flex: 1, overflow: 'hidden', backgroundColor: color.lilac, alignItems: 'center', justifyContent: 'center' },
+  tileMore: { ...StyleSheet.absoluteFill, backgroundColor: `${color.ink}9E` /* ink at 62% */, alignItems: 'center', justifyContent: 'center' },
+  tileMoreText: { fontFamily: fontFamily('sticker', 400), fontSize: 22, color: color.white },
+  firstIcon: { alignItems: 'center', justifyContent: 'center' },
+  firstIconEdge: { borderWidth: 1.5, borderColor: color.ink },
+  firstLabel: {
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingVertical: 3,
-    paddingLeft: 3,
+    gap: 6,
+    paddingVertical: 2,
+    paddingLeft: 2,
     paddingRight: 10,
     borderRadius: radius.radiusS,
-    borderWidth: border.edge,
+    borderWidth: 1.5,
     borderColor: color.ink,
-    backgroundColor: color.sunshine,
+    backgroundColor: color.card,
   },
-  firstBadgeLg: { left: 12, top: 12, gap: 6, paddingVertical: 4, paddingLeft: 4, paddingRight: 12, boxShadow: shadow.shadowSm },
-  firstText: { ...text('eyebrow'), fontSize: 12, letterSpacing: 0, textTransform: 'uppercase' },
-  hugs: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4, paddingHorizontal: 10, borderRadius: radius.radiusS, backgroundColor: color.lilac },
-  hugsText: { ...text('meta'), fontFamily: fontFamily('sans', 800) },
+  firstLabelText: { ...text('meta'), fontSize: 12, lineHeight: 16, fontFamily: fontFamily('sans', 800), flexShrink: 1 },
   hugToast: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -436,6 +563,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     gap: 10,
   },
+  nextUpFolded: { paddingVertical: 10, paddingHorizontal: 14, boxShadow: shadow.shadowSm, borderWidth: border.edge, borderRadius: radius.radiusL },
+  nextUpToggle: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
+  nextUpFoldTitle: { fontFamily: fontFamily('display', 700), fontSize: 17, lineHeight: 21, color: color.ink },
   nextUpHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
   nextUpList: { gap: 3 },
   nextUpItem: { flexDirection: 'row', gap: 8 },

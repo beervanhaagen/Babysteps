@@ -52,7 +52,7 @@ export default function MoveMoment() {
         </Button>
       }
     >
-      <Text style={styles.intro}>Kies de week waarin dit gebeurde. Het boek volgt het pad.</Text>
+      <Text style={styles.intro}>Kies de week waarin dit gebeurde.</Text>
       <ChoiceGroup label="Kies de week">
         {weeks.map((w) => (
           <ChoiceChip key={w} selected={w === week} onPress={() => setWeek(w)}>

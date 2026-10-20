@@ -350,7 +350,7 @@ S = ≤1 dag, M = 2–4 dagen, L = 1–2 weken. Totaal ongeveer 8–11 weken tot
 | 6 | Berichtjes van familie en afspelen in T2. | Oma spreekt 10 seconden in, jij hoort het. | M |
 | 7 | Familiemail: bevestigen, per moment, zondagmail F8, afmelden, `/e/`-foto's, F7 laptopbreedte. | Zondagmail in Gmail en Apple Mail. | M–L |
 | 8 | Ik: M1, M3, M5, M6 (met export), M7 + 30 dagen. | Pad verwijderen, terugzetten, oma meteen geen toegang. | L |
-| 9 | Rest: O6, T8, A3 tags + eerste keer groot, X1/X4, "Wat komt eraan"-kaart, SH2/X3 deelkaarten, B1 + boeklijst. | Alle 32 schermen klikbaar. | L |
+| 9 | Rest: O6, T8, Pad 2.0 (tijdlijn en raster), A3b eerste keren, X1/X4, "Wat komt eraan"-kaart, SH2/X3 deelkaarten. Het jaarboek (B1 en de boeklijst) is van de lancering af: backlog (eigenaar, 20 okt 2026). | Alle 32 schermen klikbaar. | L |
 | 10 | Afmaken: Sentry, Aptabase-events, metrics-views, RLS-tests, beperkingen, toegankelijkheid, reviews. | Testgroep van ≤5 gezinnen. | M |
 | 11 | Launch: Pro-plannen, back-ups, DPA's, juristpunten, privacylabels, indienen. | Goedgekeurd in beide stores. | M |
 
@@ -410,6 +410,8 @@ Gebruik één bedrijfsadres (bijv. `apps@teddysteps.nl`), een wachtwoordmanager,
 5. A1 zegt "of een video"; video zit niet in de scope → weglaten.
 6. M7 verwijdert alleen het pad; Apple eist account verwijderen → "Pad en account verwijderen".
 7. M5 "Nieuws van TeddySteps" is marketing en vraagt aparte toestemming → niet bij de launch.
+8. Pad 2.0 (eigenaar, 20 okt 2026): kaarten staan recht als in een fotoalbum, foto's tot de rand op een vaste hoogte, een rustig label per eerste keer (icoon en kleur per soort) en een schakelaar Tijdlijn/Raster. Eerste keren kies je uit een lijst (A3b) of typ je zelf; we bewaren alleen het label, de kaart zoekt het icoon erbij, dus geen databasewijziging.
+9. Het jaarboek gaat naar de backlog (eigenaar, 20 okt 2026): geen tab Boek, geen B1, geen boeklijst op de familiepagina, geen schakelaar "In het jaarboek" in T8. De kolommen `in_book` en de tabel `book_list` blijven staan, ongebruikt.
 8. Opnameformaat van berichtjes verschilt per browser → eerst testen.
 
 Alle acht bevindingen hierboven worden overgenomen zoals voorgesteld (T2: de regel "Gezien door" vervalt).

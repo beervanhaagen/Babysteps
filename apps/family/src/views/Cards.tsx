@@ -21,10 +21,9 @@ interface CardsProps {
   page: FamilyPage;
   onHugged: (id: string, counts: { mine: number; total: number }) => void;
   onOlder: () => Promise<void>;
-  onBookList: () => void;
 }
 
-export function Cards({ page, onHugged, onOlder, onBookList }: CardsProps) {
+export function Cards({ page, onHugged, onOlder }: CardsProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const name = page.child.firstName;
@@ -75,12 +74,12 @@ export function Cards({ page, onHugged, onOlder, onBookList }: CardsProps) {
               {page.moments.length ? (
                 <>
                   <Text style={[styles.groupTitle, { fontSize: 20 }]}>{page.moments[0].week === week ? 'Nieuw deze week' : 'Het nieuwste moment'}</Text>
-                  <Card moment={page.moments[0]} size="lg" tilt={-0.6} onHugged={onHugged} />
+                  <Card moment={page.moments[0]} size="lg" onHugged={onHugged} />
                   {page.moments.length > 1 ? <Text style={[styles.groupTitle, { fontSize: 20 }]}>Eerder</Text> : null}
                   <View style={styles.grid}>
                     {page.moments.slice(1).map((m, i) => (
                       <View key={m.id} style={styles.gridCell}>
-                        <Card moment={m} size="sm" tilt={i % 2 ? 0.6 : -0.6} onHugged={onHugged} />
+                        <Card moment={m} size="sm" onHugged={onHugged} />
                       </View>
                     ))}
                   </View>
@@ -90,7 +89,7 @@ export function Cards({ page, onHugged, onOlder, onBookList }: CardsProps) {
                 empty
               )}
             </View>
-            <Aside page={page} onBookList={onBookList} />
+            <Aside page={page} />
           </View>
         ) : groups.length ? (
           groups.map((group) => (
@@ -98,7 +97,7 @@ export function Cards({ page, onHugged, onOlder, onBookList }: CardsProps) {
               <Text style={styles.groupTitle}>{group.title}</Text>
               <View style={styles.cards}>
                 {group.moments.map((m, i) => (
-                  <Card key={m.id} moment={m} size="md" tilt={i % 2 ? 1 : -1} onHugged={onHugged} />
+                  <Card key={m.id} moment={m} size="md" onHugged={onHugged} />
                 ))}
               </View>
             </View>
@@ -132,45 +131,27 @@ function Older({ more, onOlder }: { more: boolean; onOlder: () => Promise<void> 
   );
 }
 
-/** F7's side column: hello, your postcards, your own book, and what this page is. */
-function Aside({ page, onBookList }: { page: FamilyPage; onBookList: () => void }) {
-  const name = page.child.firstName;
+/** F7's side column: hello, your postcards, and what this page is. */
+function Aside({ page }: { page: FamilyPage }) {
   const sent = page.moments.reduce((n, m) => n + m.myHugs, 0);
-  async function joinList() {
-    await api.bookList();
-    onBookList();
-  }
   return (
     <View style={styles.aside}>
       <View style={[styles.panel, { backgroundColor: color.lilac }]}>
         <Text style={styles.eyebrow}>Hallo {page.me.label}</Text>
         <Text style={[text('titleM'), { fontSize: 24, lineHeight: 28 }]}>{sent === 1 ? 'Al 1 knuffel gestuurd' : `Al ${sent} knuffels gestuurd`}</Text>
-        <Text style={styles.panelText}>De ouders zien elke knuffel terug, en ze komen straks ook in het jaarboek.</Text>
+        <Text style={styles.panelText}>De ouders zien elke knuffel terug.</Text>
       </View>
       <View style={[styles.panel, { backgroundColor: color.white }]}>
         <Text style={styles.panelTitle}>Je kaartjes</Text>
         <Text style={styles.panelText}>{FREQUENCY[page.me.frequency]}</Text>
         <TextLink onPress={() => navigate('/instellingen')}>Wijzig hoe vaak</TextLink>
       </View>
-      <View style={[styles.panel, { backgroundColor: color.butter }]}>
-        <Text style={styles.panelTitle}>Een eigen boek?</Text>
-        <Text style={styles.panelText}>Na een jaar wordt {possessive(name)} pad een boek. Wil je er zelf ook een?</Text>
-        {page.me.onBookList ? (
-          <Text role="status" style={styles.panelTitle}>
-            Genoteerd! We laten het je weten.
-          </Text>
-        ) : (
-          <Button size="md" variant="sunshine" onPress={joinList}>
-            Laat het me weten
-          </Button>
-        )}
-      </View>
       <Text style={styles.private}>Deze pagina is privé: alleen wie een persoonlijke uitnodiging kreeg, kan hem openen.</Text>
     </View>
   );
 }
 
-function Card({ moment: m, size, tilt, onHugged }: { moment: FamilyMoment; size: 'sm' | 'md' | 'lg'; tilt: number; onHugged: CardsProps['onHugged'] }) {
+function Card({ moment: m, size, onHugged }: { moment: FamilyMoment; size: 'sm' | 'md' | 'lg'; onHugged: CardsProps['onHugged'] }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   async function hug() {
@@ -187,7 +168,7 @@ function Card({ moment: m, size, tilt, onHugged }: { moment: FamilyMoment; size:
   const title = (m.isFirst ? m.firstLabel : m.caption) ?? `Een moment uit week ${m.week}`;
   const facts = [m.isFirst && size !== 'sm' ? m.caption : null, longDutchDate(m.day as CalendarDate)];
   return (
-    <View style={[styles.card, { transform: [{ rotate: `${tilt}deg` }] }]}>
+    <View style={styles.card}>
       <View style={[styles.photo, size === 'lg' && { height: 300 }, size === 'sm' && { height: 150 }]}>
         <Photo uri={m.photos[0]?.url} label={`Foto: ${m.caption ?? title}`} />
       </View>

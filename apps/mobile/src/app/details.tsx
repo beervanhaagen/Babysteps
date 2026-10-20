@@ -1,15 +1,15 @@
-import { daysBetween, todayInAmsterdam, trailWeek } from '@teddysteps/core';
+import { daysBetween, firstLook, todayInAmsterdam, trailWeek } from '@teddysteps/core';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { border, Button, ChoiceChip, ChoiceGroup, color, fontFamily, Icon, radius, TextField, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
+import { border, Button, ChoiceChip, ChoiceGroup, color, FirstLabel, fontFamily, Icon, radius, TextField, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/lib/auth';
 import { resetDraft, useDraft } from '@/lib/draft';
 import { pin } from '@/lib/queue';
 
-// A3 Vertel er iets over: caption, a first (as a few words), and the week.
+// A3 Vertel er iets over: caption, a first (picked on A3b or typed there), and the week.
 // The week starts at the week the first photo was taken, so older photos land in their own week.
 export default function Details() {
   const { state } = useAuth();
@@ -23,7 +23,6 @@ export default function Details() {
 
   const [caption, setCaption] = useState('');
   const [isFirst, setIsFirst] = useState(draft.isFirst);
-  const [firstLabel, setFirstLabel] = useState('');
   const [week, setWeek] = useState(Math.min(photoWeek, current));
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState<string>();
@@ -34,7 +33,8 @@ export default function Details() {
   const name = trail?.childName ?? 'je kleintje';
 
   async function save() {
-    if (isFirst && !firstLabel.trim()) return setError(`Wat deed ${name} voor het eerst? Een paar woorden is genoeg.`);
+    const firstLabel = draft.firstLabel;
+    if (isFirst && !firstLabel.trim()) return setError(`Wat deed ${name} voor het eerst? Kies er een uit de lijst of typ hem zelf.`);
     setError(undefined);
     setSaveError(undefined);
     setBusy(true);
@@ -79,7 +79,14 @@ export default function Details() {
         </ChoiceChip>
       </ChoiceGroup>
       {isFirst ? (
-        <TextField label={`Wat deed ${name} voor het eerst?`} value={firstLabel} onChangeText={setFirstLabel} maxLength={60} error={error} />
+        <>
+          <FirstRow label={draft.firstLabel} name={name} onPress={() => router.push({ pathname: '/eerste-keer', params: { voor: 'nieuw', huidig: draft.firstLabel } })} />
+          {error && !draft.firstLabel ? (
+            <Text role="alert" style={styles.error}>
+              {error}
+            </Text>
+          ) : null}
+        </>
       ) : null}
       <WeekRow week={week} open={picking} onPress={() => setPicking(!picking)} />
       {picking ? (
@@ -106,6 +113,31 @@ export default function Details() {
         </Text>
       ) : null}
     </Screen>
+  );
+}
+
+/** Which first: the calm label once picked, otherwise an invitation to pick one (A3b). */
+function FirstRow({ label, name, onPress }: { label: string; name: string; onPress: () => void }) {
+  const focus = useFocusRing();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label ? `Eerste keer: ${label}. Wijzigen` : `Wat deed ${name} voor het eerst? Kies een eerste keer`}
+      onPress={onPress}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={[styles.weekRow, focus.ring]}
+    >
+      {label ? (
+        <View style={styles.firstPicked}>
+          <FirstLabel label={label} {...firstLook(label)} />
+        </View>
+      ) : (
+        <Text style={styles.weekText}>Wat deed {name} voor het eerst?</Text>
+      )}
+      <Text style={[text('meta'), styles.muted]}>{label ? 'wijzig' : 'kies'}</Text>
+      <Icon name="chevron-right" size={20} color={color.inkMuted} />
+    </Pressable>
   );
 }
 
@@ -150,5 +182,6 @@ const styles = StyleSheet.create({
   },
   weekText: { flex: 1, fontFamily: fontFamily('sans', 800), fontSize: 15, color: color.ink },
   muted: { color: color.inkMuted },
+  firstPicked: { flex: 1, minWidth: 0 },
   weeks: { gap: 8, paddingVertical: 4 },
 });

@@ -4,7 +4,7 @@
 // hidden from screen readers and out of the tab order; each one has a visible caption.
 import { raw, ui } from './ui.mjs';
 
-// The reference TabBar is in English; the app says Pad, Boek, Familie, Ik.
+// The reference TabBar is in English; the app says Pad, Familie, Ik.
 function tabBar(active) {
   const dutch = { Trail: 'Pad', Book: 'Boek', Family: 'Familie', Me: 'Ik' };
   return ui('TabBar', { active }).replace(/<span>(Trail|Book|Family|Me)<\/span>/g, (_, word) => `<span>${dutch[word]}</span>`);

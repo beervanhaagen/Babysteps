@@ -116,11 +116,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .ts-avatar { border-radius: var(--radius-pill); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-sticker); color: var(--ink); flex: 0 0 auto; border: var(--edge) solid var(--ink); box-sizing: border-box; }
 
 /* ---- Moment card ---- */
-.ts-moment { display: block; position: relative; text-decoration: none; color: var(--ink); background: var(--white); border: var(--edge) solid var(--ink); border-radius: var(--radius-l); box-shadow: var(--shadow-md); padding: 8px; max-width: 340px; }
-.ts-moment-photo { height: 140px; border-radius: 18px; border: var(--edge) solid var(--ink); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.ts-moment-foot { padding: 10px 6px 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.ts-moment-foot .ts-meta { color: var(--ink-muted); font-size: 14px; }
-.ts-moment-hugs { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-s); background: var(--lilac); font-size: 13px; font-weight: 800; }
 
 /* ---- Range ---- */
 .ts-range { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 20px; background: var(--paper); border: var(--edge) solid var(--ink); max-width: 340px; }
@@ -178,3 +173,24 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .ts-leap.is-next .ts-leap-dot { width: 32px; height: 32px; }
   .ts-leaps-axis span:not(:first-child):not(:last-child) { display: none; }
 }
+
+/* MomentCard, Pad 2.0: straight, one ink edge, photos to the edge at 196px, calm first-time label. */
+.ts-moment { display: block; position: relative; text-decoration: none; color: var(--ink); background: var(--white); border: var(--edge) solid var(--ink); border-radius: var(--radius-l); box-shadow: var(--shadow-sm); overflow: hidden; max-width: 342px; }
+.ts-moment-pics { height: 196px; border-bottom: var(--edge) solid var(--ink); background: var(--white); }
+.ts-moment-photos { height: 100%; display: flex; gap: 3px; }
+.ts-moment-photos.is-three > .ts-moment-tile { flex: 2; }
+.ts-moment-col { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.ts-moment-tile { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ts-moment-more { position: absolute; inset: 0; background: color-mix(in srgb, var(--ink) 62%, transparent); display: flex; align-items: center; justify-content: center; font-family: var(--font-sticker); font-size: 22px; color: var(--white); }
+.ts-moment-foot { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.ts-moment-title { font-family: var(--font-display); font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 700; font-size: 18px; line-height: 1.25; }
+.ts-moment-meta { display: flex; align-items: center; gap: 12px; padding-top: 8px; border-top: 1.5px solid var(--line); font-size: 13px; font-weight: 700; color: var(--ink-muted); }
+.ts-moment-hugs { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--ink); font-weight: 800; }
+.ts-moment-hugs svg { color: var(--tomato); }
+.ts-moment.is-compact { display: flex; }
+.ts-moment.is-compact .ts-moment-pics { width: 104px; height: auto; min-height: 104px; flex: none; border-bottom: 0; border-right: var(--edge) solid var(--ink); }
+.ts-moment.is-compact .ts-moment-foot { flex: 1; min-width: 0; }
+.ts-moment.is-compact .ts-moment-title { font-size: 17px; }
+.ts-moment.is-compact .ts-moment-meta { margin-top: auto; padding-top: 0; border-top: 0; }
+.ts-first { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: var(--radius-s); background: var(--card); border: 1.5px solid var(--ink); font-size: 12px; font-weight: 800; }
+.ts-first-icon { width: 22px; height: 22px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; }

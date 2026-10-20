@@ -30,17 +30,18 @@ Ship one loop: a parent pins a moment, family sends love within a day, the paren
 
 - Sign in: S1 Splash, S2 Create account (Apple, Google, email), S3 Email code. S4 Log in uses the same email-code flow.
 - Onboarding: O1 Welcome, then 3 steps: O2 Your little one (name, birth date **and due date**), O3 Invite family (skippable), O6 Catch up (skippable). No separate privacy, permissions or "ready" screens: ask for photos when adding and for notifications (system prompt) right after the first pinned moment on A4. M1 "Profiel van Lotte" reuses the O2 form in edit mode: no step bar, button "Opslaan".
-- Trail: T1 Trail home (with the "Wat komt eraan" leap card), T2 Moment, T6 Activity, T8 Moment options (edit, delete).
-- Adding: A1 What happened? (photos, a first, older weeks; voice memo shown as "binnenkort"), A2 Photos, A3 Details (milestones as tags, no ranges yet), A4 Pinned!
-- Family, **as a web page with no app or password**, opened from a WhatsApp invite link: F1 Invite message, F2 Invite accepted (name, e-mail, how often), F3 Postcards, F4 Send love (hug and a voice note), F7 the same page at laptop width, F8 the Sunday email. Family can also join the book list ("Laat het me weten"); no prints at launch.
+- Trail: T1 Trail home as **Pad 2.0** (board "T1 · Trail home 2.0" and spec "Pad 2.0": straight cards, a Tijdlijn/Raster switch, the folded "Wat komt eraan" leap card), T2 Moment, T6 Activity, T8 Moment options (edit, delete).
+- Adding: A1 What happened? (photos, a first, older weeks; voice memo shown as "binnenkort"), A2 Photos, A3 Details (no ranges), A3b Pick a first (board "A3b · Eerste keer kiezen": 37 firsts in 6 kinds, or type your own; list in `packages/core/src/firsts.ts`), A4 Pinned!
+- Family, **as a web page with no app or password**, opened from a WhatsApp invite link: F1 Invite message, F2 Invite accepted (name, e-mail, how often), F3 Postcards, F4 Send love (hug and a voice note), F7 the same page at laptop width, F8 the Sunday email. No book list and no prints at launch.
 - Me: M1 Account (with a feedback link), M3 Family and roles, M5 Notifications (one weekly Sunday nudge), M6 Privacy and data (invite-only is fixed, not a switch; one family-wide "mag foto's bewaren" switch, off by default, which also decides whether family e-mails show photos; the "Anoniem meten" opt-out; includes export), M7 Delete.
 - Growth: SH2 Share a moment (branded card), X3 Month birthday (shareable card).
-- Book: B1 Book home showing the book filling up (weeks, moments, firsts, notes) and a "Laat het me weten" list instead of checkout.
 - States: X1 Empty trail, X2 Offline (uploads queue), X4 Upload failed (automatic and manual retry).
 
-**v1.1:** milestone map and ranges (T3, T4, needs reviewed WHO/JGZ content), the full book order flow (B2 cover, B4 preview, B5 review, B6 delivery, B7 iDEAL, B8 order placed), A6 voice memo, T7 month recap, F6 gift a book.
+**v1.1:** milestone map and ranges (T3, T4, needs reviewed WHO/JGZ content), A6 voice memo, T7 month recap.
 
-**Later:** T5 all weeks, A5 letter, B3 page editor, B9 books and prints, M2 siblings, F5 family settings, M4 founders screen, SH1 referral credit.
+**Later:** T5 all weeks, A5 letter, M2 siblings, F5 family settings, M4 founders screen, SH1 referral credit.
+
+**Backlog, nice to have (owner, 2026-10-20): the year book.** The MVP proves the loop first, so the book is out of the app, the family page and the build plan for now: B1 Book home and the "Laat het me weten" book list, the order flow (B2 cover, B4 preview, B5 review, B6 delivery, B7 iDEAL, B8 order placed), B3 page editor, B9 books and prints, F6 gift a book, and T8's "In het jaarboek" switch. The database keeps `moments.in_book` and `book_list`, unused. The landing page still tells the book story.
 
 **Where the build differs from the boards** (decided 2026-10-17, see `docs/bouwplan.md` §10): F1's link preview never shows the child's name or photo; T2 has no "Gezien door …" line per person; A1 has no video at launch; M7 becomes "Pad en account verwijderen" (Apple requires account deletion); M5 has no "Nieuws van TeddySteps" at launch; no pinning before birth at launch.
 
@@ -57,7 +58,7 @@ Parents see the next developmental leap on the trail (components `LeapTimeline` 
 
 ## Business model
 
-Free app, growth through each family's own circle (Polarsteps model), revenue from what parents want to keep: the year book (from €54,95), family copies, a kraamcadeau-tegoed friends can give at the kraamvisite, and later small prints. An optional Plus subscription may come later but never locks the core. **No ads**: "geen reclame, geen algoritme" is part of what we sell. Details and sources: `design/brand/Business-model.dc.html`.
+Free app, growth through each family's own circle (Polarsteps model), revenue later from what parents want to keep (the book is in the backlog, see MVP scope): the year book (from €54,95), family copies, a kraamcadeau-tegoed friends can give at the kraamvisite, and later small prints. An optional Plus subscription may come later but never locks the core. **No ads**: "geen reclame, geen algoritme" is part of what we sell. Details and sources: `design/brand/Business-model.dc.html`.
 
 ## Specialist reviewers
 

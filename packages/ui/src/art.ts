@@ -71,7 +71,9 @@ export const icons = {
   "camera": "<rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"3\"/><circle cx=\"12\" cy=\"13.5\" r=\"3.5\"/><path d=\"M8 7 L10 4 H14 L16 7\"/>",
   "more": "<circle cx=\"5\" cy=\"12\" r=\"1.6\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><circle cx=\"19\" cy=\"12\" r=\"1.6\"/>",
   "offline": "<path d=\"M3 3 L21 21 M8.5 16 C 10.5 14.5, 13.5 14.5, 15.5 16 M5 12.5 C 7 10.8, 9 10, 11 9.9 M2 9 C 4 7.2, 6.5 6, 9 5.6 M19 12.5 C 18 11.6, 16.8 10.9, 15.5 10.5\"/><circle cx=\"12\" cy=\"19.5\" r=\"1\"/>",
-  "play": "<path d=\"M8 5 L19 12 L8 19 Z\"/>"
+  "play": "<path d=\"M8 5 L19 12 L8 19 Z\"/>",
+  "timeline": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"9\" rx=\"2\"/><path d=\"M4 17 H20 M4 20.5 H14\"/>",
+  "grid": "<rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/>"
 } as const;
 
 export const doodles = {
