@@ -18,7 +18,7 @@ export interface TextFieldProps { label: string; hint?: string; error?: string; 
 export interface CodeInputProps { value?: string; length?: number; label?: string; }
 export interface ScreenHeaderProps { title: string; subtitle?: string; back?: boolean | string; step?: [number, number]; color?: SoftBlock; character?: CharacterName; characterRotate?: number; action?: unknown; }
 export interface StepProgressProps { current: number; total: number; }
-export interface TabBarProps { active?: "trail" | "family" | "me"; onChange?: (id: string) => void; onAdd?: () => void; }
+export interface TabBarProps { active?: "trail" | "family" | "hugs" | "me"; onChange?: (id: string) => void; onAdd?: () => void; }
 export interface StickerProps { tone?: "sunshine" | "white" | "lilac" | "pistachio" | "butter"; icon?: IconName; children: string; }
 export interface MomentCardProps { photos?: string[]; photoCount?: number; src?: string; alt?: string; caption?: string; first?: { label: string; icon: string; tone: SoftBlock }; date?: string; hugs?: number; layout?: 'large' | 'compact'; week?: string; note?: string; tint?: SoftBlock; character?: CharacterName; href?: string; }
 export interface RangeBarProps { label: string; start: number; end: number; /** @deprecated use start */ from?: number; /** @deprecated use end */ to?: number; now?: number; max?: number; note?: string; }

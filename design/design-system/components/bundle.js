@@ -133,8 +133,9 @@
       h(Scallop, { color: band }),
       p.character ? h(Character, { name: p.character, size: 88, decorative: true, rotate: p.characterRotate || 6, peek: p.step ? { position: "absolute", right: -18, top: 70 } : { position: "absolute", right: 14, top: p.back ? 18 : 4 } }) : null);
   }
-  // No Book tab while the year book is in the backlog (owner, 20 October 2026).
-  var TABS = [{ id: "trail", label: "Trail", icon: "trail" }, { id: "family", label: "Family", icon: "family" }, { id: "add", label: "Add a moment", icon: "plus", add: true }, { id: "me", label: "Me", icon: "me" }];
+  // Two tabs either side of the +, so it sits in the middle; Hugs (T6) took the Book tab's place while
+  // the year book is in the backlog (owner, 20 and 21 October 2026).
+  var TABS = [{ id: "trail", label: "Trail", icon: "trail" }, { id: "family", label: "Family", icon: "family" }, { id: "add", label: "Add a moment", icon: "plus", add: true }, { id: "hugs", label: "Hugs", icon: "heart" }, { id: "me", label: "Me", icon: "me" }];
   function TabBar(p) {
     var st = R.useState(p.active || "trail"), act = p.onChange ? p.active : st[0];
     return h("nav", { className: "ts-tabbar", "aria-label": "Main" }, TABS.map(function (t) {

@@ -99,13 +99,15 @@ const countLine = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}
 /** The day of the photo, or else the Dutch day it was pinned. */
 const dayOf = (m: TrailMoment) => shortDutchDate(m.happenedOn ?? todayInAmsterdam(new Date(m.createdAt)));
 
+/** Above a week's photos: a small sticker with the week (sunshine for this week) and its days. */
 function WeekHeading({ week, now, meta }: { week: number; now?: boolean; meta: string }) {
   return (
     <View style={styles.weekHeading}>
-      <View style={[styles.weekDot, now && styles.weekDotNow]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
-      <Text accessibilityRole="header" style={styles.weekLabel}>
-        {now ? `Week ${week} · nu` : `Week ${week}`}
-      </Text>
+      <View style={[styles.weekTag, now && styles.weekTagNow]}>
+        <Text accessibilityRole="header" style={styles.weekLabel}>
+          {now ? `Week ${week} · nu` : `Week ${week}`}
+        </Text>
+      </View>
       <Text style={styles.weekMeta}>{meta}</Text>
     </View>
   );
@@ -117,7 +119,6 @@ function Timeline({ moments, week, birthDate }: { moments: TrailMoment[]; week: 
   if (!weeks.some(([w]) => w === week)) weeks.unshift([week, []]);
   return (
     <View style={styles.timeline}>
-      <View style={styles.rail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
       {weeks.map(([w, list]) => (
         <View key={w} style={styles.week}>
           <WeekHeading week={w} now={w === week} meta={list.length ? `${weekSpan(birthDate, w)} · ${countLine(list.length, 'moment', 'momenten')}` : weekSpan(birthDate, w)} />
@@ -185,12 +186,7 @@ function Grid({ moments, birthDate }: { moments: TrailMoment[]; birthDate: Calen
         const count = list.reduce((n, m) => n + m.photos.length, 0);
         return (
           <View key={w} style={styles.gridWeek}>
-            <View style={styles.gridHeading}>
-              <Text accessibilityRole="header" style={styles.weekLabel}>
-                Week {w}
-              </Text>
-              <Text style={styles.weekMeta}>{`${weekSpan(birthDate, w)} · ${countLine(count, 'foto', 'foto’s')}`}</Text>
-            </View>
+            <WeekHeading week={w} meta={`${weekSpan(birthDate, w)} · ${countLine(count, 'foto', 'foto’s')}`} />
             <View style={styles.gridPhotos}>
               {list.flatMap((m) =>
                 m.photos.map((p, i) => (
@@ -310,15 +306,12 @@ function OnTheWay({ dueDate }: { dueDate: string }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
   content: { paddingTop: 2, paddingHorizontal: space.space5, paddingBottom: space.space6, gap: space.space4 },
-  // The dotted line down the weeks: a 0-wide box with a dotted border all round, because one-sided
-  // dotted borders draw unreliably on phones.
-  timeline: { position: 'relative', paddingLeft: 26, gap: 18 },
-  rail: { position: 'absolute', left: 6, top: 10, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink },
-  week: { gap: 14 },
-  weekHeading: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  weekDot: { position: 'absolute', left: -26, top: 2, width: 14, height: 14, borderRadius: 7, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.white },
-  weekDotNow: { backgroundColor: color.tangerine },
-  weekLabel: { ...text('eyebrow'), fontSize: 12, textTransform: 'uppercase' },
+  timeline: { gap: 22 },
+  week: { gap: 10 },
+  weekHeading: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  weekTag: { paddingVertical: 2, paddingHorizontal: 10, borderRadius: radius.radiusS, borderWidth: 1.5, borderColor: color.ink, backgroundColor: color.card },
+  weekTagNow: { backgroundColor: color.sunshine },
+  weekLabel: { fontFamily: fontFamily('sans', 800), fontSize: 12, lineHeight: 18, color: color.ink },
   weekMeta: { ...text('meta'), fontSize: 13, color: color.inkMuted },
   emptyWeek: {
     flexDirection: 'row',
@@ -336,7 +329,6 @@ const styles = StyleSheet.create({
   emptyAction: { ...text('meta'), fontSize: 13, color: color.inkMuted },
   grid: { gap: 10 },
   gridWeek: { gap: 10, marginTop: 6 },
-  gridHeading: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   gridPhotos: {
     maxWidth: 342,
     flexDirection: 'row',

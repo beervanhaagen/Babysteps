@@ -87,13 +87,14 @@ export function ScreenHeader({ title, subtitle, onBack, step, color: band = 'lil
   );
 }
 
-export type TabId = 'trail' | 'family' | 'me';
+export type TabId = 'trail' | 'family' | 'hugs' | 'me';
 
-// The year book is out of the MVP (owner, 20 October 2026), so its tab is too: the trail and
-// the family left of the +, you on the right.
+// Two tabs either side of the +, each as wide as the next, so the + sits exactly in the middle
+// (owner, 21 October 2026). The year book is out of the MVP, so "Knuffels" (T6) took its place.
 const TABS: { id: TabId; label: string; icon: IconName }[] = [
   { id: 'trail', label: 'Pad', icon: 'trail' },
   { id: 'family', label: 'Familie', icon: 'family' },
+  { id: 'hugs', label: 'Knuffels', icon: 'heart' },
   { id: 'me', label: 'Ik', icon: 'me' },
 ];
 
@@ -103,10 +104,12 @@ export interface TabBarProps {
   onAdd?: () => void;
   /** Space for the home indicator. */
   bottomInset?: number;
+  /** Tabs with something new, shown as a small rose dot (e.g. unseen hugs). */
+  news?: TabId[];
 }
 
-export function TabBar({ active, onChange, onAdd, bottomInset = 0 }: TabBarProps) {
-  const tab = (t: (typeof TABS)[number]) => <Tab key={t.id} {...t} on={t.id === active} onPress={() => onChange?.(t.id)} />;
+export function TabBar({ active, onChange, onAdd, bottomInset = 0, news = [] }: TabBarProps) {
+  const tab = (t: (typeof TABS)[number]) => <Tab key={t.id} {...t} on={t.id === active} news={news.includes(t.id)} onPress={() => onChange?.(t.id)} />;
   return (
     <View accessibilityRole="tabbar" accessibilityLabel="Hoofdmenu" style={[styles.tabbar, { height: size.tabbar - 18 + Math.max(18, bottomInset), paddingBottom: Math.max(18, bottomInset) }]}>
       {TABS.slice(0, 2).map(tab)}
@@ -116,11 +119,12 @@ export function TabBar({ active, onChange, onAdd, bottomInset = 0 }: TabBarProps
   );
 }
 
-function Tab({ label, icon, on, onPress }: { label: string; icon: IconName; on: boolean; onPress: () => void }) {
+function Tab({ label, icon, on, news, onPress }: { label: string; icon: IconName; on: boolean; news: boolean; onPress: () => void }) {
   const focus = useFocusRing();
   return (
     <Pressable
       accessibilityRole="tab"
+      accessibilityLabel={news ? `${label}, nieuw` : label}
       accessibilityState={{ selected: on }}
       onPress={onPress}
       onFocus={focus.onFocus}
@@ -135,6 +139,7 @@ function Tab({ label, icon, on, onPress }: { label: string; icon: IconName; on: 
         <Icon name={icon} size={24} weight={2} />
       )}
       <Text style={[text('tab'), on && { fontFamily: fontFamily('sans', 800) }]}>{label}</Text>
+      {news ? <View style={styles.news} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" /> : null}
     </Pressable>
   );
 }
@@ -173,9 +178,10 @@ const styles = StyleSheet.create({
     borderTopColor: color.ink,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
   },
-  tab: { minWidth: 56, minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  tab: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  news: { position: 'absolute', top: 4, left: '50%', marginLeft: 8, width: 12, height: 12, borderRadius: 6, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.rose },
   tabPill: { width: 44, height: 30, borderRadius: 15, backgroundColor: color.sunshine, alignItems: 'center', justifyContent: 'center' },
   fab: {
     width: size.fab,

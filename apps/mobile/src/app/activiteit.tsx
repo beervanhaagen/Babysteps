@@ -3,10 +3,11 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar, border, color, fontFamily, Hug, text, useFocusRing } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
+import { Tabs } from '@/components/Tabs';
 import { TextLink } from '@/components/TextLink';
 import { useActivity, type ActivityItem } from '@/lib/family';
 
-// T6 Activiteit: hugs and people who joined. Voice notes (step 6) and the month birthday
+// T6 Activiteit, the "Knuffels" tab: hugs and people who joined. Voice notes (step 6) and the month birthday
 // (X3, step 9) join this list later. Header in pistachio: this is family news, and the
 // boards' rose is an accent, not a header block.
 export default function Activity() {
@@ -20,7 +21,8 @@ export default function Activity() {
   ].filter((g) => g.items.length);
 
   return (
-    <Screen header={{ title: 'Activiteit', subtitle: 'Knuffels en wie er meeloopt', color: 'pistachio', onBack: router.back, character: 'puddle', characterRotate: -6 }}>
+    <View style={styles.screen}>
+    <Screen header={{ title: 'Knuffels', subtitle: 'Van je familie, en wie er meeloopt', color: 'pistachio', character: 'puddle', characterRotate: -6 }}>
       {items && !items.length ? (
         <View style={styles.empty}>
           <Hug size={120} />
@@ -38,6 +40,8 @@ export default function Activity() {
         </View>
       ))}
     </Screen>
+    <Tabs active="hugs" />
+    </View>
   );
 }
 
@@ -82,6 +86,7 @@ function Row({ item }: { item: ActivityItem }) {
 }
 
 const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: color.paper },
   empty: { alignItems: 'center', gap: 10, paddingTop: 24 },
   eyebrow: { ...text('eyebrow'), fontSize: 13, letterSpacing: 2, textTransform: 'uppercase', marginTop: 6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 66, borderBottomWidth: 2, borderBottomColor: color.line, borderStyle: 'dashed' },

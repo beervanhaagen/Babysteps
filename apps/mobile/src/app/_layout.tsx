@@ -65,7 +65,7 @@ function Routes() {
         <Stack.Screen name="iemand" />
         <Stack.Screen name="uitnodiging/[id]" />
         <Stack.Screen name="kring/[id]" />
-        <Stack.Screen name="activiteit" />
+        <Stack.Screen name="activiteit" options={{ animation: 'none' }} />
         <Stack.Screen name="familie" options={{ animation: 'none' }} />
         <Stack.Screen name="ik" options={{ animation: 'none' }} />
       </Stack.Protected>

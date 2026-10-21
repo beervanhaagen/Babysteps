@@ -82,7 +82,7 @@ export function listenForTaps(): () => void {
     if (response?.notification.request.content.data?.kind !== 'daily') return;
     // Handled once: a later sign-in doesn't open an old push again.
     Notifications.clearLastNotificationResponse();
-    router.push('/activiteit');
+    router.replace('/activiteit');
   };
   open(Notifications.getLastNotificationResponse());
   const subscription = Notifications.addNotificationResponseReceivedListener(open);

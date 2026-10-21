@@ -99,7 +99,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* ---- Tab bar ---- */
 .ts-tabbar { height: var(--tabbar); box-sizing: border-box; padding: 6px 12px 18px; background: var(--white); border-top: var(--edge-bold) solid var(--ink); display: flex; align-items: center; justify-content: space-around; max-width: 390px; margin-top: 40px; }
-.ts-tab { min-width: 56px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; background: none; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer; }
+.ts-tab { flex: 1; min-width: 56px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; background: none; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer; }
 .ts-tab.is-on { font-weight: 800; }
 .ts-tab-pill { width: 44px; height: 30px; border-radius: 15px; background: var(--sunshine); display: flex; align-items: center; justify-content: center; }
 .ts-fab { width: var(--fab); height: var(--fab); padding: 0; border-radius: 31px; background: var(--bluebird); color: var(--on-bluebird); box-shadow: var(--shadow-lg); margin-top: -30px; }
