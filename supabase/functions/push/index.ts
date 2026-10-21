@@ -13,7 +13,13 @@ const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID');
 const APNS_TOPIC = Deno.env.get('APNS_TOPIC') ?? 'nl.teddysteps.app';
 const FCM_ACCOUNT = Deno.env.get('FCM_SERVICE_ACCOUNT');
 
-type Push = { token: string; platform: 'ios' | 'android'; apns_sandbox: boolean; body: string };
+// kind: 'daily' (hugs from family) or a seintje ('week', 'idee', 'kring', 'inhalen', 'start', 'terug').
+type Push = { token: string; platform: 'ios' | 'android'; apns_sandbox: boolean; body: string; kind: string };
+
+// Seintjes are quiet: no sound, normal priority, their own Android channel (parents can mute
+// them there and keep the hugs), and a newer seintje replaces an older one on the lock screen.
+const hug = (push: Push) => push.kind === 'daily';
+const group = (push: Push) => (hug(push) ? 'daily' : 'seintje');
 // Error reasons per run, for the logs (never tokens or sentences).
 const reasons: Record<string, number> = {};
 
@@ -66,12 +72,13 @@ async function toApple(push: Push, bearer: string): Promise<string> {
       authorization: `bearer ${bearer}`,
       'apns-topic': APNS_TOPIC,
       'apns-push-type': 'alert',
-      'apns-priority': '10',
-      'apns-expiration': String(Math.floor(Date.now() / 1000) + 24 * 3600),
-      'apns-collapse-id': 'daily',
+      'apns-priority': hug(push) ? '10' : '5',
+      // Sent at 19:00: a phone that's off until after 22:00 gets nothing (quiet hours, M5).
+      'apns-expiration': String(Math.floor(Date.now() / 1000) + 3 * 3600),
+      'apns-collapse-id': group(push),
     },
     // expo-notifications on iOS reads the extra data from "body" (what a tap opens).
-    body: JSON.stringify({ aps: { alert: { body: push.body }, sound: 'default' }, body: { kind: 'daily' } }),
+    body: JSON.stringify({ aps: { alert: { body: push.body }, ...(hug(push) ? { sound: 'default' } : {}) }, body: { kind: push.kind } }),
   });
   if (response.ok) return 'sent';
   const reason = (await response.json().catch(() => ({}))).reason;
@@ -87,8 +94,8 @@ async function toGoogle(push: Push, access: { token: string; project: string }):
       message: {
         token: push.token,
         notification: { body: push.body },
-        data: { kind: 'daily' },
-        android: { ttl: '86400s', collapse_key: 'daily', notification: { channel_id: 'knuffels', tag: 'daily' } },
+        data: { kind: push.kind },
+        android: { ttl: '10800s', collapse_key: group(push), notification: { channel_id: hug(push) ? 'knuffels' : 'seintjes', tag: group(push) } },
       },
     }),
   });

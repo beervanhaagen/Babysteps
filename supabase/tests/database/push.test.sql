@@ -84,7 +84,8 @@ reset role;
 update public.trails set paused_at = null where id = (select trail_id from lotte);
 update public.moments set deleted_at = now() where id = 'a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 set local role service_role;
-select is((select count(*) from public.push_digest((select seven_pm from t))), 0::bigint, 'no push for hugs on a deleted moment');
+-- (With its only moment gone, the parent may get a "start" seintje instead: that's not a hug push.)
+select is((select count(*) from public.push_digest((select seven_pm from t)) where kind = 'daily'), 0::bigint, 'no push for hugs on a deleted moment');
 reset role;
 update public.moments set deleted_at = null where id = 'a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 

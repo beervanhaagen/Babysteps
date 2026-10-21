@@ -1,9 +1,11 @@
+import { todayInAmsterdam } from '@teddysteps/core';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
 import { color, useTeddyFonts } from '@teddysteps/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
-import { listenForTaps, registerDevice } from '@/lib/push';
+import { askQuietly, listenForTaps, registerDevice } from '@/lib/push';
 import { startQueue } from '@/lib/queue';
 
 export default function RootLayout() {
@@ -26,11 +28,26 @@ function Routes() {
   const userId = state.status === 'ready' ? state.session.user.id : null;
   const trailId = state.status === 'ready' ? state.trail.id : null;
   useEffect(() => (userId && trailId ? startQueue(userId, trailId) : undefined), [userId, trailId]);
-  // The daily push (step 5): this device stays registered for this parent, and a tap opens T6.
+  // Pushes: quiet permission on iPhone, this device stays registered for this parent, and a tap
+  // opens Knuffels or the screen a seintje is about.
   useEffect(() => {
     if (!userId) return undefined;
-    registerDevice().catch(() => undefined);
-    return listenForTaps();
+    askQuietly()
+      .then(registerDevice)
+      .catch(() => undefined);
+    // Coming back from the background also counts as opening the app (for the seintjes),
+    // once per day is enough.
+    let seenOn = todayInAmsterdam();
+    const back = AppState.addEventListener('change', (next) => {
+      if (next !== 'active' || seenOn === todayInAmsterdam()) return;
+      seenOn = todayInAmsterdam();
+      registerDevice().catch(() => undefined);
+    });
+    const stopTaps = listenForTaps();
+    return () => {
+      back.remove();
+      stopTaps();
+    };
   }, [userId]);
   // Wait until we know who this is, so a link into the app isn't bounced while loading.
   if (status === 'loading') return null;
@@ -61,6 +78,7 @@ function Routes() {
         <Stack.Screen name="bewerken/[id]" />
         <Stack.Screen name="week/[id]" />
         <Stack.Screen name="verwijderd" />
+        <Stack.Screen name="meldingen" />
         <Stack.Screen name="geboren" />
         <Stack.Screen name="uitnodigen" />
         <Stack.Screen name="inhalen" options={{ gestureEnabled: false }} />

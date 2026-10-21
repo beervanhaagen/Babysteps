@@ -329,14 +329,22 @@ export interface CalloutProps {
   children?: string;
   tone?: SoftBlock;
   tilt?: number;
+  /** Something to the right of the words, e.g. a sticker with a time. */
+  accessory?: ReactNode;
 }
 
 /** A soft-block card with one message; at most one per screen. */
-export function Callout({ title, children, tone = 'lilac', tilt = -1 }: CalloutProps) {
-  return (
-    <View style={[styles.callout, { backgroundColor: color[tone], transform: [{ rotate: `${tilt}deg` }] }]}>
+export function Callout({ title, children, tone = 'lilac', tilt = -1, accessory }: CalloutProps) {
+  const words = (
+    <>
       <Text style={[text('rowTitle'), { fontSize: 15 }]}>{title}</Text>
       {children ? <Text style={text('meta')}>{children}</Text> : null}
+    </>
+  );
+  return (
+    <View style={[styles.callout, accessory ? styles.calloutRow : null, { backgroundColor: color[tone], transform: [{ rotate: `${tilt}deg` }] }]}>
+      {accessory ? <View style={styles.grow}>{words}</View> : words}
+      {accessory}
     </View>
   );
 }
@@ -687,6 +695,7 @@ const styles = StyleSheet.create({
   nextUpList: { gap: 3 },
   nextUpItem: { flexDirection: 'row', gap: 8 },
   nextUpBullet: { ...text('body'), width: 10 },
+  calloutRow: { flexDirection: 'row', alignItems: 'center', gap: space.space3 },
   callout: {
     gap: space.space1,
     maxWidth: 342,

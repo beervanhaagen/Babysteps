@@ -244,7 +244,7 @@ Alle tabellen hebben RLS aan; de rol `anon` mag niets. Tabellen met geheime code
 
 | Tabel | Belangrijke kolommen | Opmerking |
 |---|---|---|
-| `profiles` (ouders) | `id`, `first_name`, `analytics_opt_out`, `notify_sunday`, `notify_reactions`, `notify_month` | Geen achternaam-kolom. |
+| `profiles` (ouders) | `id`, `first_name`, `analytics_opt_out`, `notify_nudges`, `notify_reactions`, `notify_month` | Geen achternaam-kolom. |
 | `trails` | `id`, `created_at`, `family_may_keep_photos` (standaard false), `paused_at`, `delete_requested_at`, `purge_after` (+30 dagen), `deleted_at` | M6-schakelaar "mag foto's bewaren". |
 | `children` | `trail_id`, `first_name`, `birth_date` (leeg bij "Nog onderweg"), `due_date` (verplicht), `avatar_path`, `leap_cards_on` | |
 | `trail_parents` | `trail_id`, `user_id`, `joined_at` | Rol "ouder". |
@@ -414,6 +414,7 @@ Gebruik één bedrijfsadres (bijv. `apps@teddysteps.nl`), een wachtwoordmanager,
 9. Het jaarboek gaat naar de backlog (eigenaar, 20 okt 2026): geen tab Boek, geen B1, geen boeklijst op de familiepagina, geen schakelaar "In het jaarboek" in T8. De kolommen `in_book` en de tabel `book_list` blijven staan, ongebruikt.
 10. Pad 3.0 (eigenaar, 21 okt 2026): elk moment één grote foto (400px) om door te vegen, per week "Bekijk week" naar T2b, de week schermvullend als een verhaal. De schakelaar Tijdlijn/Raster is weg; het menu krijgt twee tabbladen aan elke kant van de + ("Knuffels" in plaats van het belletje).
 11. O6 Inhalen (eigenaar, 21 okt 2026): geen scan van de fotobibliotheek zoals op het bord, maar de fotokiezer van de telefoon (max. 20 foto's tot de lancering); wij sorteren per week en stellen per dag een foto voor. Inhaalmomenten tellen niet als nieuw in de zondagmail.
+12. Seintjes voor ouders (eigenaar, 21 okt 2026; plan tech-architect en design-reviewer): in de pushdigest van 19.00 uur, hooguit één push per dag (knuffels gaan voor). Eerste 4 weken max. 2 per week (een ideetje halverwege, het seintje op de laatste dag van de padweek, alleen als die week leeg is), daarna 1; eenmalig kring uitnodigen en inhalen; nog niets vastgepind: dag 1, 4 en 18. Na 3 genegeerd om de week, na 6 alleen op de maandverjaardag; app openen of vastpinnen zet het terug. Op iPhone vragen we meteen stil (provisional) toestemming; de echte vraag blijft op A4. Uit te zetten in M5 Meldingen (`profiles.notify_nudges`); Android-kanaal "Seintjes". Aantal weken op rij mag op het vergrendelscherm, een weeknummer niet.
 8. Opnameformaat van berichtjes verschilt per browser → eerst testen.
 
 Alle acht bevindingen hierboven worden overgenomen zoals voorgesteld (T2: de regel "Gezien door" vervalt).

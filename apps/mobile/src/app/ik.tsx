@@ -25,6 +25,7 @@ export default function Me() {
   return (
     <ComingSoon title="Ik" tab="me" tone="lilac" character="tiggy" step="stap 8">
       <View>
+        <ListRow icon="bell" title="Meldingen" subtitle="Seintjes en knuffels" onPress={() => router.push('/meldingen')} />
         <ListRow icon="trash" title="Onlangs verwijderd" subtitle="Momenten terugzetten, tot 30 dagen" onPress={() => router.push('/verwijderd')} />
       </View>
       {sure ? (

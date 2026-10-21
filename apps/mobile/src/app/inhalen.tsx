@@ -158,7 +158,7 @@ export default function CatchUp() {
           <Text style={[styles.body, styles.centerText]}>
             Ze staan op {possessive(name)} pad, elk in de juiste week. Een zin of een eerste keer erbij? Dat kan altijd via het moment.
           </Text>
-          {asking ? <Text style={[styles.body, styles.centerText]}>Zet meldingen aan, dan hoor je ’s avonds wie {name} een knuffel stuurde.</Text> : null}
+          {asking ? <Text style={[styles.body, styles.centerText]}>Zet meldingen aan, dan hoor je ’s avonds wie {name} een knuffel stuurde. En je krijgt een seintje als een week nog leeg is.</Text> : null}
         </View>
       </Screen>
     );
