@@ -6,7 +6,8 @@
 // - Rose is never text and no section background (design-system README); plum can't sit on
 //   aubergine, so feeling words on dark sections are sunshine.
 // - Only claims that hold at launch: family sends hugs and voice notes (no typed messages),
-//   one family-wide "mag foto's bewaren" switch, ordering the book comes in v1.1.
+//   one family-wide "mag foto's bewaren" switch. The year book is in the backlog (owner,
+//   20 October 2026), so the page promises no book.
 // - Leap copy checked by child-development-reviewer: always "misschien", "rond", "ongeveer".
 import { check, CONTACT, KEEP_POSTED, page, TEST_ALONG } from './layout.mjs';
 import { appSection, partySection } from './screens.mjs';
@@ -19,7 +20,7 @@ const art = (html, className = '') => `<div class="${className}" aria-hidden="tr
 const nav = `
 <a class="lp-link" href="#sprongetjes">Wat komt eraan</a>
 <a class="lp-link" href="#kring">Je eigen kring</a>
-<a class="lp-link" href="#boek">Het jaarboek</a>
+<a class="lp-link" href="#app">Een kijkje</a>
 <a class="lp-link" href="#vragen">Vragen</a>
 ${ui('Button', { size: 'md', variant: 'paper', href: '#start' }, 'Hou me op de hoogte')}`;
 
@@ -28,7 +29,7 @@ const hero = `
 <div class="lp-hero-text">
 <p class="lp-eyebrow">Binnenkort · voor nieuwe ouders</p>
 <h1 id="hero-titel" class="lp-h lp-h1">Het eerste jaar gaat zo snel. <em>Hou elk moment vast.</em></h1>
-<p class="lp-lead">Leg de kleine en grote momenten vast in een paar seconden. Deel ze alleen met de mensen die je dierbaar zijn, en zie welk sprongetje er ongeveer aankomt. Na een jaar wordt alles een boek om samen in te bladeren.</p>
+<p class="lp-lead">Leg de kleine en grote momenten vast in een paar seconden. Deel ze alleen met de mensen die je dierbaar zijn, en zie welk sprongetje er ongeveer aankomt. Week na week groeit er een pad vol herinneringen.</p>
 <div class="lp-actions">
 ${ui('Button', { href: '#start', icon: 'heart' }, 'Hou me op de hoogte')}
 ${ui('Button', { variant: 'paper', href: '#hoe' }, 'Zo werkt het')}
@@ -42,7 +43,7 @@ ${ui('Button', { variant: 'paper', href: '#hoe' }, 'Zo werkt het')}
 ${art(`<div class="lp-hero-blob"></div>
 <div class="lp-hero-cards">
 ${ui('MomentCard', { week: 'Week 9', caption: 'Eerste echte lach', note: "Om drie uur 's nachts. Natuurlijk.", hugs: 6, tint: 'butter', character: 'bo' })}
-${ui('NextUp', { eyebrow: 'Wat komt eraan', title: 'Een nieuw sprongetje', when: 'Rond week 12 · over 2 weken', character: 'tiggy', items: ['Misschien even wat onrustiger', 'Daarna misschien: meer kijken, kirren en lachen'] })}
+${ui('NextUp', { eyebrow: 'Wat komt eraan', title: 'Misschien een sprongetje', when: 'Rond week 12 · over 2 weken', character: 'tiggy', items: ['Misschien even wat onrustiger', 'Daarna misschien: meer kijken, kirren en lachen'] })}
 </div>
 <div class="lp-hero-sticker">${ui('Sticker', { icon: 'family' }, 'Gedeeld met 6 mensen')}</div>`, 'lp-hero-art')}
 </section>`;
@@ -70,7 +71,7 @@ const how = `
 <div class="lp-intro">
 <p class="lp-eyebrow">Zo werkt het</p>
 <h2 id="hoe-titel" class="lp-h lp-h2">Het grootste avontuur van je leven, <em>stap voor stap.</em></h2>
-<p class="lp-text">Net als een reisdagboek: jij legt de reis vast, je familie leest thuis mee, en aan het eind heb je een boek. Alleen gaat deze reis over het eerste jaar van je kind.</p>
+<p class="lp-text">Net als een reisdagboek: jij legt de reis vast, je familie leest thuis mee, en samen kijk je terug. Alleen gaat deze reis over het eerste jaar van je kind.</p>
 </div>
 <ol class="lp-steps">
 <li class="lp-step" data-tone="butter">
@@ -81,12 +82,12 @@ ${art(ui('EmptySlot', { title: 'Deze week is nog leeg!', subtitle: 'Week 14 · v
 <li class="lp-step" data-tone="pistachio">
 <h3 class="lp-h lp-h3"><span class="lp-num" aria-hidden="true">2</span>Je kring leest mee</h3>
 <p>Opa, oma, tantes en je beste vriendin krijgen elk een eigen WhatsApp-link. Ze zien elk nieuw moment en sturen knuffels en berichtjes terug. Zonder app of wachtwoord.</p>
-${art(ui('HugToast', { title: 'Oma Ria stuurt een knuffel' }, 'Bij week 9 · Eerste echte lach'), 'lp-step-art')}
+${art(ui('HugToast', { title: 'Oma Ria stuurde een knuffel' }, 'Bij week 9 · Eerste echte lach'), 'lp-step-art')}
 </li>
 <li class="lp-step" data-tone="cornflower">
-<h3 class="lp-h lp-h3"><span class="lp-num" aria-hidden="true">3</span>Een boek na een jaar</h3>
-<p>Na twaalf maanden wordt je pad een jaarboek: elk moment en elk bijschrift, op volgorde. Je hoeft zelf niets te ontwerpen.</p>
-${art(ui('BookCover', { name: 'Lotte', color: 'apricot', size: 150, tilt: -3, subtitle: 'ons eerste jaar' }), 'lp-step-art lp-center')}
+<h3 class="lp-h lp-h3"><span class="lp-num" aria-hidden="true">3</span>Week voor week terugkijken</h3>
+<p>Elke week heeft een eigen plek. Blader terug en zie precies hoe het ging, met de foto’s groot in beeld. Later begonnen? Haal de eerdere weken in met foto’s uit je fotorol.</p>
+${art(ui('MomentCard', { week: 'Week 12', caption: 'Voor het eerst omgerold. Zelf ook verbaasd.', hugs: 9, tint: 'cornflower', character: 'tiggy' }), 'lp-step-art')}
 </li>
 </ol>
 </div>
@@ -147,33 +148,14 @@ ${check('Veilig in de EU', 'Je gegevens worden nooit verkocht, nooit gedeeld met
 </div>
 </section>`;
 
-const book = `
-<section id="boek" class="lp-section lp-band" data-tone="cornflower" aria-labelledby="boek-titel">
-<div class="lp-wrap lp-split">
-${art(`${ui('BookCover', { name: 'Lotte', color: 'apricot', size: 300, subtitle: 'ons eerste jaar' })}
-<div class="lp-book-second">${ui('BookCover', { name: 'Lotte', color: 'pistachio', size: 190, tilt: 5, subtitle: 'voor oma' })}</div>`, 'lp-col lp-books')}
-<div class="lp-col">
-<p class="lp-eyebrow">Het jaarboek</p>
-<h2 id="boek-titel" class="lp-h lp-h2">Een jaar vol eerste keren. <em>In één boek.</em></h2>
-<p class="lp-text">Elk moment dat je vastlegde, op volgorde, met jouw woorden erbij. Je hoeft niets te ontwerpen: als je kind één wordt, maken wij van je pad een boek.</p>
-<ul class="lp-checks" data-tick="white">
-${check('Gemaakt om in te bladeren', 'Om honderd keer samen voor te lezen, plakhandjes en al.')}
-${check('Een exemplaar voor opa en oma', 'Een extra boek voor wie het eerste jaar van dichtbij volgde.')}
-${check('Later begonnen? Geen probleem', 'Zet de eerdere weken in één keer over uit je fotorol.')}
-</ul>
-<p class="lp-strong">De app blijft gratis. Je betaalt alleen als je het boek wilt.</p>
-</div>
-</div>
-</section>`;
-
 const faq = [
-  ['Is TeddySteps echt gratis?', 'Ja. Momenten vastleggen en delen met je eigen kring is gratis, met zoveel familieleden als je wilt. Wij verdienen aan het jaarboek, dus het gaat ons alleen goed als dat boek de moeite waard is.'],
+  ['Is TeddySteps echt gratis?', 'Ja. Vastleggen en delen met je eigen kring is gratis, met zoveel familie als je wilt. Geen reclame, en we verkopen je gegevens nooit. Waar verdienen we dan aan? Later willen we iets maken om je pad te bewaren, waarvoor je alleen betaalt als je het wilt. Vastleggen en delen blijft gratis.'],
   ["Wie kan de foto's van mijn kind zien?", "Alleen de mensen die jij uitnodigt. Er zijn geen openbare profielen en je kunt een pad niet zoeken. Je haalt iemand er op elk moment weer af, en jij bepaalt of familie foto's mag bewaren."],
   ['Moet oma een app installeren?', 'Nee. Ze opent de link die je via WhatsApp stuurt en ziet elk moment, in grote, duidelijke letters, met een knuffelknop.'],
   ['Hoe weten jullie wanneer een sprongetje komt?', 'We rekenen vanaf de uitgerekende datum, met de weken die vaak voor sprongetjes worden genoemd. Het onderzoek daarachter is niet eenduidig, dus zie het als een ruwe schatting: bij jouw kind kan het eerder, later of nauwelijks merkbaar zijn. Het is geen planning en geen medisch advies. Maak je je zorgen? Vraag het consultatiebureau of je huisarts.'],
-  ['Mijn baby is al een paar maanden. Te laat?', 'Helemaal niet. Je zet de eerdere weken in één keer over uit je fotorol, zodat het boek toch het hele eerste jaar laat zien.'],
+  ['Mijn baby is al een paar maanden. Te laat?', 'Helemaal niet. Kies foto’s uit je fotorol, dan zet TeddySteps ze in de week waarin je ze maakte. Zo staan ook de eerste weken gewoon op je pad.'],
   ['Kunnen we allebei momenten toevoegen?', 'Ja. Nodig je partner uit als ouder en jullie vullen samen hetzelfde pad.'],
-  ['En als ik een paar weken oversla?', 'Dan gebeurt er niets. Het pad wacht gewoon, met hooguit één vriendelijk seintje op zondag. Geen reeksen om bij te houden, geen schuldgevoel.'],
+  ['En als ik een week oversla?', 'Dan wacht je pad gewoon op je. Is een week nog leeg, dan krijg je een vriendelijk seintje, en dat zet je uit als je wilt. Een gemiste week vul je later aan met foto’s uit je fotorol. Geen schuldgevoel.'],
   ['Wanneer kan ik beginnen?', SIGNUP_ON
     ? 'Binnenkort. We testen TeddySteps eerst met een kleine groep gezinnen. Wil je meetesten of het als eerste horen? <a href="#start">Meld je hier aan</a>.'
     : `Binnenkort. We testen TeddySteps eerst met een kleine groep gezinnen. Wil je meetesten of het als eerste horen? Mail naar <a href="${KEEP_POSTED}">${CONTACT}</a>.`],
@@ -207,7 +189,7 @@ const start = `
 <div class="lp-wrap lp-split">
 <div class="lp-col">
 <p class="lp-eyebrow">Binnenkort</p>
-<h2 id="start-titel" class="lp-h lp-h2">Je onthoudt niet elke eerste keer. <em>Het boek wel.</em></h2>
+<h2 id="start-titel" class="lp-h lp-h2">Je onthoudt niet elke eerste keer. <em>Je pad wel.</em></h2>
 ${SIGNUP_ON ? keepPostedForm : keepPostedMail}
 </div>
 ${art(ui('Hug', { size: 240 }), 'lp-col lp-center')}
@@ -217,12 +199,12 @@ ${art(ui('Hug', { size: 240 }), 'lp-col lp-center')}
 export function home() {
   return page({
     title: 'TeddySteps: het eerste jaar van je baby, alleen voor je kring',
-    description: 'Leg het eerste jaar van je baby vast, deel het alleen met je eigen kring en zie welk sprongetje eraan komt. Na een jaar wordt het een boek. Geen reclame.',
+    description: 'Leg het eerste jaar van je baby vast, deel het alleen met je eigen kring en zie welk sprongetje er ongeveer aankomt. Geen reclame, geen algoritme.',
     ogTitle: 'Het eerste jaar gaat zo snel',
     ogDescription: 'Hou elk moment vast en deel het alleen met je eigen kring. TeddySteps komt binnenkort.',
     path: '/',
     nav,
     navOnPhone: false,
-    body: [hero, memories, how, appSection, leaps, partySection, circle, book, questions, start].join('\n'),
+    body: [hero, memories, how, appSection, leaps, partySection, circle, questions, start].join('\n'),
   });
 }

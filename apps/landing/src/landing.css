@@ -122,10 +122,6 @@ h1, h2, h3, p { margin: 0; }
 .lp-phone a { color: var(--ink); }
 .lp-phone-body { padding: var(--space-1) var(--space-5) var(--space-6); }
 
-/* ---- Jaarboek ---- */
-.lp-books { flex-direction: row; justify-content: center; align-items: center; min-height: 360px; }
-.lp-book-second { margin-left: -70px; margin-top: 140px; }
-
 /* ---- Vragen ---- */
 .lp-faq-head { flex: 1 1 300px; }
 .lp-faq-list { flex: 2 1 560px; gap: 0; }
@@ -164,13 +160,11 @@ details.lp-faq p { margin: 0 0 14px; font-size: 16px; line-height: 25px; color: 
 .lp-party-title { margin: 0; }
 .lp-party-gang { display: flex; justify-content: center; gap: var(--space-4); }
 .lp-party-row { gap: var(--space-2); }
-.lp-month { display: flex; justify-content: center; padding: var(--space-3) 0; }
-.lp-grow { background: var(--white); border: var(--edge) solid var(--ink); border-radius: var(--radius-l); box-shadow: var(--shadow-md); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
-.lp-grow-bar { height: 16px; border: var(--edge) solid var(--ink); border-radius: var(--radius-pill); background: var(--paper); overflow: hidden; }
-.lp-grow-bar span { display: block; height: 100%; background: var(--sunshine); border-right: var(--edge) solid var(--ink); }
-.lp-grow-stats { display: flex; gap: var(--space-6); font-size: 14px; font-weight: 700; }
-/* number and title-m from tokens.json */
-.lp-grow-stats b { display: block; font-family: var(--font-sticker); font-size: 40px; line-height: 38px; font-weight: 400; }
+.lp-month { display: flex; flex-direction: column; align-items: center; padding: var(--space-3) 0; }
+/* X3: the month as a big Bagel number, as on the board (no book cover). */
+.lp-month-num { font-family: var(--font-sticker); font-size: 120px; line-height: 110px; color: var(--ink); }
+.lp-month-word { font-family: var(--font-sticker); font-size: 28px; line-height: 32px; color: var(--ink); }
+/* title-m from tokens.json */
 .lp-h4 { font-size: 22px; line-height: 26px; font-weight: 700; }
 .lp-shot figcaption { display: flex; flex-direction: column; gap: var(--space-1); padding: 0 var(--space-2); }
 .lp-shot figcaption p { font-size: 16px; line-height: 24px; }
@@ -215,7 +209,6 @@ details.lp-faq p { margin: 0 0 14px; font-size: 16px; line-height: 25px; color: 
   .lp-memory { font-size: 21px; line-height: 28px; }
   .lp-memory:nth-child(2) { margin-left: var(--space-4); }
   .lp-logo { padding-right: 0; }
-  .lp-books { transform: scale(0.8); min-height: 300px; }
   .lp-phones { margin: 0 calc(-1 * var(--space-4)); padding: var(--space-2) var(--space-4) var(--space-4); gap: var(--space-5); }
   .lp-phones-two { flex-basis: auto; max-width: none; }
   .lp-shot { flex-basis: 270px; }
