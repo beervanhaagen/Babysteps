@@ -110,6 +110,12 @@ function load(userId: string): Promise<void> {
           if (entry instanceof Directory && !items.some((q) => q.clientId === entry.name)) entry.delete();
         }
       }
+      // Copies the photo picker left behind (with location and date) when the app was closed
+      // halfway through A2 or O6, and half-made versions: nothing in them is still needed.
+      for (const name of ['ImagePicker', 'ImageManipulator']) {
+        const leftover = new Directory(Paths.cache, name);
+        if (leftover.exists) leftover.delete();
+      }
     } catch {
       items = [];
     }
@@ -266,25 +272,32 @@ export function run(force = false): Promise<void> {
     do {
       again = false;
       await loading;
-      for (const item of [...items]) {
-        if (!online || generation !== started) return;
-        if (!due(item, Date.now())) continue;
-        try {
-          while (items.includes(item) && generation === started) {
-            await step(item);
-            item.failedAt = item.nextTryAt = undefined;
-            item.attempts = 0;
+      // Two rounds: first every moment as far as visible for family (small and view versions),
+      // then the print versions. After a catch-up (O6) family see week 2 without waiting for
+      // all of week 1's large files.
+      for (const round of ['visible', 'done'] as const) {
+        for (const item of [...items]) {
+          if (!online || generation !== started) return;
+          if (!due(item, Date.now())) continue;
+          // Moments pinned while the first round ran get their next pass, visible first.
+          if (round === 'done' && item.stage !== 'visible') continue;
+          try {
+            while (items.includes(item) && generation === started && (round === 'done' || item.stage !== 'visible')) {
+              await step(item);
+              item.failedAt = item.nextTryAt = undefined;
+              item.attempts = 0;
+              await save();
+              emit();
+            }
+          } catch (error) {
+            if (error instanceof OtherParent) return;
+            item.attempts += 1;
+            item.failedAt = new Date().toISOString();
+            if (error instanceof Permanent) item.stuck = true;
+            else item.nextTryAt = new Date(Date.now() + BACKOFF_MS[Math.min(item.attempts, BACKOFF_MS.length) - 1]).toISOString();
             await save();
             emit();
           }
-        } catch (error) {
-          if (error instanceof OtherParent) return;
-          item.attempts += 1;
-          item.failedAt = new Date().toISOString();
-          if (error instanceof Permanent) item.stuck = true;
-          else item.nextTryAt = new Date(Date.now() + BACKOFF_MS[Math.min(item.attempts, BACKOFF_MS.length) - 1]).toISOString();
-          await save();
-          emit();
         }
       }
     } while (again && generation === started);

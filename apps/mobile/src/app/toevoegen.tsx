@@ -31,7 +31,7 @@ export default function WhatHappened() {
             </View>
             <View style={styles.row}>
               <Tile tone="pistachio" character="puddle" label="Geluidsopname" sub="binnenkort" />
-              <Tile tone="rose" character="bo" label="Oudere weken" sub="inhalen uit je foto’s" onPress={() => startMoment('older', 'replace')} />
+              <Tile tone="rose" character="bo" label="Oudere weken" sub="inhalen uit je foto’s" onPress={() => router.replace('/inhalen')} />
             </View>
           </>
         ) : (

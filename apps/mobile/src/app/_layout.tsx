@@ -63,6 +63,7 @@ function Routes() {
         <Stack.Screen name="verwijderd" />
         <Stack.Screen name="geboren" />
         <Stack.Screen name="uitnodigen" />
+        <Stack.Screen name="inhalen" options={{ gestureEnabled: false }} />
         <Stack.Screen name="iemand" />
         <Stack.Screen name="uitnodiging/[id]" />
         <Stack.Screen name="kring/[id]" />

@@ -10,7 +10,6 @@ import { Tabs } from '@/components/Tabs';
 import { TrailHeader } from '@/components/TrailHeader';
 import { UploadStatus } from '@/components/UploadStatus';
 import { useAuth } from '@/lib/auth';
-import { startMoment } from '@/lib/draft';
 import { friendlyError } from '@/lib/errors';
 import { restoreMoment } from '@/lib/moments';
 import { byWeek, dayOf, useQueue, useTrailMoments, type TrailMoment } from '@/lib/trail';
@@ -210,9 +209,11 @@ function EmptyTrail({ week }: { week: number }) {
         <Button block icon="plus" onPress={() => router.push('/toevoegen')}>
           Voeg je eerste moment toe
         </Button>
-        <Button block variant="paper" onPress={() => void startMoment('older')}>
-          Haal oudere foto’s op
-        </Button>
+        {week > 1 ? (
+          <Button block variant="paper" onPress={() => router.push('/inhalen')}>
+            Haal oudere foto’s op
+          </Button>
+        ) : null}
       </View>
     </View>
   );
