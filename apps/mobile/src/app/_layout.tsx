@@ -56,6 +56,7 @@ function Routes() {
         <Stack.Screen name="eerste-keer" />
         <Stack.Screen name="vastgepind" options={{ gestureEnabled: false }} />
         <Stack.Screen name="moment/[id]" />
+        <Stack.Screen name="weekweergave/[week]" />
         <Stack.Screen name="opties/[id]" />
         <Stack.Screen name="bewerken/[id]" />
         <Stack.Screen name="week/[id]" />

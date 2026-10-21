@@ -1,4 +1,4 @@
-import type { CalendarDate } from '@teddysteps/core';
+import { shortDutchDate, todayInAmsterdam, type CalendarDate } from '@teddysteps/core';
 import { Image } from 'expo-image';
 import { Directory, File, Paths } from 'expo-file-system';
 import { useFocusEffect } from 'expo-router';
@@ -98,6 +98,16 @@ function writeCache(userId: string, rows: Row[]) {
     // Only a convenience; the server stays the source.
   }
 }
+
+/** Moments by week, newest week first (T1 and T2b show them in this order). */
+export function byWeek(moments: TrailMoment[]): [number, TrailMoment[]][] {
+  const weeks = new Map<number, TrailMoment[]>();
+  for (const m of moments) weeks.set(m.trailWeek, [...(weeks.get(m.trailWeek) ?? []), m]);
+  return [...weeks.entries()].sort((a, b) => b[0] - a[0]);
+}
+
+/** "za 17 okt": the day of the photo, or else the Dutch day it was pinned. */
+export const dayOf = (m: TrailMoment) => shortDutchDate(m.happenedOn ?? todayInAmsterdam(new Date(m.createdAt)));
 
 /** All moments of the trail, newest week first, including the ones still on the phone. */
 export function useTrailMoments() {

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Lottes pad 3.0</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&amp;family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&amp;family=Nunito:wght@400;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+@keyframes ts-bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-7px) rotate(3deg)}}
+.ts-bob{transform-box:fill-box;transform-origin:50% 100%;animation:ts-bob 2.6s ease-in-out infinite}
+.ts-btn{transition:transform .12s ease, box-shadow .12s ease}
+.ts-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #2D1E2F !important}
+@media (prefers-reduced-motion: reduce){.ts-bob{animation:none}.ts-btn{transition:none}}
+a:focus-visible,button:focus-visible{outline:3px solid #2D1E2F;outline-offset:3px}
+.scroll{scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.snap{scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.snap::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F2ECE1; color: #2D1E2F; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="position: relative; flex: 0 0 auto; z-index: 1"><div style="background: #7393E6; padding: 14px 20px 4px; display: flex; align-items: center; gap: 10px"><h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 800; letter-spacing: -0.01em; font-size: 28px; line-height: 1.05">Lottes pad</h1><span style="padding: 4px 10px; border-radius: 14px; background: #FFD84D; border: 2px solid #2D1E2F; font-size: 12px; font-weight: 800; white-space: nowrap">Week 31 van 78</span><span style="flex: 1"></span><a href="Trail-4.dc.html" aria-label="Activiteit" style="width: 44px; height: 44px; border-radius: 22px; background: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#2D1E2F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17 V11 C 6 7, 9 5, 12 5 C 15 5, 18 7, 18 11 V17 H6 Z M10 20 H14"/></g></svg></a></div><svg viewBox="0 0 1000 24" width="100%" height="20" preserveAspectRatio="none" aria-hidden="true" style="display: block; margin-top: -1px"><path d="M0 0 H1000 V8 Q987.5 18 975 8 Q962.5 6 950 8 Q937.5 18 925 8 Q912.5 6 900 8 Q887.5 18 875 8 Q862.5 6 850 8 Q837.5 18 825 8 Q812.5 6 800 8 Q787.5 18 775 8 Q762.5 6 750 8 Q737.5 18 725 8 Q712.5 6 700 8 Q687.5 18 675 8 Q662.5 6 650 8 Q637.5 18 625 8 Q612.5 6 600 8 Q587.5 18 575 8 Q562.5 6 550 8 Q537.5 18 525 8 Q512.5 6 500 8 Q487.5 18 475 8 Q462.5 6 450 8 Q437.5 18 425 8 Q412.5 6 400 8 Q387.5 18 375 8 Q362.5 6 350 8 Q337.5 18 325 8 Q312.5 6 300 8 Q287.5 18 275 8 Q262.5 6 250 8 Q237.5 18 225 8 Q212.5 6 200 8 Q187.5 18 175 8 Q162.5 6 150 8 Q137.5 18 125 8 Q112.5 6 100 8 Q87.5 18 75 8 Q62.5 6 50 8 Q37.5 18 25 8 Q12.5 6 0 8 Z" fill="#7393E6"/></svg><div aria-hidden="true" style="position: absolute; right: 70px; top: 6px; pointer-events: none"><div class="ts-bob"><svg viewBox="0 0 200 200" width="44" style="display: block; overflow: visible"><circle cx="56" cy="56" r="26" fill="#D98E55"/><circle cx="144" cy="56" r="26" fill="#D98E55"/><circle cx="56" cy="56" r="13" fill="#FF6B8E" opacity="0.5"/><circle cx="144" cy="56" r="13" fill="#FF6B8E" opacity="0.5"/><path d="M100 40 C 150 40, 176 76, 176 120 C 176 162, 142 184, 100 184 C 58 184, 24 162, 24 120 C 24 76, 50 40, 100 40 Z" fill="#D98E55"/><ellipse cx="100" cy="140" rx="32" ry="24" fill="#F8EAD4"/><circle cx="76" cy="108" r="6" fill="#2D1E2F"/><circle cx="124" cy="108" r="6" fill="#2D1E2F"/><ellipse cx="100" cy="129" rx="10" ry="7" fill="#2D1E2F"/><path d="M90 143 q10 8 20 0" fill="none" stroke="#2D1E2F" stroke-width="4" stroke-linecap="round"/></svg></div></div></div>
+
+<main class="scroll" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding: 4px 16px 28px; gap: 12px">
+
+<div role="region" aria-label="Wat komt eraan" style="flex: 0 0 auto; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px 0 14px; border-radius: 16px; background: #D9CFF2; border: 2px solid #2D1E2F; color: #2D1E2F"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em; white-space: nowrap">WAT KOMT ERAAN</span><span style="flex: 1; min-width: 0; font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Een sprongetje, over zo’n 6 weken</span></div>
+
+<div style="display: flex; align-items: baseline; gap: 8px; padding: 6px 4px 0"><h2 style="margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 0.14em">WEEK 31 · NU</h2><span style="font-size: 13px; font-weight: 700; color: #5E4D5C">19 – 25 okt</span></div>
+<a href="Add-4.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 0 16px; border-radius: 20px; border: 2px dashed #2D1E2F; text-decoration: none; color: #2D1E2F"><span style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px; background: #3D6AE0; border: 2px solid #2D1E2F; display: flex; align-items: center; justify-content: center; flex: 0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M12 5 V19 M5 12 H19" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"></path></svg></span><span style="font-size: 15px; font-weight: 800">Deze week is nog leeg!</span></a>
+
+<sc-for list="{{ weeks }}" as="wk" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 8px; padding: 14px 4px 0"><h2 style="margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 0.14em">{{ wk.label }}</h2><span style="font-size: 13px; font-weight: 700; color: #5E4D5C">{{ wk.range }}</span><a href="Week-view.dc.html" style="margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; text-decoration: none; color: #3D6AE0">Bekijk week<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M9 5 L16 12 L9 19" fill="none" stroke="#3D6AE0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></div>
+<sc-for list="{{ wk.moments }}" as="m" hint-placeholder-count="1">
+<article style="flex: 0 0 auto; background: #FFFFFF; border: 2px solid #2D1E2F; border-radius: 22px; box-shadow: 0 3px 0 #2D1E2F; overflow: hidden">
+<div style="position: relative">
+<div class="snap" style="display: flex; overflow-x: auto; height: 400px; background: #2D1E2F">
+<sc-for list="{{ m.photos }}" as="p" hint-placeholder-count="1">
+<a href="Week-view.dc.html" aria-label="{{ p.alt }}" style="flex: 0 0 100%; height: 100%; scroll-snap-align: start; display: block"><svg viewBox="0 0 100 125" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" aria-hidden="true" style="display: block"><rect width="100" height="125" fill="{{ p.sky }}"></rect><circle cx="{{ p.cx }}" cy="36" r="15" fill="{{ p.sun }}"></circle><path d="M0 {{ p.h }} C 30 {{ p.h1 }}, 62 {{ p.h2 }}, 100 {{ p.h }} V125 H0 Z" fill="{{ p.ground }}"></path><ellipse cx="{{ p.ex }}" cy="104" rx="26" ry="8" fill="{{ p.accent }}"></ellipse></svg></a>
+</sc-for>
+</div>
+<sc-if value="{{ m.multi }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; right: 12px; top: 12px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #2D1E2F; font-size: 12px; font-weight: 800; pointer-events: none"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="13" height="13" rx="2.5"></rect><path d="M4 16 V6 C4 4.9 4.9 4 6 4 H16"></path></g></svg>{{ m.count }}</span><span style="position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 5px; pointer-events: none" aria-hidden="true"><sc-for list="{{ m.dots }}" as="d" hint-placeholder-count="3"><span style="width: 7px; height: 7px; border-radius: 4px; background: {{ d.bg }}; box-shadow: 0 0 0 1.5px #2D1E2F"></span></sc-for></span></sc-if>
+</div>
+<a href="Week-view.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 12px; border-top: 2px solid #2D1E2F; text-decoration: none; color: #2D1E2F">
+<sc-if value="{{ m.first }}" hint-placeholder-val="{{ false }}"><span style="align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: 14px; background: #FBF8F2; border: 1.5px solid #2D1E2F; font-size: 12px; font-weight: 800"><span style="width: 22px; height: 22px; border-radius: 11px; background: {{ m.catBg }}; display: inline-flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="{{ m.icon }}" fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>Eerste keer · {{ m.firstLabel }}</span></sc-if>
+<span style="font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 700; font-size: 19px; line-height: 1.25">{{ m.title }}</span>
+<span style="display: flex; align-items: center; gap: 14px; font-size: 13px; font-weight: 700; color: #5E4D5C"><span>{{ m.date }}</span><span style="margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: #2D1E2F; font-weight: 800"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M12 20 C 4 14, 2 9, 5 6 C 8 3, 11 5, 12 8 C 13 5, 16 3, 19 6 C 22 9, 20 14, 12 20 Z" fill="none" stroke="#D2402F" stroke-width="2.6" stroke-linejoin="round"></path></svg>{{ m.hugs }}<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">knuffels</span></span><span style="display: inline-flex; align-items: center; gap: 4px; color: #2D1E2F; font-weight: 800"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M4 10 V14 M8 7 V17 M12 4 V20 M16 8 V16 M20 11 V13" fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round"></path></svg>{{ m.notes }}<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">berichtjes</span></span></span>
+</a>
+</article>
+</sc-for>
+</sc-for>
+</main>
+
+<nav aria-label="Hoofdmenu" style="flex: 0 0 auto; height: 84px; box-sizing: border-box; padding: 6px 12px 18px; background: #FFFFFF; border-top: 2.5px solid #2D1E2F; display: flex; align-items: center; justify-content: space-around"><a href="Trail-3-0.dc.html" aria-current="page" style="min-width: 56px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; font-size: 12px; font-weight: 800; color: #2D1E2F"><span style="width: 44px; height: 30px; border-radius: 15px; background: #FFD84D; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#2D1E2F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20 C 5 15, 18 16, 17 11 C 16 7, 7 9, 8 4" stroke-dasharray="1 4"/><circle cx="8" cy="4" r="1.5"/></g></svg></span><span>Pad</span></a><a href="Book-1.dc.html" style="min-width: 56px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; font-size: 12px; font-weight: 700; color: #2D1E2F"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#2D1E2F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5 C 7 4, 10 4, 12 6 C 14 4, 17 4, 20 5 V19 C 17 18, 14 18, 12 20 C 10 18, 7 18, 4 19 Z M12 6 V20"/></g></svg><span>Boek</span></a><a href="Add-4.dc.html" aria-label="Moment toevoegen" class="ts-btn" style="width: 62px; height: 62px; box-sizing: border-box; border-radius: 31px; background: #3D6AE0; border: 2.5px solid #2D1E2F; box-shadow: 0 5px 0 #2D1E2F; display: flex; align-items: center; justify-content: center; margin-top: -30px"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 V19 M5 12 H19"/></g></svg></a><a href="Account-2.dc.html" style="min-width: 56px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; font-size: 12px; font-weight: 700; color: #2D1E2F"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#2D1E2F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20 C 3 15, 6 13, 9 13 C 12 13, 15 15, 16 20 M15 14 C 18 14, 21 16, 22 19"/></g></svg><span>Familie</span></a><a href="Account-1.dc.html" style="min-width: 56px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; font-size: 12px; font-weight: 700; color: #2D1E2F"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#2D1E2F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21 C 5 16, 8 14, 12 14 C 16 14, 19 16, 20 21"/></g></svg><span>Ik</span></a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      a: { sky: '#F7E3A3', sun: '#FFD84D', cx: 30, ground: '#BFD39A', h: 82, h1: 70, h2: 92, accent: '#FBF8F2', ex: 60 },
+      b: { sky: '#D9CFF2', sun: '#FFFFFF', cx: 70, ground: '#7393E6', h: 88, h1: 96, h2: 76, accent: '#F7A76C', ex: 40 },
+      c: { sky: '#BFD39A', sun: '#F7E3A3', cx: 50, ground: '#F7A76C', h: 90, h1: 80, h2: 98, accent: '#FFFFFF', ex: 55 },
+      d: { sky: '#7393E6', sun: '#FFD84D', cx: 26, ground: '#D9CFF2', h: 84, h1: 92, h2: 74, accent: '#FFD84D', ex: 62 },
+      e: { sky: '#FFD84D', sun: '#FFFFFF', cx: 74, ground: '#F7E3A3', h: 86, h1: 74, h2: 94, accent: '#7393E6', ex: 45 }
+    };
+    const ph = (k, alt) => Object.assign({ alt }, P[k]);
+    const dots = (n) => { const r = []; for (let i = 0; i < n; i++) r.push({ bg: i === 0 ? '#FFFFFF' : 'rgba(255,255,255,0.45)' }); return r; };
+    const mom = (o) => Object.assign({ first: false, firstLabel: '', catBg: '#FFFFFF', icon: '', notes: '0' }, o, {
+      multi: o.photos.length > 1, count: o.photos.length + ' foto’s', dots: dots(o.photos.length) });
+    const sit = 'M9.5 6 a2.5 2.5 0 1 0 5 0 a2.5 2.5 0 1 0 -5 0 M12 9 V14 M6 19 C6 16, 9 14, 12 14 C15 14, 18 16, 18 19 M9 11 L7 13 M15 11 L17 13';
+    const spoon = 'M12 3 C9.5 3 9 5.5 9 7 C9 8.8 10.3 10 12 10 C13.7 10 15 8.8 15 7 C15 5.5 14.5 3 12 3 Z M12 10 V21';
+    const weeks = [
+      { label: 'WEEK 30', range: '12 – 18 okt', moments: [
+        mom({ first: true, firstLabel: 'Zelf gezeten', catBg: '#F7A76C', icon: sit, title: 'Drie hele seconden lang. Toen omgerold, met stijl.', date: 'za 17 okt', hugs: '9', notes: '2',
+          photos: [ph('a', 'Foto 1 van 3: zelf rechtop gezeten'), ph('b', 'Foto 2 van 3'), ph('c', 'Foto 3 van 3')] }),
+        mom({ title: 'Klapte. Nergens om.', date: 'wo 14 okt', hugs: '6', photos: [ph('d', 'Foto: geklapt')] })
+      ]},
+      { label: 'WEEK 29', range: '5 – 11 okt', moments: [
+        mom({ first: true, firstLabel: 'Eerste hapje', catBg: '#FFD84D', icon: spoon, title: 'Pastinaak. Het gezicht zegt genoeg.', date: 'zo 11 okt', hugs: '12', notes: '3',
+          photos: [ph('e', 'Foto 1 van 2: eerste hapje'), ph('a', 'Foto 2 van 2')] })
+      ]}
+    ];
+    return { weeks };
+  }
+}
+</script>
+</body>
+</html>

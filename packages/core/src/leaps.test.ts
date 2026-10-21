@@ -15,7 +15,7 @@ test('six weeks ahead the card says roughly when', () => {
   const card = leapCard('Lotte', due, due, inWeek(20))!;
   assert.equal(card.kind, 'leap');
   assert.equal(card.when, 'over zo’n 6 weken');
-  assert.equal(card.title, 'Een nieuw sprongetje');
+  assert.equal(card.title, 'Misschien een sprongetje');
   assert.equal(card.capture, 'Mooi om vast te pinnen: het eerste ‘gesprekje’ waarin Lotte terugbrabbelt');
   assert.equal(card.safety, LEAP_SAFETY);
   assert.equal(card.disclaimer, LEAP_DISCLAIMER);

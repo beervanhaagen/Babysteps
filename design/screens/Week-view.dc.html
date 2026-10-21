@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Lottes week</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&amp;family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&amp;family=Nunito:wght@400;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+@keyframes ts-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.ts-bob{animation:ts-bob 2.6s ease-in-out infinite}
+.ts-btn{transition:transform .12s ease, box-shadow .12s ease}
+.ts-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #2D1E2F !important}
+@media (prefers-reduced-motion: reduce){.ts-bob{animation:none}.ts-btn{transition:none}}
+a:focus-visible,button:focus-visible{outline:3px solid #2D1E2F;outline-offset:3px}
+.tap:focus-visible{outline-offset:-6px}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F2ECE1; color: #2D1E2F; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="position: relative; flex: 0 0 auto; z-index: 1"><div style="background: #7393E6; padding: 8px 16px 0">
+<div style="display: flex; align-items: center; gap: 8px">
+<a href="Trail-3-0.dc.html" aria-label="Terug naar de tijdlijn" style="width: 44px; height: 44px; box-sizing: border-box; border-radius: 22px; background: #FFFFFF; border: 2px solid #2D1E2F; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M15 5 L8 12 L15 19" fill="none" stroke="#2D1E2F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+<div style="flex: 1; min-width: 0; text-align: center"><h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 800; font-size: 22px; line-height: 1.1">{{ weekTitle }}</h1><div style="font-size: 13px; font-weight: 800">{{ weekMeta }}</div></div>
+<a href="Trail-3-0.dc.html" aria-label="Alle weken als tijdlijn" style="width: 44px; height: 44px; box-sizing: border-box; border-radius: 22px; background: #FFFFFF; border: 2px solid #2D1E2F; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><g fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="9" rx="2"></rect><path d="M4 17 H20 M4 20.5 H14"></path></g></svg></a>
+</div>
+<div role="group" aria-label="Kies een week" style="position: relative; display: flex; justify-content: space-between; align-items: flex-end; height: 70px; padding: 0 6px">
+<div aria-hidden="true" style="position: absolute; left: 24px; right: 24px; top: 41px; border-top: 2.5px dotted #2D1E2F"></div>
+<sc-for list="{{ stops }}" as="s" hint-placeholder-count="6">
+<sc-if value="{{ s.isCur }}" hint-placeholder-val="{{ false }}"><button type="button" aria-label="{{ s.aria }}" aria-current="true" onClick="{{ s.pick }}" style="position: relative; width: 52px; height: 70px; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px"><span class="ts-bob" style="width: 44px; height: 44px; box-sizing: border-box; border-radius: 22px; background: #FFD84D; border: 2.5px solid #2D1E2F; box-shadow: 0 3px 0 #2D1E2F; display: flex; align-items: center; justify-content: center; overflow: hidden"><svg viewBox="20 30 160 160" width="34" aria-hidden="true" style="display: block; margin-top: 4px"><circle cx="56" cy="56" r="26" fill="#D98E55"></circle><circle cx="144" cy="56" r="26" fill="#D98E55"></circle><path d="M100 40 C 150 40, 176 76, 176 120 C 176 162, 142 184, 100 184 C 58 184, 24 162, 24 120 C 24 76, 50 40, 100 40 Z" fill="#D98E55"></path><ellipse cx="100" cy="140" rx="32" ry="24" fill="#F8EAD4"></ellipse><circle cx="76" cy="108" r="7" fill="#2D1E2F"></circle><circle cx="124" cy="108" r="7" fill="#2D1E2F"></circle><ellipse cx="100" cy="129" rx="11" ry="8" fill="#2D1E2F"></ellipse></svg></span><span style="font-size: 12px; font-weight: 800; margin-top: 3px">{{ s.label }}</span></button></sc-if>
+<sc-if value="{{ s.isFull }}" hint-placeholder-val="{{ true }}"><button type="button" aria-label="{{ s.aria }}" onClick="{{ s.pick }}" style="position: relative; width: 52px; height: 70px; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding-top: 30px"><span style="width: 24px; height: 24px; box-sizing: border-box; border-radius: 12px; background: #FFFFFF; border: 2px solid #2D1E2F"></span><span style="font-size: 12px; font-weight: 700; margin-top: 1px">{{ s.label }}</span></button></sc-if>
+<sc-if value="{{ s.isEmpty }}" hint-placeholder-val="{{ false }}"><button type="button" aria-label="{{ s.aria }}" onClick="{{ s.pick }}" style="position: relative; width: 52px; height: 70px; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding-top: 30px"><span style="width: 24px; height: 24px; box-sizing: border-box; border-radius: 12px; background: #7393E6; border: 2px dashed #2D1E2F"></span><span style="font-size: 12px; font-weight: 700; margin-top: 1px">{{ s.label }}</span></button></sc-if>
+</sc-for>
+</div>
+</div><svg viewBox="0 0 1000 24" width="100%" height="18" preserveAspectRatio="none" aria-hidden="true" style="display: block; margin-top: -1px"><path d="M0 0 H1000 V8 Q987.5 18 975 8 Q962.5 6 950 8 Q937.5 18 925 8 Q912.5 6 900 8 Q887.5 18 875 8 Q862.5 6 850 8 Q837.5 18 825 8 Q812.5 6 800 8 Q787.5 18 775 8 Q762.5 6 750 8 Q737.5 18 725 8 Q712.5 6 700 8 Q687.5 18 675 8 Q662.5 6 650 8 Q637.5 18 625 8 Q612.5 6 600 8 Q587.5 18 575 8 Q562.5 6 550 8 Q537.5 18 525 8 Q512.5 6 500 8 Q487.5 18 475 8 Q462.5 6 450 8 Q437.5 18 425 8 Q412.5 6 400 8 Q387.5 18 375 8 Q362.5 6 350 8 Q337.5 18 325 8 Q312.5 6 300 8 Q287.5 18 275 8 Q262.5 6 250 8 Q237.5 18 225 8 Q212.5 6 200 8 Q187.5 18 175 8 Q162.5 6 150 8 Q137.5 18 125 8 Q112.5 6 100 8 Q87.5 18 75 8 Q62.5 6 50 8 Q37.5 18 25 8 Q12.5 6 0 8 Z" fill="#7393E6"/></svg></div>
+
+<sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ true }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 2px 12px 0; border: 2px solid #2D1E2F; border-radius: 24px; box-shadow: 0 3px 0 #2D1E2F; overflow: hidden; background: #FFFFFF">
+<div style="position: relative; flex: 1; min-height: 0; background: #2D1E2F">
+<svg viewBox="0 0 100 125" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" role="img" aria-label="{{ cp.alt }}" style="display: block; position: absolute; inset: 0"><rect width="100" height="125" fill="{{ cp.sky }}"></rect><circle cx="{{ cp.cx }}" cy="36" r="15" fill="{{ cp.sun }}"></circle><path d="M0 {{ cp.h }} C 30 {{ cp.h1 }}, 62 {{ cp.h2 }}, 100 {{ cp.h }} V125 H0 Z" fill="{{ cp.ground }}"></path><ellipse cx="{{ cp.ex }}" cy="104" rx="26" ry="8" fill="{{ cp.accent }}"></ellipse></svg>
+<div aria-hidden="true" style="position: absolute; left: 14px; right: 14px; top: 12px; display: flex; gap: 4px"><sc-for list="{{ segs }}" as="g" hint-placeholder-count="4"><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ g.bg }}; box-shadow: 0 0 0 1px rgba(45,30,47,0.35)"></span></sc-for></div>
+<button type="button" class="tap" aria-label="Vorige foto" onClick="{{ prevPhoto }}" style="position: absolute; left: 0; top: 24px; bottom: 70px; width: 35%; border: 0; padding: 0; background: transparent"></button>
+<button type="button" class="tap" aria-label="Volgende foto" onClick="{{ nextPhoto }}" style="position: absolute; right: 0; top: 24px; bottom: 70px; width: 65%; border: 0; padding: 0; background: transparent"></button>
+<sc-if value="{{ mo.first }}" hint-placeholder-val="{{ true }}"><span style="position: absolute; left: 12px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 3px; border-radius: 16px; background: #FFFFFF; border: 1.5px solid #2D1E2F; font-size: 12px; font-weight: 800"><span style="width: 24px; height: 24px; border-radius: 12px; background: {{ mo.catBg }}; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="{{ mo.icon }}" fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>Eerste keer · {{ mo.firstLabel }}</span></sc-if>
+<div style="position: absolute; right: 12px; bottom: 10px; display: flex; align-items: center; padding: 0 4px; border-radius: 24px; background: #FFFFFF; border: 2px solid #2D1E2F; box-shadow: 0 3px 0 #2D1E2F">
+<a href="Family-3.dc.html" aria-label="{{ mo.hugsAria }}" style="min-width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 3px; text-decoration: none; font-size: 13px; font-weight: 800"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M12 20 C 4 14, 2 9, 5 6 C 8 3, 11 5, 12 8 C 13 5, 16 3, 19 6 C 22 9, 20 14, 12 20 Z" fill="none" stroke="#D2402F" stroke-width="2.6" stroke-linejoin="round"></path></svg>{{ mo.hugs }}</a>
+<a href="Trail-2.dc.html" aria-label="Berichtjes" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M4 10 V14 M8 7 V17 M12 4 V20 M16 8 V16 M20 11 V13" fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round"></path></svg></a>
+<a href="Share-2.dc.html" aria-label="Deel dit moment" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M12 15 V3 M7 8 L12 3 L17 8 M5 13 V19 C5 20 6 21 7 21 H17 C18 21 19 20 19 19 V13" fill="none" stroke="#2D1E2F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+<a href="Trail-8.dc.html" aria-label="Meer opties" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M5 12 h0.01 M12 12 h0.01 M19 12 h0.01" fill="none" stroke="#2D1E2F" stroke-width="3.6" stroke-linecap="round"></path></svg></a>
+</div>
+</div>
+<div style="flex: 0 0 auto; padding: 14px 18px 16px; border-top: 2px solid #2D1E2F; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 700; font-size: 21px; line-height: 1.25">{{ mo.title }}</div>
+<div style="display: flex; gap: 10px; font-size: 13px; font-weight: 700; color: #5E4D5C"><span>{{ mo.date }}</span><span aria-hidden="true">·</span><span>{{ pos }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ noPhotos }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; margin: 2px 12px 0; border: 2.5px dashed #2D1E2F; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center">
+<div style="font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'SOFT' 100, 'WONK' 1; font-weight: 700; font-size: 24px">Deze week is nog leeg!</div>
+<div style="font-size: 15px; font-weight: 700; color: #5E4D5C; max-width: 260px">Een foto en één zin is genoeg. Oma wacht al.</div>
+<a href="Add-4.dc.html" class="ts-btn" style="display: inline-flex; align-items: center; justify-content: center; min-height: 58px; padding: 0 28px; border-radius: 29px; background: #3D6AE0; color: #FFFFFF; border: 2.5px solid #2D1E2F; box-shadow: 0 5px 0 #2D1E2F; font-family: 'Bagel Fat One', 'Nunito', system-ui, sans-serif; font-size: 18px; text-decoration: none">Moment toevoegen</a>
+</div>
+</sc-if>
+
+<div style="flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 18px">
+<sc-if value="{{ hasPrev }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ prevWeek }}" style="min-height: 44px; padding: 0 12px 0 6px; display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 22px; background: transparent; color: #2D1E2F; font-size: 14px; font-weight: 800"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M15 5 L8 12 L15 19" fill="none" stroke="#2D1E2F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{ prevLabel }}</button></sc-if>
+<sc-if value="{{ noPrev }}" hint-placeholder-val="{{ false }}"><span></span></sc-if>
+<sc-if value="{{ hasNext }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ nextWeek }}" style="min-height: 44px; padding: 0 6px 0 12px; display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 22px; background: transparent; color: #2D1E2F; font-size: 14px; font-weight: 800">{{ nextLabel }}<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="display: block"><path d="M9 5 L16 12 L9 19" fill="none" stroke="#2D1E2F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></sc-if>
+<sc-if value="{{ noNext }}" hint-placeholder-val="{{ false }}"><span></span></sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { wk: 4, ph: 0 };
+  }
+  data() {
+    const P = {
+      a: { sky: '#F7E3A3', sun: '#FFD84D', cx: 30, ground: '#BFD39A', h: 82, h1: 70, h2: 92, accent: '#FBF8F2', ex: 60 },
+      b: { sky: '#D9CFF2', sun: '#FFFFFF', cx: 70, ground: '#7393E6', h: 88, h1: 96, h2: 76, accent: '#F7A76C', ex: 40 },
+      c: { sky: '#BFD39A', sun: '#F7E3A3', cx: 50, ground: '#F7A76C', h: 90, h1: 80, h2: 98, accent: '#FFFFFF', ex: 55 },
+      d: { sky: '#7393E6', sun: '#FFD84D', cx: 26, ground: '#D9CFF2', h: 84, h1: 92, h2: 74, accent: '#FFD84D', ex: 62 },
+      e: { sky: '#FFD84D', sun: '#FFFFFF', cx: 74, ground: '#F7E3A3', h: 86, h1: 74, h2: 94, accent: '#7393E6', ex: 45 }
+    };
+    const sit = 'M9.5 6 a2.5 2.5 0 1 0 5 0 a2.5 2.5 0 1 0 -5 0 M12 9 V14 M6 19 C6 16, 9 14, 12 14 C15 14, 18 16, 18 19 M9 11 L7 13 M15 11 L17 13';
+    const spoon = 'M12 3 C9.5 3 9 5.5 9 7 C9 8.8 10.3 10 12 10 C13.7 10 15 8.8 15 7 C15 5.5 14.5 3 12 3 Z M12 10 V21';
+    const drops = 'M12 3 C12 3 7 9 7 13 a5 5 0 0 0 10 0 C17 9 12 3 12 3 Z M4 6 C4 6 2.5 8 2.5 9 a1.5 1.5 0 0 0 3 0 C5.5 8 4 6 4 6 Z M20 4 C20 4 18.5 6 18.5 7 a1.5 1.5 0 0 0 3 0 C21.5 6 20 4 20 4 Z';
+    const waves = 'M2 9 C4 7 6 7 8 9 C10 11 12 11 14 9 C16 7 18 7 20 9 L22 10 M2 15 C4 13 6 13 8 15 C10 17 12 17 14 15 C16 13 18 13 20 15 L22 16';
+    const m = (o, keys) => ({ moment: Object.assign({ first: false, firstLabel: '', catBg: '#FFFFFF', icon: '' }, o), keys });
+    return [
+      { num: 26, range: '14 – 20 sep', moments: [m({ first: true, firstLabel: 'Eerste keer zwemmen', catBg: '#7393E6', icon: waves, title: 'Babyzwemmen. Zij rustig, papa niet.', date: 'zo 20 sep', hugs: 8 }, ['b', 'd'])] },
+      { num: 27, range: '21 – 27 sep', moments: [m({ title: 'Oma op visite. Lotte sliep er gewoon doorheen.', date: 'za 26 sep', hugs: 5 }, ['c'])] },
+      { num: 28, range: '28 sep – 4 okt', moments: [m({ first: true, firstLabel: 'Gespetterd', catBg: '#7393E6', icon: drops, title: 'Bad leeg, badkamer nat.', date: 'do 1 okt', hugs: 11 }, ['d', 'a', 'e'])] },
+      { num: 29, range: '5 – 11 okt', moments: [m({ first: true, firstLabel: 'Eerste hapje', catBg: '#FFD84D', icon: spoon, title: 'Pastinaak. Het gezicht zegt genoeg.', date: 'zo 11 okt', hugs: 12 }, ['e', 'a'])] },
+      { num: 30, range: '12 – 18 okt', moments: [
+        m({ first: true, firstLabel: 'Zelf gezeten', catBg: '#F7A76C', icon: sit, title: 'Drie hele seconden lang. Toen omgerold, met stijl.', date: 'za 17 okt', hugs: 9 }, ['a', 'b', 'c']),
+        m({ title: 'Klapte. Nergens om.', date: 'wo 14 okt', hugs: 6 }, ['d'])
+      ]},
+      { num: 31, range: '19 – 25 okt', moments: [] }
+    ].map((w) => {
+      const photos = [];
+      w.moments.forEach((x) => x.keys.forEach((k, i) => photos.push({ p: Object.assign({ alt: 'Foto: ' + x.moment.title }, P[k]), mo: x.moment })));
+      return { num: w.num, range: w.range, photos };
+    });
+  }
+  renderVals() {
+    const weeks = this.data();
+    const wk = Math.min(this.state.wk, weeks.length - 1);
+    const W = weeks[wk];
+    const n = W.photos.length;
+    const ph = Math.min(this.state.ph, Math.max(0, n - 1));
+    const go = (w, p) => this.setState({ wk: w, ph: p });
+    const cur = n ? W.photos[ph] : null;
+    const mo = cur ? Object.assign({}, cur.mo, { hugs: String(cur.mo.hugs), hugsAria: cur.mo.hugs + ' knuffels' }) : { first: false, title: '', date: '', hugs: '0', hugsAria: '' };
+    const segs = W.photos.map((x, i) => ({ bg: i < ph ? '#FFFFFF' : (i === ph ? '#FFD84D' : 'rgba(255,255,255,0.5)') }));
+    const lastNum = weeks[weeks.length - 1].num;
+    const stops = weeks.map((w, i) => ({
+      label: w.num === lastNum ? 'nu' : String(w.num),
+      aria: 'Week ' + w.num + (w.photos.length ? '' : ', nog leeg'),
+      isCur: i === wk, isFull: i !== wk && w.photos.length > 0, isEmpty: i !== wk && w.photos.length === 0,
+      pick: () => go(i, 0)
+    }));
+    return {
+      stops, segs, mo,
+      cp: cur ? cur.p : {},
+      hasPhotos: n > 0, noPhotos: n === 0,
+      weekTitle: 'Week ' + W.num,
+      weekMeta: W.range + (n ? ' · ' + n + (n === 1 ? ' foto' : ' foto’s') : ''),
+      pos: 'foto ' + (ph + 1) + ' van ' + n,
+      nextPhoto: () => { if (ph < n - 1) go(wk, ph + 1); else if (wk < weeks.length - 1) go(wk + 1, 0); },
+      prevPhoto: () => { if (ph > 0) go(wk, ph - 1); else if (wk > 0) go(wk - 1, Math.max(0, weeks[wk - 1].photos.length - 1)); },
+      hasPrev: wk > 0, noPrev: wk === 0, hasNext: wk < weeks.length - 1, noNext: wk === weeks.length - 1,
+      prevLabel: wk > 0 ? 'Week ' + weeks[wk - 1].num : '',
+      nextLabel: wk < weeks.length - 1 ? 'Week ' + weeks[wk + 1].num : '',
+      prevWeek: () => { if (wk > 0) go(wk - 1, 0); },
+      nextWeek: () => { if (wk < weeks.length - 1) go(wk + 1, 0); }
+    };
+  }
+}
+</script>
+</body>
+</html>

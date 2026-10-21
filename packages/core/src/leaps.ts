@@ -76,7 +76,8 @@ export function leapCard(name: string, dueDate: CalendarDate, birthDate: Calenda
   }
   return {
     kind: 'leap',
-    title: away <= 0 ? 'Misschien een sprongetje' : 'Een nieuw sprongetje',
+    // Never certain, also before it comes (child-development-reviewer, 21 October 2026).
+    title: 'Misschien een sprongetje',
     when: away <= 0 ? 'rond nu' : away === 1 ? 'over ongeveer een week' : `over zo’n ${away} weken`,
     notice: named(leap.notice, name),
     capture: capture(leap.capture, name),

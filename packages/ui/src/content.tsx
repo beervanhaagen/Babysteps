@@ -1,8 +1,9 @@
-import { useEffect, type ReactNode } from 'react';
-import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState, type ComponentRef, type ReactNode } from 'react';
+import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Character, Hug, Icon, type CharacterName, type IconName } from './brand';
 import { SvgMarkup } from './svg';
 import { useFocusRing } from './focus';
+import { useReducedMotion } from './motion';
 import type { SoftBlock } from './navigation';
 import { fontFamily, text } from './text';
 import { border, color, radius, shadow, size, space } from './tokens';
@@ -95,11 +96,15 @@ export interface MomentCardProps {
   /** "za 17 okt". */
   date: string;
   hugs?: number;
-  /** 'large': photos on top at a fixed height. 'compact': one photo beside the words. */
-  layout?: 'large' | 'compact';
+  /**
+   * 'album' (Pad 3.0): one big photo (400px) to swipe through, "N foto's" and dots.
+   * 'large': photos on top at a fixed height. 'compact': one photo beside the words.
+   */
+  layout?: 'album' | 'large' | 'compact';
   /** Spoken first, e.g. "Week 30". */
   context?: string;
-  onPress?: () => void;
+  /** Gets the photo shown at the time (album), to open the week there. */
+  onPress?: (photo: number) => void;
 }
 
 /** A page in a photo album (Pad 2.0): straight, one ink edge, the photos to the edge, your line under it. */
@@ -108,14 +113,14 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
   const compact = layout === 'compact';
   const hugText = hugs ? (hugs === 1 ? '1 knuffel' : `${hugs} knuffels`) : null;
   const words = (
-    <View style={[styles.momentBody, !compact && styles.momentBodyLarge]}>
+    <View style={[styles.momentBody, !compact && styles.momentBodyLarge, layout === 'album' && styles.albumBody]}>
       {first ? <FirstLabel {...first} /> : null}
       {caption ? (
-        <Text style={[styles.momentTitle, compact && { fontSize: 17 }]} numberOfLines={compact ? 3 : 4}>
+        <Text style={[styles.momentTitle, compact && { fontSize: 17 }, layout === 'album' && { fontSize: 19, lineHeight: 24 }]} numberOfLines={compact ? 3 : 4}>
           {caption}
         </Text>
       ) : null}
-      <View style={[styles.momentFoot, !compact && styles.momentFootRule]}>
+      <View style={[styles.momentFoot, layout === 'large' && styles.momentFootRule]}>
         <Text style={styles.momentDate}>{date}</Text>
         {hugText ? (
           <View style={styles.momentHugs}>
@@ -138,18 +143,98 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
     </View>
   );
   const label = [context, first ? `Eerste keer: ${first.label}` : null, caption, date, hugText].filter(Boolean).join(', ');
+  if (layout === 'album') return <AlbumCard photos={photos} alt={alt} label={label} words={words} onPress={onPress} />;
   if (!onPress) return <View style={styles.moment}>{body}</View>;
   return (
     <Pressable
       accessibilityRole="link"
       accessibilityLabel={label}
-      onPress={onPress}
+      onPress={() => onPress(0)}
       onFocus={focus.onFocus}
       onBlur={focus.onBlur}
       style={({ pressed }) => [styles.moment, pressed && styles.momentPressed, focus.ring]}
     >
       {body}
     </Pressable>
+  );
+}
+
+const ALBUM_HEIGHT = 400;
+
+/**
+ * Pad 3.0: the photos big, one at a time, swiped sideways. Each photo and the words open the
+ * week (T2b) at the photo shown. Screen readers get the photos as one adjustable image.
+ */
+function AlbumCard({ photos, alt, label, words, onPress }: { photos: ReactNode[]; alt?: string; label: string; words: ReactNode; onPress?: (photo: number) => void }) {
+  const focus = useFocusRing();
+  const [width, setWidth] = useState(0);
+  const [page, setPage] = useState(0);
+  const pager = useRef<ComponentRef<typeof ScrollView>>(null);
+  const reduced = useReducedMotion();
+  const count = photos.length;
+  const go = (to: number) => {
+    const next = Math.max(0, Math.min(count - 1, to));
+    pager.current?.scrollTo({ x: next * width, animated: !reduced });
+    setPage(next);
+  };
+  return (
+    <View style={[styles.moment, styles.album]}>
+      <View
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel={alt}
+        accessibilityValue={{ text: count > 1 ? `foto ${page + 1} van ${count}` : undefined }}
+        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }, { name: 'activate' }]}
+        onAccessibilityAction={(e) =>
+          e.nativeEvent.actionName === 'increment' ? go(page + 1) : e.nativeEvent.actionName === 'decrement' ? go(page - 1) : onPress?.(page)
+        }
+        style={styles.albumPhotos}
+      >
+        <ScrollView
+          ref={pager}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(e) => width && setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
+        >
+          {(count ? photos : [undefined]).map((photo, i) => (
+            <Pressable key={i} onPress={() => onPress?.(i)} style={{ width, height: ALBUM_HEIGHT }}>
+              <Tile>{photo}</Tile>
+            </Pressable>
+          ))}
+        </ScrollView>
+        {count > 1 ? (
+          <>
+            <View style={styles.albumCount}>
+              <Icon name="photos" size={14} weight={2.4} />
+              <Text style={styles.albumCountText}>{count} foto’s</Text>
+            </View>
+            <View style={styles.albumDots}>
+              {photos.map((_, i) => (
+                <View key={i} style={[styles.albumDot, i === page && styles.albumDotOn]} />
+              ))}
+            </View>
+          </>
+        ) : null}
+      </View>
+      {onPress ? (
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={label}
+          onPress={() => onPress(page)}
+          onFocus={focus.onFocus}
+          onBlur={focus.onBlur}
+          style={({ pressed }) => [pressed && { opacity: 0.7 }, focus.ring]}
+        >
+          {words}
+        </Pressable>
+      ) : (
+        <View accessible accessibilityLabel={label}>
+          {words}
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -302,7 +387,7 @@ export interface NextUpProps {
   /** "over zo'n 6 weken". */
   when?: string;
   eyebrow?: string;
-  /** One short line under the title in the folded card. */
+  /** The one line of the folded card, e.g. "Een nieuw sprongetje, over zo’n 6 weken". */
   summary?: string;
   items?: string[];
   character?: CharacterName;
@@ -342,28 +427,37 @@ export function NextUp({ title, when, eyebrow = 'Wat komt eraan', summary, items
   ) : null;
   const note = footnote ? <Text style={[text('meta'), styles.muted, { fontSize: 13, lineHeight: 18 }]}>{footnote}</Text> : null;
   if (foldable) {
+    // Pad 3.0: folded it's one line ("WAT KOMT ERAAN  Een sprongetje, over zo'n 6 weken");
+    // open, the title, the lines and the small print follow.
     return (
-      <View role="region" aria-label={eyebrow} style={[styles.nextUp, styles.nextUpFolded, { backgroundColor: color[tone] }]}>
+      <View role="region" aria-label={eyebrow} style={[styles.nextUpFolded, { backgroundColor: color[tone] }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ expanded: open }}
-          accessibilityLabel={[eyebrow, when, title, summary].filter(Boolean).join('. ')}
+          accessibilityLabel={[eyebrow, summary ?? title].join('. ')}
+          accessibilityHint={open ? 'Sluit de uitleg' : 'Opent de uitleg'}
           onPress={onToggle}
           onFocus={focus.onFocus}
           onBlur={focus.onBlur}
           style={[styles.nextUpToggle, focus.ring]}
         >
-          <View style={styles.shrink}>
-            <Text style={[styles.eyebrow, { fontSize: 11 }]}>{when ? `${eyebrow} · ${when}` : eyebrow}</Text>
-            <Text style={styles.nextUpFoldTitle}>{title}</Text>
-            {summary ? <Text style={[text('meta'), styles.muted, { fontSize: 13, lineHeight: 18 }]}>{summary}</Text> : null}
-          </View>
+          <Text style={[styles.eyebrow, { fontSize: 11 }]}>{eyebrow}</Text>
+          <Text numberOfLines={1} style={styles.nextUpLine}>
+            {summary ?? title}
+          </Text>
           <View style={{ transform: [{ rotate: open ? '-90deg' : '90deg' }] }}>
-            <Icon name="chevron-right" size={20} weight={2.4} color={color.inkMuted} />
+            <Icon name="chevron-right" size={18} weight={2.4} color={color.inkMuted} />
           </View>
         </Pressable>
-        {details}
-        {note}
+        {open ? (
+          <View style={styles.nextUpOpen}>
+            <Text accessibilityRole="header" style={styles.nextUpFoldTitle}>
+              {when ? `${title}, ${when}` : title}
+            </Text>
+            {details}
+            {note}
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -470,6 +564,27 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   eyebrow: { ...text('eyebrow'), textTransform: 'uppercase' },
+  album: { maxWidth: undefined },
+  albumBody: { paddingHorizontal: 16 },
+  albumPhotos: { height: ALBUM_HEIGHT, backgroundColor: color.ink, borderBottomWidth: border.edge, borderBottomColor: color.ink },
+  albumCount: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: radius.radiusS,
+    borderWidth: 1.5,
+    borderColor: color.ink,
+    backgroundColor: color.white,
+  },
+  albumCountText: { ...text('meta'), fontSize: 12, lineHeight: 16, fontFamily: fontFamily('sans', 800) },
+  albumDots: { position: 'absolute', left: 0, right: 0, bottom: 10, flexDirection: 'row', justifyContent: 'center', gap: 5 },
+  albumDot: { width: 7, height: 7, borderRadius: 4, borderWidth: 1.5, borderColor: color.ink, backgroundColor: `${color.white}73` },
+  albumDotOn: { backgroundColor: color.white },
   momentPressed: { transform: [{ translateY: 2 }], boxShadow: `0 1px 0 0 ${color.ink}` },
   momentRow: { flexDirection: 'row', alignItems: 'stretch' },
   momentPhotos: { height: 196, backgroundColor: color.white, borderBottomWidth: border.edge, borderBottomColor: color.ink },
@@ -563,8 +678,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     gap: 10,
   },
-  nextUpFolded: { paddingVertical: 10, paddingHorizontal: 14, boxShadow: shadow.shadowSm, borderWidth: border.edge, borderRadius: radius.radiusL },
-  nextUpToggle: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
+  nextUpFolded: { paddingHorizontal: 14, paddingRight: 12, borderWidth: border.edge, borderColor: color.ink, borderRadius: radius.radiusM },
+  nextUpToggle: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 },
+  nextUpLine: { flex: 1, minWidth: 0, fontFamily: fontFamily('sans', 800), fontSize: 14, lineHeight: 19, color: color.ink },
+  nextUpOpen: { gap: 10, paddingBottom: 14 },
   nextUpFoldTitle: { fontFamily: fontFamily('display', 700), fontSize: 17, lineHeight: 21, color: color.ink },
   nextUpHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
   nextUpList: { gap: 3 },

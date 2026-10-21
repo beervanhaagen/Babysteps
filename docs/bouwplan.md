@@ -412,6 +412,8 @@ Gebruik één bedrijfsadres (bijv. `apps@teddysteps.nl`), een wachtwoordmanager,
 7. M5 "Nieuws van TeddySteps" is marketing en vraagt aparte toestemming → niet bij de launch.
 8. Pad 2.0 (eigenaar, 20 okt 2026): kaarten staan recht als in een fotoalbum, foto's tot de rand op een vaste hoogte, een rustig label per eerste keer (icoon en kleur per soort) en een schakelaar Tijdlijn/Raster. Eerste keren kies je uit een lijst (A3b) of typ je zelf; we bewaren alleen het label, de kaart zoekt het icoon erbij, dus geen databasewijziging.
 9. Het jaarboek gaat naar de backlog (eigenaar, 20 okt 2026): geen tab Boek, geen B1, geen boeklijst op de familiepagina, geen schakelaar "In het jaarboek" in T8. De kolommen `in_book` en de tabel `book_list` blijven staan, ongebruikt.
+10. Pad 3.0 (eigenaar, 21 okt 2026): elk moment één grote foto (400px) om door te vegen, per week "Bekijk week" naar T2b, de week schermvullend als een verhaal. De schakelaar Tijdlijn/Raster is weg; het menu krijgt twee tabbladen aan elke kant van de + ("Knuffels" in plaats van het belletje).
+11. O6 Inhalen (eigenaar, 21 okt 2026): geen scan van de fotobibliotheek zoals op het bord, maar de fotokiezer van de telefoon (max. 20 foto's tot de lancering); wij sorteren per week en stellen per dag een foto voor. Inhaalmomenten tellen niet als nieuw in de zondagmail.
 8. Opnameformaat van berichtjes verschilt per browser → eerst testen.
 
 Alle acht bevindingen hierboven worden overgenomen zoals voorgesteld (T2: de regel "Gezien door" vervalt).

@@ -665,6 +665,24 @@
    "h": 2240,
    "title": "Pad 2.0: momentkaart en eerste keren",
    "page": "journeys"
+  },
+  "Trail-3-0.dc.html": {
+   "x": 0,
+   "y": 15600,
+   "w": 390,
+   "h": 844,
+   "title": "T1 · Pad 3.0, grote foto’s · Voorstel",
+   "page": "journeys",
+   "is_interactive": true
+  },
+  "Week-view.dc.html": {
+   "x": 470,
+   "y": 15600,
+   "w": 390,
+   "h": 844,
+   "title": "T2b · Weekweergave · Voorstel",
+   "page": "journeys",
+   "is_interactive": true
   }
  },
  "createdOnFiles": {
@@ -815,6 +833,14 @@
    "kind": "title1",
    "maxW": 2220,
    "page": "journeys"
+  },
+  "j10": {
+   "x": 0,
+   "y": 15350,
+   "text": "11 · Pad 3.0: foto’s groot, week voor week",
+   "kind": "title1",
+   "maxW": 2220,
+   "page": "journeys"
   }
  },
  "order": [
@@ -892,7 +918,9 @@
   "Family-8.dc.html",
   "Trail-2-0.dc.html",
   "Add-first.dc.html",
-  "Trail-2-0-spec.dc.html"
+  "Trail-2-0-spec.dc.html",
+  "Trail-3-0.dc.html",
+  "Week-view.dc.html"
  ],
  "pages": [
   {
