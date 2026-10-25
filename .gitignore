@@ -24,7 +24,8 @@ credentials/
 *firebase-adminsdk*.json
 .vercel/
 
-# Supabase local state
+# Supabase local state (and the lock file Deno writes when checking functions)
+deno.lock
 supabase/.branches
 supabase/.temp
 

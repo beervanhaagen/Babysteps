@@ -1,6 +1,7 @@
 import type { CalendarDate } from '@teddysteps/core';
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { forgetExports } from './export';
 import { unregisterDevice } from './push';
 import { supabase } from './supabase';
 
@@ -14,8 +15,19 @@ export interface Trail {
   dueDate: CalendarDate;
 }
 
+/** M7: what is being deleted, and until when "Toch bewaren" works. */
+export interface Deletion {
+  /** This parent's own account, if they asked. */
+  accountUntil: string | null;
+  /** The trail, if it is going (asked by this parent or the other one). */
+  trailUntil: string | null;
+  byMe: boolean;
+  byName: string | null;
+}
+
 type AuthState =
   | { status: 'loading' }
+  | { status: 'leaving'; session: Session; trail: Trail | null; deletion: Deletion }
   | { status: 'signed-out' }
   | { status: 'onboarding'; session: Session }
   | { status: 'offline'; session: Session }
@@ -40,6 +52,7 @@ async function findTrail(): Promise<Trail | null> {
 
 /** Every sign-out goes through here: first this device stops getting pushes for this account. */
 export async function signOut() {
+  forgetExports();
   await unregisterDevice().catch(() => undefined);
   await supabase.auth.signOut();
 }
@@ -50,7 +63,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async (session: Session | null) => {
     if (!session) return setState({ status: 'signed-out' });
     try {
-      const trail = await findTrail();
+      const [trail, { data: pending }] = await Promise.all([findTrail(), supabase.rpc('my_deletion')]);
+      const row = ((pending ?? []) as { account_until: string | null; trail_until: string | null; by_me: boolean | null; by_name: string | null }[])[0];
+      if (row) {
+        const deletion = { accountUntil: row.account_until, trailUntil: row.trail_until, byMe: !!row.by_me, byName: row.by_name };
+        return setState({ status: 'leaving', session, trail, deletion });
+      }
       setState(trail ? { status: 'ready', session, trail } : { status: 'onboarding', session });
     } catch (error) {
       // No connection at start-up: stay signed in and offer to try again,

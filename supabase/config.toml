@@ -443,3 +443,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # Called by the app with the parent's own session (JWT checked).
 [functions.parent-invite]
 verify_jwt = true
+
+# Called by the app with the parent's own session (JWT checked).
+[functions.leave]
+verify_jwt = true

@@ -5,3 +5,4 @@ export * from './metadata';
 export * from './leaps';
 export * from './firsts';
 export * from './catchup';
+export * from './zip';

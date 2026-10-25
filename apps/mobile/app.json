@@ -62,7 +62,8 @@
           "savePhotosPermission": "Zo kan TeddySteps foto’s van je pad in je fotobibliotheek zetten.",
           "isAccessMediaLocationEnabled": false
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true

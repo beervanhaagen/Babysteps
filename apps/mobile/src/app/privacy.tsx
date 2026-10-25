@@ -10,8 +10,8 @@ import { supabase } from '@/lib/supabase';
 
 // M6 Privacy en gegevens (board Account-3, step 8): invite-only is fixed, not a switch; the
 // sprongetjes, the family-wide "mag foto's bewaren" (off by default; family gets a "Bewaar foto"
-// button for the 1280px version, never print) and "Anoniem meten". Export (Alles downloaden) and
-// "Pad verwijderen" (M7) come in the next slices; "Pad pauzeren" isn't in the launch scope.
+// button for the 1280px version, never print), "Anoniem meten", and "Alles downloaden" (export).
+// "Pad verwijderen" (M7); "Pad pauzeren" isn't in the launch scope.
 type Settings = { leap: boolean; keep: boolean; measure: boolean };
 
 export default function Privacy() {
@@ -81,6 +81,10 @@ export default function Privacy() {
             />
           </>
         ) : null}
+      </View>
+      <View>
+        <ListRow icon="download" title="Alles downloaden" subtitle="Foto’s, bijschriften en knuffels" onPress={() => router.push('/downloaden')} />
+        <ListRow icon="trash" title={`${possessive(name)} pad verwijderen`} subtitle="Na 30 dagen definitief" danger onPress={() => router.push('/verwijderen')} />
       </View>
       {message ? (
         <Text role="alert" style={[text('meta'), { color: color.plum }]}>

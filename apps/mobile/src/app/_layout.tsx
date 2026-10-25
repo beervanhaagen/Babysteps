@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { color, useTeddyFonts } from '@teddysteps/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { forgetExports } from '@/lib/export';
 import { askQuietly, listenForTaps, registerDevice } from '@/lib/push';
 import { startQueue } from '@/lib/queue';
 
@@ -27,6 +28,8 @@ function Routes() {
   // Uploads only run for a parent with a trail, in that parent's own queue.
   const userId = state.status === 'ready' ? state.session.user.id : null;
   const trailId = state.status === 'ready' ? state.trail.id : null;
+  // An export from earlier (M6) never stays in the cache longer than needed.
+  useEffect(() => forgetExports(), []);
   useEffect(() => (userId && trailId ? startQueue(userId, trailId) : undefined), [userId, trailId]);
   // Pushes: quiet permission on iPhone, this device stays registered for this parent, and a tap
   // opens Knuffels or the screen a seintje is about.
@@ -86,6 +89,7 @@ function Routes() {
         <Stack.Screen name="profiel" />
         <Stack.Screen name="jouw-naam" />
         <Stack.Screen name="privacy" />
+        <Stack.Screen name="verwijderen" options={{ gestureEnabled: false }} />
         <Stack.Screen name="ouder-uitnodigen" />
         <Stack.Screen name="geboren" />
         <Stack.Screen name="uitnodigen" />
@@ -96,6 +100,13 @@ function Routes() {
         <Stack.Screen name="activiteit" options={{ animation: 'none' }} />
         <Stack.Screen name="familie" options={{ animation: 'none' }} />
         <Stack.Screen name="ik" options={{ animation: 'none' }} />
+      </Stack.Protected>
+      {/* M7: while something is being deleted, only this screen, and downloading everything first. */}
+      <Stack.Protected guard={status === 'leaving'}>
+        <Stack.Screen name="vertrek" />
+      </Stack.Protected>
+      <Stack.Protected guard={status === 'ready' || status === 'leaving'}>
+        <Stack.Screen name="downloaden" options={{ gestureEnabled: false }} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'offline'}>
         <Stack.Screen name="opnieuw" />

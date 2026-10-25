@@ -1,12 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Alert, StyleSheet, Text } from 'react-native';
 import { Button, color, text, useAnnounce } from '@teddysteps/ui';
 import { useChildForm } from '@/components/ChildForm';
 import { Screen } from '@/components/Screen';
 import { TextLink } from '@/components/TextLink';
 import { signOut, useAuth } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
+import { requestDeletion, signOutEverywhere } from '@/lib/leave';
 import { myPartnerInvite } from '@/lib/family';
 import { supabase } from '@/lib/supabase';
 
@@ -28,6 +29,18 @@ export default function YourLittleOne() {
   const [formError, setFormError] = useState<string>();
   const [busy, setBusy] = useState(false);
   useAnnounce(formError);
+
+  function deleteAccount() {
+    Alert.alert('Account verwijderen?', 'Je account is dan binnen een uur weg. Er staat nog niets op een pad.', [
+      { text: 'Toch niet', style: 'cancel' },
+      {
+        text: 'Ja, verwijder',
+        style: 'destructive',
+        onPress: () =>
+          requestDeletion('account', true).then(signOutEverywhere, () => setFormError('Dat lukte even niet. Check je internet en probeer het opnieuw.')),
+      },
+    ]);
+  }
 
   async function next() {
     const values = check();
@@ -70,6 +83,8 @@ export default function YourLittleOne() {
       {/* A way out for a second parent who used the wrong address, so no duplicate trail. */}
       <Text style={styles.hint}>Uitgenodigd door je partner? Log dan in met het adres uit de mail.</Text>
       <TextLink onPress={() => signOut()}>Ander e-mailadres? Uitloggen</TextLink>
+      {/* Apple: an account can always be deleted in the app, also before there is a trail. */}
+      <TextLink onPress={deleteAccount}>Account verwijderen</TextLink>
     </Screen>
   );
 }
