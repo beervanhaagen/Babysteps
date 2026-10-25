@@ -75,7 +75,9 @@ export default function Trail() {
   );
 }
 
-const openWeek = (week: number, photo = 0) => router.push({ pathname: '/weekweergave/[week]', params: { week: String(week), foto: String(photo) } });
+/** T2b at a week, or at one photo of a moment. */
+const openWeek = (week: number, at?: { moment: string; photo: number }) =>
+  router.push({ pathname: '/weekweergave/[week]', params: { week: String(week), ...(at ? { moment: at.moment, foto: String(at.photo) } : {}) } });
 
 /** Above a week's photos: the week, its days, and "Bekijk week". */
 function WeekHeading({ week, now, days, onOpen }: { week: number; now?: boolean; days: string; onOpen?: () => void }) {
@@ -110,8 +112,6 @@ function Timeline({ moments, week, birthDate }: { moments: TrailMoment[]; week: 
   return (
     <View style={styles.timeline}>
       {weeks.map(([w, list]) => {
-        // Where each moment's photos start in the week, so a tap opens T2b at that photo.
-        const starts = list.map((_, i) => list.slice(0, i).reduce((n, m) => n + m.photos.length, 0));
         return (
           <View key={w} style={styles.week}>
             <View style={styles.gutter}>
@@ -119,7 +119,7 @@ function Timeline({ moments, week, birthDate }: { moments: TrailMoment[]; week: 
             </View>
             {list.length ? (
               // The photos run edge to edge, like a travel diary; everything else keeps the gutter.
-              list.map((m, i) => <Card key={m.key} moment={m} onOpen={(photo) => openWeek(w, starts[i] + photo)} />)
+              list.map((m) => <Card key={m.key} moment={m} onOpen={(photo) => openWeek(w, { moment: m.key, photo })} />)
             ) : (
               <View style={styles.gutter}>
                 <EmptyWeek />

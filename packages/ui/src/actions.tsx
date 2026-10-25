@@ -18,6 +18,8 @@ export interface ButtonProps {
   size?: 'lg' | 'md';
   block?: boolean;
   icon?: IconName;
+  /** An icon after the label, for "Volgende ›". */
+  iconAfter?: IconName;
   disabled?: boolean;
   /** While waiting for the server: shows "Even geduld…" and can't be pressed twice. */
   busy?: boolean;
@@ -28,7 +30,7 @@ export interface ButtonProps {
 }
 
 /** A sticker you could peel off: ink edge, hard drop, presses 3px into its shadow. */
-export function Button({ variant = 'primary', size = 'lg', block, icon, disabled: off, busy, onPress, accessibilityLabel, children }: ButtonProps) {
+export function Button({ variant = 'primary', size = 'lg', block, icon, iconAfter, disabled: off, busy, onPress, accessibilityLabel, children }: ButtonProps) {
   const v = VARIANTS[variant];
   const disabled = off || busy;
   const lg = size === 'lg';
@@ -58,6 +60,7 @@ export function Button({ variant = 'primary', size = 'lg', block, icon, disabled
     >
       {icon && !busy ? <Icon name={icon} size={22} weight={2.6} color={v.ink} /> : null}
       <Text style={[text(lg ? 'buttonLg' : 'buttonMd'), { color: v.ink, includeFontPadding: false }]}>{busy ? 'Even geduld…' : children}</Text>
+      {iconAfter && !busy ? <Icon name={iconAfter} size={22} weight={2.6} color={v.ink} /> : null}
     </Pressable>
   );
 }
