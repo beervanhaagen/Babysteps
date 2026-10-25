@@ -8,7 +8,12 @@
 
 html { scroll-behavior: smooth; scroll-padding-top: var(--space-6); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans); overflow-x: hidden; }
+body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans); }
+/* Tilted cards and stickers poke out a little; the page must never scroll sideways. On iPhone
+   Safari overflow on body alone doesn't hold, so html gets it too. Clip (where supported) keeps
+   sticky positioning working, unlike hidden. */
+html, body { overflow-x: hidden; max-width: 100%; }
+@supports (overflow: clip) { html, body { overflow-x: clip; } }
 main { display: block; }
 a { color: var(--ink); }
 a:hover { color: var(--plum); }

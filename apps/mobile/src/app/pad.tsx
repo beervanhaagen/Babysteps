@@ -40,30 +40,32 @@ export default function Trail() {
       ) : source === 'server' && !moments.length ? (
         <EmptyTrail week={week} />
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
-          {source === 'failed' || (source === 'cached' && !queue.length) ? (
-            <Banner tone="sunshine" character="bizzy" title="Je bent offline">
-              {source === 'failed'
-                ? 'Je pad verschijnt zodra je weer verbinding hebt.'
-                : 'Dit is je pad zoals we het kenden. Nieuwe dingen zie je zodra je weer verbinding hebt.'}
-            </Banner>
-          ) : null}
-          <Undo onRestored={refresh} />
-          <UploadStatus queue={queue} online={online && source !== 'failed'} />
-          {leap ? (
-            <NextUp
-              title={leap.title}
-              when={leap.when}
-              summary={leap.kind === 'leap' && leap.when ? `${leap.title}, ${leap.when}` : leap.title}
-              items={[leap.notice, leap.capture]}
-              tone="lilac"
-              footnote={leap.safety ?? undefined}
-              open={leapOpen}
-              onToggle={() => setLeapOpen(!leapOpen)}
-            >
-              {leap.disclaimer}
-            </NextUp>
-          ) : null}
+        <ScrollView contentContainerStyle={styles.content} alwaysBounceHorizontal={false} showsHorizontalScrollIndicator={false}>
+          <View style={styles.gutter}>
+            {source === 'failed' || (source === 'cached' && !queue.length) ? (
+              <Banner tone="sunshine" character="bizzy" title="Je bent offline">
+                {source === 'failed'
+                  ? 'Je pad verschijnt zodra je weer verbinding hebt.'
+                  : 'Dit is je pad zoals we het kenden. Nieuwe dingen zie je zodra je weer verbinding hebt.'}
+              </Banner>
+            ) : null}
+            <Undo onRestored={refresh} />
+            <UploadStatus queue={queue} online={online && source !== 'failed'} />
+            {leap ? (
+              <NextUp
+                title={leap.title}
+                when={leap.when}
+                summary={leap.kind === 'leap' && leap.when ? `${leap.title}, ${leap.when}` : leap.title}
+                items={[leap.notice, leap.capture]}
+                tone="lilac"
+                footnote={leap.safety ?? undefined}
+                open={leapOpen}
+                onToggle={() => setLeapOpen(!leapOpen)}
+              >
+                {leap.disclaimer}
+              </NextUp>
+            ) : null}
+          </View>
           <Timeline moments={shown} week={week} birthDate={trail.birthDate} />
         </ScrollView>
       )}
@@ -111,8 +113,17 @@ function Timeline({ moments, week, birthDate }: { moments: TrailMoment[]; week: 
         const starts = list.map((_, i) => list.slice(0, i).reduce((n, m) => n + m.photos.length, 0));
         return (
           <View key={w} style={styles.week}>
-            <WeekHeading week={w} now={w === week} days={weekSpan(birthDate, w)} onOpen={list.length ? () => openWeek(w) : undefined} />
-            {list.length ? list.map((m, i) => <Card key={m.key} moment={m} onOpen={(photo) => openWeek(w, starts[i] + photo)} />) : <EmptyWeek />}
+            <View style={styles.gutter}>
+              <WeekHeading week={w} now={w === week} days={weekSpan(birthDate, w)} onOpen={list.length ? () => openWeek(w) : undefined} />
+            </View>
+            {list.length ? (
+              // The photos run edge to edge, like a travel diary; everything else keeps the gutter.
+              list.map((m, i) => <Card key={m.key} moment={m} onOpen={(photo) => openWeek(w, starts[i] + photo)} />)
+            ) : (
+              <View style={styles.gutter}>
+                <EmptyWeek />
+              </View>
+            )}
           </View>
         );
       })}
@@ -242,9 +253,10 @@ function OnTheWay({ dueDate }: { dueDate: string }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
-  content: { paddingTop: 4, paddingHorizontal: space.space4, paddingBottom: 28, gap: 12 },
-  timeline: { gap: 12 },
-  week: { gap: 12 },
+  content: { paddingTop: 4, paddingBottom: 28, gap: 12 },
+  gutter: { paddingHorizontal: space.space4, gap: space.space3 },
+  timeline: { gap: space.space5 },
+  week: { gap: space.space4 },
   weekHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 10, paddingHorizontal: 4, minHeight: 44 },
   weekLabel: { ...text('eyebrow'), fontSize: 12, textTransform: 'uppercase' },
   weekMeta: { ...text('meta'), fontSize: 13, color: color.inkMuted },

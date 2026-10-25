@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ComponentRef, type ReactNode } from 'react';
-import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Character, Hug, Icon, type CharacterName, type IconName } from './brand';
 import { SvgMarkup } from './svg';
 import { useFocusRing } from './focus';
@@ -97,7 +97,7 @@ export interface MomentCardProps {
   date: string;
   hugs?: number;
   /**
-   * 'album' (Pad 3.0): one big photo (400px) to swipe through, "N foto's" and dots.
+   * 'album' (Pad 3.0): one big photo, full-bleed in portrait, to swipe through, "N foto's" and dots.
    * 'large': photos on top at a fixed height. 'compact': one photo beside the words.
    */
   layout?: 'album' | 'large' | 'compact';
@@ -116,7 +116,7 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
     <View style={[styles.momentBody, !compact && styles.momentBodyLarge, layout === 'album' && styles.albumBody]}>
       {first ? <FirstLabel {...first} /> : null}
       {caption ? (
-        <Text style={[styles.momentTitle, compact && { fontSize: 17 }, layout === 'album' && { fontSize: 19, lineHeight: 24 }]} numberOfLines={compact ? 3 : 4}>
+        <Text style={[styles.momentTitle, compact && { fontSize: 17 }, layout === 'album' && text('titleM')]} numberOfLines={compact ? 3 : 4}>
           {caption}
         </Text>
       ) : null}
@@ -159,15 +159,17 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
   );
 }
 
-const ALBUM_HEIGHT = 400;
-
 /**
  * Pad 3.0: the photos big, one at a time, swiped sideways. Each photo and the words open the
  * week (T2b) at the photo shown. Screen readers get the photos as one adjustable image.
  */
 function AlbumCard({ photos, alt, label, words, onPress }: { photos: ReactNode[]; alt?: string; label: string; words: ReactNode; onPress?: (photo: number) => void }) {
   const focus = useFocusRing();
-  const [width, setWidth] = useState(0);
+  const screen = useWindowDimensions();
+  const [width, setWidth] = useState(screen.width);
+  // Like a travel diary (owner, 25 October 2026): the photo edge to edge in portrait (4:5),
+  // at most about two thirds of the screen, so the next moment still peeks in.
+  const height = Math.min(Math.round(width * 1.25), Math.round(screen.height * 0.68));
   const [page, setPage] = useState(0);
   const pager = useRef<ComponentRef<typeof ScrollView>>(null);
   const reduced = useReducedMotion();
@@ -178,28 +180,32 @@ function AlbumCard({ photos, alt, label, words, onPress }: { photos: ReactNode[]
     setPage(next);
   };
   return (
-    <View style={[styles.moment, styles.album]}>
+    <View style={styles.album}>
       <View
-        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+        // Whole pixels, so paging never leaves a sliver of the next photo.
+        onLayout={(e) => setWidth(Math.round(e.nativeEvent.layout.width))}
         accessible
-        accessibilityRole="adjustable"
+        accessibilityRole={count > 1 ? 'adjustable' : 'image'}
         accessibilityLabel={alt}
         accessibilityValue={{ text: count > 1 ? `foto ${page + 1} van ${count}` : undefined }}
-        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }, { name: 'activate' }]}
+        accessibilityActions={count > 1 ? [{ name: 'increment' }, { name: 'decrement' }, { name: 'activate' }] : [{ name: 'activate' }]}
         onAccessibilityAction={(e) =>
           e.nativeEvent.actionName === 'increment' ? go(page + 1) : e.nativeEvent.actionName === 'decrement' ? go(page - 1) : onPress?.(page)
         }
-        style={styles.albumPhotos}
+        style={[styles.albumPhotos, { height }]}
       >
         <ScrollView
           ref={pager}
           horizontal
           pagingEnabled
+          // One photo: nothing to swipe to, and no empty space to drag into.
+          scrollEnabled={count > 1}
+          bounces={count > 1}
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(e) => width && setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
         >
           {(count ? photos : [undefined]).map((photo, i) => (
-            <Pressable key={i} onPress={() => onPress?.(i)} style={{ width, height: ALBUM_HEIGHT }}>
+            <Pressable key={i} onPress={() => onPress?.(i)} style={({ pressed }) => [{ width, height }, pressed && { opacity: 0.85 }]}>
               <Tile>{photo}</Tile>
             </Pressable>
           ))}
@@ -225,12 +231,13 @@ function AlbumCard({ photos, alt, label, words, onPress }: { photos: ReactNode[]
           onPress={() => onPress(page)}
           onFocus={focus.onFocus}
           onBlur={focus.onBlur}
-          style={({ pressed }) => [pressed && { opacity: 0.7 }, focus.ring]}
+          // Inset, so the focus ring stays on screen next to a full-bleed photo.
+          style={({ pressed }) => [styles.albumWords, pressed && { opacity: 0.7 }, focus.ring]}
         >
           {words}
         </Pressable>
       ) : (
-        <View accessible accessibilityLabel={label}>
+        <View accessible accessibilityLabel={label} style={styles.albumWords}>
           {words}
         </View>
       )}
@@ -572,13 +579,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   eyebrow: { ...text('eyebrow'), textTransform: 'uppercase' },
-  album: { maxWidth: undefined },
-  albumBody: { paddingHorizontal: 16 },
-  albumPhotos: { height: ALBUM_HEIGHT, backgroundColor: color.ink, borderBottomWidth: border.edge, borderBottomColor: color.ink },
+  // Full-bleed: no card, no edge; the page's own gutter is for the words.
+  album: { width: '100%' },
+  // With albumWords' margin the text sits 20px in (space5); the margin keeps the focus ring on screen.
+  albumWords: { marginHorizontal: space.space4 },
+  albumBody: { paddingHorizontal: space.space1, paddingTop: space.space3, paddingBottom: space.space2 },
+  albumPhotos: { backgroundColor: color.ink },
   albumCount: {
     position: 'absolute',
-    right: 12,
-    top: 12,
+    right: space.space4,
+    top: space.space4,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
@@ -590,7 +600,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
   },
   albumCountText: { ...text('meta'), fontSize: 12, lineHeight: 16, fontFamily: fontFamily('sans', 800) },
-  albumDots: { position: 'absolute', left: 0, right: 0, bottom: 10, flexDirection: 'row', justifyContent: 'center', gap: 5 },
+  albumDots: { position: 'absolute', left: 0, right: 0, bottom: space.space3, flexDirection: 'row', justifyContent: 'center', gap: space.space1 },
   albumDot: { width: 7, height: 7, borderRadius: 4, borderWidth: 1.5, borderColor: color.ink, backgroundColor: `${color.white}73` },
   albumDotOn: { backgroundColor: color.white },
   momentPressed: { transform: [{ translateY: 2 }], boxShadow: `0 1px 0 0 ${color.ink}` },
