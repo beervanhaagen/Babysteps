@@ -79,6 +79,9 @@ function Routes() {
         <Stack.Screen name="week/[id]" />
         <Stack.Screen name="verwijderd" />
         <Stack.Screen name="meldingen" />
+        <Stack.Screen name="profiel" />
+        <Stack.Screen name="jouw-naam" />
+        <Stack.Screen name="privacy" />
         <Stack.Screen name="geboren" />
         <Stack.Screen name="uitnodigen" />
         <Stack.Screen name="inhalen" options={{ gestureEnabled: false }} />

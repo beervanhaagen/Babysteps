@@ -2,7 +2,8 @@
 // Family has no database login: a personal link code is swapped once for a session cookie
 // (__Host-ts, HttpOnly), and every request after that is checked here with the service role.
 // Family only ever gets the view or small version of moments that are ready, 12 at a time,
-// through signed links that expire after 15 minutes; never a print version.
+// through signed links that expire after 15 minutes; never a print version. When the parents
+// allow keeping photos (M6), /keep gives a 60-second download link to the view version.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { ipHash } from '../_shared/ip.ts';
 import { button, C, COMPANY, frame, send, SERIF, SIGN_OFF, unsubscribeMember } from '../_shared/mail.ts';
@@ -80,8 +81,9 @@ const PAGE_SIZE = 12;
 
 /** One page of postcards: at most 12, links only for the version this screen shows. */
 async function page(who: { member: string; trail: string }, skip: number, wide: boolean) {
-  const [{ data: child }, { data: me }, { data: rows }] = await Promise.all([
+  const [{ data: child }, { data: trail }, { data: me }, { data: rows }] = await Promise.all([
     service.from('children').select('first_name, birth_date').eq('trail_id', who.trail).single(),
+    service.from('trails').select('family_may_keep_photos').eq('id', who.trail).single(),
     service.from('circle_members').select('label, relation, email, email_frequency, joined_at, book_list_at').eq('id', who.member).single(),
     // One more than shown, to know whether there are older ones.
     service.rpc('family_page', { member: who.member, skip, page_size: PAGE_SIZE + 1 }),
@@ -115,6 +117,8 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
       myHugs: m.my_hugs,
     })),
     more: all.length > PAGE_SIZE,
+    // M6 "Familie mag foto's bewaren": shows the "Bewaar" button; /keep checks it again.
+    mayKeep: !!trail?.family_may_keep_photos,
   };
 }
 
@@ -223,6 +227,28 @@ Deno.serve(async (request) => {
     if (error) return json(404, { error: 'unknown moment' });
     const counts = (data as { mine: number; total: number }[])[0];
     return json(200, counts);
+  }
+
+  // M6: a 5-minute download link to the view version (1280px), never print, only while the
+  // parents allow it (checked in the database on every tap).
+  if (route === '/keep' && request.method === 'POST') {
+    const position = typeof body.position === 'number' ? body.position : NaN;
+    if (typeof body.moment !== 'string' || !/^[0-9a-f-]{36}$/.test(body.moment) || !Number.isInteger(position) || position < 0 || position > 9) {
+      return json(422, { error: 'bad request' });
+    }
+    const { data: path, error: keepError } = await service.rpc('family_keep_photo', { member: who.member, kept_moment: body.moment, photo_position: position });
+    if (keepError) return json(500, { error: 'failed' });
+    if (!path) return json(403, { error: 'not allowed' });
+    // A name to find it back by ("lotte-week-31-1.webp"), not twenty "teddysteps-foto (3)" files.
+    const [{ data: child }, { data: week }] = await Promise.all([
+      service.from('children').select('first_name').eq('trail_id', who.trail).single(),
+      service.from('moments').select('trail_week').eq('id', body.moment).single(),
+    ]);
+    const base = (child?.first_name ?? 'teddysteps').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'teddysteps';
+    const name = `${base}-week-${week?.trail_week ?? 0}-${position + 1}.webp`;
+    const { data } = await service.storage.from('view').createSignedUrl(path as string, 60, { download: name });
+    if (!data) return json(500, { error: 'no link' });
+    return json(200, { url: publicLink(data.signedUrl) });
   }
 
   if (route === '/book' && request.method === 'POST') {

@@ -26,12 +26,16 @@ export interface FamilyPage {
   moments: FamilyMoment[];
   /** Older postcards exist ("Eerdere kaartjes"). */
   more: boolean;
+  /** The parents allow keeping photos (M6): show "Bewaar foto". */
+  mayKeep: boolean;
 }
 
 /** No session, or the link doesn't (or no longer) work. */
 export class NoAccess extends Error {}
 /** The link is already in use on five devices. */
 export class TooManyDevices extends Error {}
+/** Not allowed (any more), e.g. the parents just switched keeping photos off. */
+export class NotAllowed extends Error {}
 
 async function call<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(`/api${path}`, {
@@ -42,6 +46,7 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
   });
   if (response.status === 401 || response.status === 404) throw new NoAccess();
   if (response.status === 409) throw new TooManyDevices();
+  if (response.status === 403) throw new NotAllowed();
   if (!response.ok) throw new Error(`family-api ${response.status}`);
   return response.json() as Promise<T>;
 }
@@ -54,5 +59,6 @@ export const api = {
   unsubscribe: (token: string) => call<{ ok: true }>(`/afmelden/${token}`, {}),
   hug: (moment: string) => call<{ mine: number; total: number }>('/hug', { moment }),
   bookList: () => call<{ ok: true }>('/book', {}),
+  keep: (moment: string, position: number) => call<{ url: string }>('/keep', { moment, position }),
   leave: () => call<{ ok: true }>('/leave', {}),
 };

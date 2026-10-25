@@ -2,7 +2,7 @@ import { ageLine, longDutchDate, possessive, todayInAmsterdam, trailWeek, type C
 import { useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { border, Button, Character, color, fontFamily, IconButton, Scallop, shadow, text, Wordmark } from '@teddysteps/ui';
-import { api, type FamilyMoment, type FamilyPage } from '../api';
+import { api, NotAllowed, type FamilyMoment, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
 import { Heading, Page, Photo, TextLink } from './shared';
 
@@ -74,12 +74,12 @@ export function Cards({ page, onHugged, onOlder }: CardsProps) {
               {page.moments.length ? (
                 <>
                   <Text style={[styles.groupTitle, { fontSize: 20 }]}>{page.moments[0].week === week ? 'Nieuw deze week' : 'Het nieuwste moment'}</Text>
-                  <Card moment={page.moments[0]} size="lg" onHugged={onHugged} />
+                  <Card moment={page.moments[0]} size="lg" mayKeep={page.mayKeep} onHugged={onHugged} />
                   {page.moments.length > 1 ? <Text style={[styles.groupTitle, { fontSize: 20 }]}>Eerder</Text> : null}
                   <View style={styles.grid}>
                     {page.moments.slice(1).map((m, i) => (
                       <View key={m.id} style={styles.gridCell}>
-                        <Card moment={m} size="sm" onHugged={onHugged} />
+                        <Card moment={m} size="sm" mayKeep={page.mayKeep} onHugged={onHugged} />
                       </View>
                     ))}
                   </View>
@@ -97,7 +97,7 @@ export function Cards({ page, onHugged, onOlder }: CardsProps) {
               <Text style={styles.groupTitle}>{group.title}</Text>
               <View style={styles.cards}>
                 {group.moments.map((m, i) => (
-                  <Card key={m.id} moment={m} size="md" onHugged={onHugged} />
+                  <Card key={m.id} moment={m} size="md" mayKeep={page.mayKeep} onHugged={onHugged} />
                 ))}
               </View>
             </View>
@@ -151,9 +151,24 @@ function Aside({ page }: { page: FamilyPage }) {
   );
 }
 
-function Card({ moment: m, size, onHugged }: { moment: FamilyMoment; size: 'sm' | 'md' | 'lg'; onHugged: CardsProps['onHugged'] }) {
+function Card({ moment: m, size, mayKeep, onHugged }: { moment: FamilyMoment; size: 'sm' | 'md' | 'lg'; mayKeep: boolean; onHugged: CardsProps['onHugged'] }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [keeping, setKeeping] = useState(false);
+  const [keepProblem, setKeepProblem] = useState<'failed' | 'off'>();
+  // M6: only when the parents allow it; the browser downloads the photo on this card (1280px).
+  async function keep() {
+    if (keeping) return;
+    setKeeping(true);
+    setKeepProblem(undefined);
+    try {
+      const { url } = await api.keep(m.id, 0);
+      window.location.assign(url);
+    } catch (e) {
+      setKeepProblem(e instanceof NotAllowed ? 'off' : 'failed');
+    }
+    setKeeping(false);
+  }
   async function hug() {
     setBusy(true);
     setFailed(false);
@@ -188,7 +203,17 @@ function Card({ moment: m, size, onHugged }: { moment: FamilyMoment; size: 'sm' 
         <Button icon="heart" block={size !== 'lg'} busy={busy} onPress={hug} accessibilityLabel={`Knuffelen: ${title}`}>
           {m.myHugs ? 'Nog een knuffel' : 'Knuffelen'}
         </Button>
+        {mayKeep && m.photos.length && keepProblem !== 'off' ? (
+          <Button icon="download" variant="paper" block={size !== 'lg'} busy={keeping} onPress={keep} accessibilityLabel={`Bewaar de foto: ${title}`}>
+            Bewaar foto
+          </Button>
+        ) : null}
       </View>
+      {keepProblem ? (
+        <Text role="alert" style={styles.error}>
+          {keepProblem === 'off' ? 'Foto’s bewaren kan nu niet meer: de ouders hebben het uitgezet.' : 'Bewaren lukte even niet. Probeer het zo nog eens.'}
+        </Text>
+      ) : null}
       {failed ? (
         <Text role="alert" style={styles.error}>
           Je knuffel kwam niet aan. Probeer het zo nog eens.
@@ -249,7 +274,7 @@ const styles = StyleSheet.create({
   cardTitle: { ...text('titleM'), fontSize: 25, lineHeight: 29 },
   meta: { fontFamily: fontFamily('sans', 700), fontSize: 15, lineHeight: 21, color: color.inkMuted },
   mine: { fontFamily: fontFamily('sans', 800), fontSize: 15, lineHeight: 21, color: color.ink },
-  actions: { paddingHorizontal: 4, paddingBottom: 6 },
+  actions: { paddingHorizontal: 4, paddingBottom: 6, gap: 8 },
   error: { fontFamily: fontFamily('sans', 700), fontSize: 15, color: color.plum, paddingHorizontal: 8, paddingBottom: 6 },
   empty: { alignItems: 'center', gap: 12, paddingTop: 40 },
   emptyText: { fontFamily: fontFamily('sans', 400), fontSize: 17, lineHeight: 25, color: color.ink, textAlign: 'center' },

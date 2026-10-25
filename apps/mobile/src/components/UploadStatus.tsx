@@ -34,7 +34,7 @@ export function UploadStatus({ queue, online }: { queue: QueuedMoment[]; online:
               Nu opnieuw proberen
             </Button>
           ) : null}
-          <TextLink onPress={() => Linking.openURL('mailto:feedback@teddysteps.nl?subject=Uploaden%20lukt%20niet')}>
+          <TextLink onPress={() => Linking.openURL('mailto:hallo@teddysteps.nl?subject=Uploaden%20lukt%20niet')}>
             Blijft het misgaan? Laat het ons weten
           </TextLink>
         </>
