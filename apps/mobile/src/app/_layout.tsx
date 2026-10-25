@@ -64,6 +64,9 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={status === 'onboarding'}>
         <Stack.Screen name="kleintje" />
+      </Stack.Protected>
+      {/* Invited as the second parent: from O2, or from an own trail that is still empty. */}
+      <Stack.Protected guard={status === 'onboarding' || status === 'ready'}>
         <Stack.Screen name="ouder-uitnodiging" />
       </Stack.Protected>
       <Stack.Protected guard={status === 'ready'}>

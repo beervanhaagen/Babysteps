@@ -11,7 +11,7 @@ import { acceptPartnerInvite, InviteRefused, myPartnerInvite } from '@/lib/famil
 // M3, the invited parent after signing in (with exactly the invited, confirmed address): join the
 // trail, or start an own one (O2). Someone who already has a trail never gets here (M2 is later).
 export default function PartnerInvite() {
-  const { refresh } = useAuth();
+  const { state, refresh } = useAuth();
   const [invite, setInvite] = useState<{ id: string; child: string; inviter: string | null } | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
@@ -21,8 +21,8 @@ export default function PartnerInvite() {
     myPartnerInvite().then(setInvite, () => setInvite(null));
   }, []);
   useEffect(() => {
-    if (invite === null) router.replace('/kleintje');
-  }, [invite]);
+    if (invite === null) router.replace(state.status === 'ready' ? '/pad' : '/kleintje');
+  }, [invite, state.status]);
   if (!invite) {
     return (
       <Screen header={{ title: 'Even kijken…', color: 'lilac', character: 'tiggy' }}>
@@ -54,7 +54,9 @@ export default function PartnerInvite() {
           <Button block onPress={join} busy={busy}>
             Ja, ik doe mee
           </Button>
-          <TextLink onPress={() => router.replace({ pathname: '/kleintje', params: { eigen: '1' } })}>Nee, ik begin een eigen pad</TextLink>
+          <TextLink onPress={() => (state.status === 'ready' ? router.back() : router.replace({ pathname: '/kleintje', params: { eigen: '1' } }))}>
+            {state.status === 'ready' ? 'Nee, ik houd mijn eigen pad' : 'Nee, ik begin een eigen pad'}
+          </TextLink>
         </>
       }
     >

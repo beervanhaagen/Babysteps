@@ -1,7 +1,7 @@
 -- Tests for M3: inviting the other parent. Run: npx supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(26);
+select plan(31);
 
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at)
 values
@@ -84,6 +84,30 @@ create temp table to_parent on commit drop as select id from public.invite_paren
 set local request.jwt.claims = '{"sub": "96666666-6666-6666-6666-666666666666", "role": "authenticated"}';
 select is((select count(*) from public.my_parent_invite()), 0::bigint, 'someone with a trail sees no invite');
 select throws_ok(format('select public.accept_parent_invite(%L)', (select id from to_parent)), '23514', null, 'and cannot join a second trail');
+
+-- Lars made an own, still empty trail before the invite came: he may swap it.
+reset role;
+insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at)
+values ('00000000-0000-0000-0000-000000000000', '9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'authenticated', 'authenticated', 'lars@voorbeeld.nl', now());
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", "role": "authenticated"}';
+select public.create_trail('Leeg', '2026-04-02', '2026-04-02');
+reset role;
+update public.parent_invites set sent_at = now() - interval '2 days' where trail_id = (select trail_id from public.trail_parents where user_id = '99999999-9999-9999-9999-999999999999');
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "99999999-9999-9999-9999-999999999999", "role": "authenticated"}';
+create temp table to_lars on commit drop as select id from public.invite_parent('lars@voorbeeld.nl');
+set local request.jwt.claims = '{"sub": "9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", "role": "authenticated"}';
+select is((select child from public.my_parent_invite()), 'Noor', 'an empty own trail doesn''t hide the invite');
+select lives_ok(format('select public.accept_parent_invite(%L)', (select id from to_lars)), 'he joins');
+select is((select count(*) from public.children where first_name = 'Leeg'), 0::bigint, 'and the empty trail is gone');
+-- Kim can take Lars off again (a typo), within 7 days; Lars can't do that to Kim.
+select throws_ok(format('select public.remove_joined_parent(%L)', (select id from to_lars)), '42501', null, 'only the inviter can undo it');
+set local request.jwt.claims = '{"sub": "99999999-9999-9999-9999-999999999999", "role": "authenticated"}';
+select public.remove_joined_parent((select id from to_lars));
+reset role;
+select is((select count(*) from public.trail_parents where user_id = '9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 0::bigint, 'the inviter took the wrong parent off');
+set local role authenticated;
 -- A trail being deleted invites nobody.
 reset role;
 update public.trails set delete_requested_at = now() where id = (select trail_id from public.trail_parents where user_id = '99999999-9999-9999-9999-999999999999');

@@ -1,8 +1,8 @@
-import { firstLook, leapCard, longDutchDate, todayInAmsterdam, TRAIL_WEEKS, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
+import { firstLook, leapCard, longDutchDate, possessive, todayInAmsterdam, TRAIL_WEEKS, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Banner, border, Button, Character, color, fontFamily, Icon, MomentCard, NextUp, radius, space, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
+import { Banner, border, Button, Callout, Character, color, fontFamily, Icon, MomentCard, NextUp, radius, space, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 import { Photo } from '@/components/Photo';
 import { TextLink } from '@/components/TextLink';
@@ -11,6 +11,7 @@ import { TrailHeader } from '@/components/TrailHeader';
 import { UploadStatus } from '@/components/UploadStatus';
 import { useAuth } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
+import { myPartnerInvite } from '@/lib/family';
 import { restoreMoment } from '@/lib/moments';
 import { byWeek, dayOf, useQueue, useTrailMoments, type TrailMoment } from '@/lib/trail';
 
@@ -208,8 +209,23 @@ function Undo({ onRestored }: { onRestored: () => Promise<void> }) {
 
 /** X1 Leeg pad. */
 function EmptyTrail({ week }: { week: number }) {
+  // Invited as a parent after starting an own (still empty) trail: that invite comes first.
+  const [invite, setInvite] = useState<{ inviter: string | null; child: string } | null>(null);
+  useEffect(() => {
+    myPartnerInvite().then(setInvite, () => undefined);
+  }, []);
   return (
     <View style={styles.center}>
+      {invite ? (
+        <Callout title={`${invite.inviter ?? 'De andere ouder'} nodigde je uit`} tone="lilac">
+          {`Doe mee met ${possessive(invite.child)} pad. Je eigen lege pad verdwijnt dan.`}
+        </Callout>
+      ) : null}
+      {invite ? (
+        <Button block onPress={() => router.push('/ouder-uitnodiging')}>
+          Bekijk de uitnodiging
+        </Button>
+      ) : null}
       <Doodles />
       <Character name="bo" size={130} decorative />
       <Text accessibilityRole="header" style={[text('titleL'), styles.centerText]}>

@@ -1,22 +1,30 @@
 import { possessive } from '@teddysteps/core';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { color, PersonRow, text } from '@teddysteps/ui';
 import { CircleList } from '@/components/CircleList';
 import { Screen } from '@/components/Screen';
 import { Tabs } from '@/components/Tabs';
 import { useAuth } from '@/lib/auth';
 import { TextLink } from '@/components/TextLink';
-import { cancelPartnerInvite, useCircle, useParents } from '@/lib/family';
+import { cancelPartnerInvite, removeJoinedParent, useCircle, useParents } from '@/lib/family';
 
 // M3 Familie en rollen: the parents (and inviting the other one), who is in the circle, a new
 // link, withdrawing; devices per person on their own screen (kring/[id]).
 export default function Family() {
   const { state } = useAuth();
   const { members } = useCircle();
-  const { parents, invite, refresh } = useParents();
+  const { parents, invite, recent, refresh } = useParents();
   const [cancelFailed, setCancelFailed] = useState(false);
+
+  // A typo in the address made someone else a parent: undo it, within 7 days of joining.
+  function takeOff(who: string, inviteId: string) {
+    Alert.alert(`${who} eraf halen?`, `${who} kan het pad dan niet meer zien. Was het toch goed? Dan nodig je opnieuw uit.`, [
+      { text: 'Toch niet', style: 'cancel' },
+      { text: 'Ja, haal eraf', style: 'destructive', onPress: () => removeJoinedParent(inviteId).then(refresh, () => setCancelFailed(true)) },
+    ]);
+  }
   const name = state.status === 'ready' ? state.trail.childName : '';
   const joined = members?.filter((m) => m.joinedAt).length ?? 0;
 
@@ -40,6 +48,8 @@ export default function Family() {
               name={p.isMe ? (p.firstName ? `${p.firstName} (jij)` : 'Jij') : (p.firstName ?? 'De andere ouder')}
               role="Ouder · kan toevoegen en aanpassen"
               tone="pistachio"
+              action={recent && recent.userId === p.userId ? 'Haal eraf' : undefined}
+              onAction={recent && recent.userId === p.userId ? () => takeOff(p.firstName ?? 'deze ouder', recent.invite) : undefined}
             />
           ))}
           {invite ? (

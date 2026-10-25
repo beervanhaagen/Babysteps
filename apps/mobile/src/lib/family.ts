@@ -205,12 +205,20 @@ export interface PartnerInvite {
   sentAt: string;
 }
 
+/** A parent who joined on this parent's invite in the last 7 days: can still be taken off. */
+export interface RecentJoin {
+  invite: string;
+  userId: string;
+}
+
 /** The parents of this trail, and an open invite for the second one. */
 export function useParents() {
   const [parents, setParents] = useState<Parent[] | null>(null);
   const [invite, setInvite] = useState<PartnerInvite | null>(null);
+  const [recent, setRecent] = useState<RecentJoin | null>(null);
   const refresh = useCallback(async () => {
-    const [list, open] = await Promise.all([
+    const { data: me } = await supabase.auth.getUser();
+    const [list, open, joined] = await Promise.all([
       supabase.rpc('trail_parents_list'),
       supabase
         .from('parent_invites')
@@ -220,7 +228,17 @@ export function useParents() {
         .gt('expires_at', new Date().toISOString())
         .order('sent_at', { ascending: false })
         .limit(1),
+      supabase
+        .from('parent_invites')
+        .select('id, accepted_by')
+        .eq('invited_by', me.user?.id ?? '')
+        .is('removed_at', null)
+        .not('accepted_by', 'is', null)
+        .gt('accepted_at', new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString())
+        .limit(1),
     ]);
+    const join = (joined.data ?? [])[0] as { id: string; accepted_by: string } | undefined;
+    setRecent(join ? { invite: join.id, userId: join.accepted_by } : null);
     setParents(((list.data ?? []) as { user_id: string; first_name: string | null; is_me: boolean }[]).map((p) => ({ userId: p.user_id, firstName: p.first_name, isMe: p.is_me })));
     const row = (open.data ?? [])[0] as { id: string; email: string; sent_at: string } | undefined;
     setInvite(row ? { id: row.id, email: row.email, sentAt: row.sent_at } : null);
@@ -230,7 +248,7 @@ export function useParents() {
       void refresh();
     }, [refresh]),
   );
-  return { parents, invite, refresh };
+  return { parents, invite, recent, refresh };
 }
 
 /** Errors from the parent-invite function, by what the parent can do about them. */
@@ -255,6 +273,12 @@ async function parentInvite(body: Record<string, string>) {
 
 export const invitePartner = (email: string) => parentInvite({ action: 'invite', email });
 export const acceptPartnerInvite = (invite: string) => parentInvite({ action: 'accept', invite });
+
+/** Within 7 days of joining: the inviter takes a wrongly joined parent off again. */
+export async function removeJoinedParent(invite: string) {
+  const { error } = await supabase.rpc('remove_joined_parent', { invite });
+  if (error) throw error;
+}
 
 export async function cancelPartnerInvite(invite: string) {
   const { error } = await supabase.rpc('cancel_parent_invite', { invite });

@@ -50,7 +50,7 @@ function joinedMail(child: string, joinerEmail: string, joinerName: string | nul
 
 ${who} doet nu mee als ouder op het pad van ${child}. Jullie kunnen nu allebei momenten vastpinnen en alles zien.
 
-Klopt dit niet? Mail ons meteen op hallo@teddysteps.nl, dan halen we diegene eraf.
+Klopt dit niet? Haal diegene er binnen 7 dagen zelf af in de app, bij Familie. Of mail ons op hallo@teddysteps.nl.
 
 Liefs, TeddySteps
 
@@ -60,7 +60,7 @@ ${COMPANY}`;
     `<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${C.inkMuted};">Samen een pad</p>
 <h1 style="margin:0 0 14px;font-family:${SERIF};font-size:28px;line-height:32px;font-weight:bold;color:${C.ink};">Jullie zijn met z'n tweeën</h1>
 <p style="margin:0 0 14px;"><b>${escapeHtml(who)}</b> doet nu mee als ouder op het pad van ${escapeHtml(child)}. Jullie kunnen nu allebei momenten vastpinnen en alles zien.</p>
-<p style="margin:0;font-size:14px;line-height:21px;color:${C.inkMuted};">Klopt dit niet? Mail ons meteen op hallo@teddysteps.nl, dan halen we diegene eraf.</p>
+<p style="margin:0;font-size:14px;line-height:21px;color:${C.inkMuted};">Klopt dit niet? Haal diegene er binnen 7 dagen zelf af in de app, bij Familie. Of mail ons op hallo@teddysteps.nl.</p>
 ${SIGN_OFF}`,
     COMPANY,
     escapeHtml(`${who} doet nu mee.`),
