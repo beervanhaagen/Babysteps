@@ -82,6 +82,29 @@ export async function revokeFamily(memberId: string) {
   if (error) throw error;
 }
 
+/** M3: the devices a family member's link is open on (a rough name and dates, never a token). */
+export interface FamilyDevice {
+  id: string;
+  hint: string;
+  lastUsedOn: string;
+}
+
+export async function memberDevices(memberId: string): Promise<FamilyDevice[]> {
+  const { data, error } = await supabase.rpc('member_devices', { member: memberId });
+  if (error) throw error;
+  return ((data ?? []) as { id: string; device_hint: string | null; last_used_on: string }[]).map((d) => ({
+    id: d.id,
+    hint: d.device_hint ?? 'Een browser',
+    lastUsedOn: d.last_used_on,
+  }));
+}
+
+/** Logs out one device; the link keeps working elsewhere. */
+export async function revokeDevice(deviceId: string) {
+  const { error } = await supabase.rpc('revoke_device', { device: deviceId });
+  if (error) throw error;
+}
+
 export interface ActivityItem {
   key: string;
   kind: 'hug' | 'joined';
@@ -166,4 +189,81 @@ export function useUnseenHugs() {
     }, []),
   );
   return count;
+}
+
+// M3, the other parent (supabase/migrations/20261025120000_parent_invites.sql, function
+// `parent-invite` for the mails). Both parents have the same rights.
+export interface Parent {
+  userId: string;
+  firstName: string | null;
+  isMe: boolean;
+}
+
+export interface PartnerInvite {
+  id: string;
+  email: string;
+  sentAt: string;
+}
+
+/** The parents of this trail, and an open invite for the second one. */
+export function useParents() {
+  const [parents, setParents] = useState<Parent[] | null>(null);
+  const [invite, setInvite] = useState<PartnerInvite | null>(null);
+  const refresh = useCallback(async () => {
+    const [list, open] = await Promise.all([
+      supabase.rpc('trail_parents_list'),
+      supabase
+        .from('parent_invites')
+        .select('id, email, sent_at')
+        .is('accepted_at', null)
+        .is('cancelled_at', null)
+        .gt('expires_at', new Date().toISOString())
+        .order('sent_at', { ascending: false })
+        .limit(1),
+    ]);
+    setParents(((list.data ?? []) as { user_id: string; first_name: string | null; is_me: boolean }[]).map((p) => ({ userId: p.user_id, firstName: p.first_name, isMe: p.is_me })));
+    const row = (open.data ?? [])[0] as { id: string; email: string; sent_at: string } | undefined;
+    setInvite(row ? { id: row.id, email: row.email, sentAt: row.sent_at } : null);
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh]),
+  );
+  return { parents, invite, refresh };
+}
+
+/** Errors from the parent-invite function, by what the parent can do about them. */
+export class InviteRefused extends Error {
+  constructor(public reason: 'address' | 'full' | 'limit' | 'gone' | 'other') {
+    super(reason);
+  }
+}
+
+// The database's own error code, from the function's answer (sturdier than the HTTP status:
+// a function that isn't there also answers 404).
+const REASON: Record<string, InviteRefused['reason']> = { '22023': 'address', '23514': 'full', '54000': 'limit', P0002: 'gone' };
+
+async function parentInvite(body: Record<string, string>) {
+  const { data, error } = await supabase.functions.invoke('parent-invite', { body });
+  if (error) {
+    const answer = await (error as { context?: Response }).context?.json?.().catch(() => null);
+    throw new InviteRefused(REASON[answer?.error] ?? 'other');
+  }
+  return data as { ok: true; sent?: boolean; trail?: string };
+}
+
+export const invitePartner = (email: string) => parentInvite({ action: 'invite', email });
+export const acceptPartnerInvite = (invite: string) => parentInvite({ action: 'accept', invite });
+
+export async function cancelPartnerInvite(invite: string) {
+  const { error } = await supabase.rpc('cancel_parent_invite', { invite });
+  if (error) throw error;
+}
+
+/** For someone signed in without a trail: an invite to join one, if there is one. */
+export async function myPartnerInvite(): Promise<{ id: string; child: string; inviter: string | null } | null> {
+  const { data } = await supabase.rpc('my_parent_invite');
+  const row = ((data ?? []) as { id: string; child: string; inviter: string | null }[])[0];
+  return row ?? null;
 }

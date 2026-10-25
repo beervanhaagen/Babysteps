@@ -2,11 +2,12 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { color, fontFamily, size, useFocusRing } from '@teddysteps/ui';
 
 /** A bold text link with a 44px tap target, like "Ik heb al een account". */
-export function TextLink({ children, onPress, disabled }: { children: string; onPress: () => void; disabled?: boolean }) {
+export function TextLink({ children, onPress, disabled, accessibilityLabel }: { children: string; onPress: () => void; disabled?: boolean; accessibilityLabel?: string }) {
   const focus = useFocusRing();
   return (
     <Pressable
       accessibilityRole="link"
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

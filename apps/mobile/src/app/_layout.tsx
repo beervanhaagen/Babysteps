@@ -64,6 +64,7 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={status === 'onboarding'}>
         <Stack.Screen name="kleintje" />
+        <Stack.Screen name="ouder-uitnodiging" />
       </Stack.Protected>
       <Stack.Protected guard={status === 'ready'}>
         <Stack.Screen name="pad" />
@@ -82,6 +83,7 @@ function Routes() {
         <Stack.Screen name="profiel" />
         <Stack.Screen name="jouw-naam" />
         <Stack.Screen name="privacy" />
+        <Stack.Screen name="ouder-uitnodigen" />
         <Stack.Screen name="geboren" />
         <Stack.Screen name="uitnodigen" />
         <Stack.Screen name="inhalen" options={{ gestureEnabled: false }} />

@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { Button, color, text, useAnnounce } from '@teddysteps/ui';
 import { useChildForm } from '@/components/ChildForm';
@@ -7,12 +7,24 @@ import { Screen } from '@/components/Screen';
 import { TextLink } from '@/components/TextLink';
 import { signOut, useAuth } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
+import { myPartnerInvite } from '@/lib/family';
 import { supabase } from '@/lib/supabase';
 
 // O2 Je kleintje (1 van 3). The fields are shared with M1 "Profiel van Lotte" (components/ChildForm).
 export default function YourLittleOne() {
   const { refresh } = useAuth();
   const { fields, check } = useChildForm();
+  const { eigen } = useLocalSearchParams<{ eigen?: string }>();
+  // Invited as the second parent? Then that comes first (M3), unless they chose an own trail.
+  // Nothing shows until we know, so nobody starts a second trail by accident.
+  const [checked, setChecked] = useState(!!eigen);
+  useEffect(() => {
+    if (eigen) return;
+    myPartnerInvite().then(
+      (invite) => (invite ? router.replace('/ouder-uitnodiging') : setChecked(true)),
+      () => setChecked(true),
+    );
+  }, [eigen]);
   const [formError, setFormError] = useState<string>();
   const [busy, setBusy] = useState(false);
   useAnnounce(formError);
@@ -38,6 +50,8 @@ export default function YourLittleOne() {
     router.replace({ pathname: '/uitnodigen', params: { onboarding: '1' } });
   }
 
+  if (!checked) return null;
+
   return (
     <Screen
       header={{ title: 'Wie is de kleine ontdekker?', color: 'lilac', step: [1, 3], character: 'tiggy', characterRotate: -8 }}
@@ -54,6 +68,7 @@ export default function YourLittleOne() {
         </Text>
       ) : null}
       {/* A way out for a second parent who used the wrong address, so no duplicate trail. */}
+      <Text style={styles.hint}>Uitgenodigd door je partner? Log dan in met het adres uit de mail.</Text>
       <TextLink onPress={() => signOut()}>Ander e-mailadres? Uitloggen</TextLink>
     </Screen>
   );
@@ -61,4 +76,5 @@ export default function YourLittleOne() {
 
 const styles = StyleSheet.create({
   error: { ...text('meta'), color: color.plum },
+  hint: { ...text('meta'), color: color.inkMuted, textAlign: 'center' },
 });
