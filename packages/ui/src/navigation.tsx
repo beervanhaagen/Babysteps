@@ -112,9 +112,13 @@ export function TabBar({ active, onChange, onAdd, bottomInset = 0, news = [] }: 
   const tab = (t: (typeof TABS)[number]) => <Tab key={t.id} {...t} on={t.id === active} news={news.includes(t.id)} onPress={() => onChange?.(t.id)} />;
   return (
     <View accessibilityRole="tabbar" accessibilityLabel="Hoofdmenu" style={[styles.tabbar, { height: size.tabbar - 18 + Math.max(18, bottomInset), paddingBottom: Math.max(18, bottomInset) }]}>
-      {TABS.slice(0, 2).map(tab)}
-      <Fab onPress={onAdd} />
-      {TABS.slice(2).map(tab)}
+      {/* Two equal halves around a fixed middle slot: the + is always exactly in the centre,
+          whatever the labels or the phone's text size. */}
+      <View style={styles.tabSide}>{TABS.slice(0, 2).map(tab)}</View>
+      <View style={styles.fabSlot}>
+        <Fab onPress={onAdd} />
+      </View>
+      <View style={styles.tabSide}>{TABS.slice(2).map(tab)}</View>
     </View>
   );
 }
@@ -138,7 +142,7 @@ function Tab({ label, icon, on, news, onPress }: { label: string; icon: IconName
       ) : (
         <Icon name={icon} size={24} weight={2} />
       )}
-      <Text style={[text('tab'), on && { fontFamily: fontFamily('sans', 800) }]}>{label}</Text>
+      <Text numberOfLines={1} style={[text('tab'), on && { fontFamily: fontFamily('sans', 800) }]}>{label}</Text>
       {news ? <View style={styles.news} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" /> : null}
     </Pressable>
   );
@@ -180,7 +184,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tab: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  tabSide: { flex: 1, flexDirection: 'row' },
+  fabSlot: { width: size.fab + space.space4, alignItems: 'center' },
+  tab: { flex: 1, minWidth: 0, minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 3 },
   news: { position: 'absolute', top: 4, left: '50%', marginLeft: 8, width: 12, height: 12, borderRadius: 6, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.rose },
   tabPill: { width: 44, height: 30, borderRadius: 15, backgroundColor: color.sunshine, alignItems: 'center', justifyContent: 'center' },
   fab: {
