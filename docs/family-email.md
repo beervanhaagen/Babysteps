@@ -19,7 +19,7 @@ Status: decided, 17 Oct 2026, confirmed with the stack (Expo web on Vercel, Supa
 - **Sessions last 180 days after their last use**, on the server and in the cookie (renewed on every visit).
 - **E-mail buttons** carry their own sign-in code after the `#`, valid for 7 days and only for that recipient.
 - Failed claims are rate-limited per IP (20 per 10 minutes); POST requests must come from the family page itself (`Sec-Fetch-Site: same-origin`, or an Origin on the allow-list).
-- **Built (step 4):** `supabase/functions/family-api` (routes `/claim`, `/page`, `/join`, `/hug`, `/book`, and since step 8 `/keep`: while the parents allow it (M6), a 60-second download link to the view version, never print) with the `family_*` database functions, which only the service role may call. Family gets signed links (15 minutes) to view and small versions of ready moments only. Locally `scripts/family-dev.mjs` plays the part of the Vercel rewrites.
+- **Built (step 4):** `supabase/functions/family-api` (routes `/claim`, `/page`, `/join`, `/hug`, `/book`, and since step 8 `/keep`: while the parents allow it (M6), a 60-second download link to the view version, never print; and `/views` (T2b on a phone): 15-minute links to the view version for at most 25 moments the page has loaded, with the same checks as `/page`, only when the big view opens) with the `family_*` database functions, which only the service role may call. Family gets signed links (15 minutes) to view and small versions of ready moments only. Locally `scripts/family-dev.mjs` plays the part of the Vercel rewrites.
 
 ## Image links (when the switch is on)
 

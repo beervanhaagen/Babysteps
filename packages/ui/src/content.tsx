@@ -97,18 +97,20 @@ export interface MomentCardProps {
   date: string;
   hugs?: number;
   /**
-   * 'album' (Pad 3.0): one big photo, full-bleed in portrait, to swipe through, "N foto's" and dots.
-   * 'large': photos on top at a fixed height. 'compact': one photo beside the words.
+   * 'large': photos on top at a fixed height (the timeline, T1). 'compact': one photo beside the words.
+   * 'album': one big photo, full-bleed in portrait, to swipe through (Pad 3.0 until 25 October 2026).
    */
   layout?: 'album' | 'large' | 'compact';
   /** Spoken first, e.g. "Week 30". */
   context?: string;
+  /** 'large': the height of the photos (196 by default). */
+  photoHeight?: number;
   /** Gets the photo shown at the time (album), to open the week there. */
   onPress?: (photo: number) => void;
 }
 
 /** A page in a photo album (Pad 2.0): straight, one ink edge, the photos to the edge, your line under it. */
-export function MomentCard({ photos, photoCount = photos.length, alt, caption, first, date, hugs, layout = 'large', context, onPress }: MomentCardProps) {
+export function MomentCard({ photos, photoCount = photos.length, alt, caption, first, date, hugs, layout = 'large', context, photoHeight, onPress }: MomentCardProps) {
   const focus = useFocusRing();
   const compact = layout === 'compact';
   const hugText = hugs ? (hugs === 1 ? '1 knuffel' : `${hugs} knuffels`) : null;
@@ -132,8 +134,8 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
     </View>
   );
   const pictures = (
-    <View accessible={!!alt} accessibilityRole={alt ? 'image' : undefined} accessibilityLabel={alt} style={compact ? styles.momentThumb : styles.momentPhotos}>
-      {compact ? <Tile>{photos[0]}</Tile> : <Mosaic photos={photos} count={photoCount} />}
+    <View accessible={!!alt} accessibilityRole={alt ? 'image' : undefined} accessibilityLabel={alt} style={compact ? styles.momentThumb : [styles.momentPhotos, photoHeight ? { height: photoHeight } : null]}>
+      {compact ? <Tile>{photos[0]}</Tile> : <Mosaic photos={photos} count={photoCount} onTile={onPress} />}
     </View>
   );
   const body = (
@@ -259,26 +261,25 @@ function Tile({ children, more }: { children?: ReactNode; more?: number }) {
   );
 }
 
-/** Fixed layouts for one, two, three or more photos, 3px of white between them. */
-function Mosaic({ photos, count }: { photos: ReactNode[]; count: number }) {
-  if (photos.length <= 1) return <Tile>{photos[0]}</Tile>;
-  if (photos.length === 2) {
-    return (
-      <View style={styles.mosaicRow}>
-        <Tile>{photos[0]}</Tile>
-        <Tile>{photos[1]}</Tile>
-      </View>
+/** Fixed layouts for one, two, three or more photos, 3px of white between them. Each tile opens at its photo. */
+function Mosaic({ photos, count, onTile }: { photos: ReactNode[]; count: number; onTile?: (photo: number) => void }) {
+  const tile = (i: number, more?: number) =>
+    onTile ? (
+      // The card itself is the link for screen readers and keyboards; the tiles are for fingers.
+      <Pressable key={i} onPress={() => onTile(i)} accessible={false} focusable={false} tabIndex={-1} style={styles.tilePress}>
+        <Tile more={more}>{photos[i]}</Tile>
+      </Pressable>
+    ) : (
+      <Tile key={i} more={more}>
+        {photos[i]}
+      </Tile>
     );
-  }
+  if (photos.length <= 1) return tile(0);
+  if (photos.length === 2) return <View style={styles.mosaicRow}>{[tile(0), tile(1)]}</View>;
   return (
     <View style={styles.mosaicRow}>
-      <View style={{ flex: 2 }}>
-        <Tile>{photos[0]}</Tile>
-      </View>
-      <View style={styles.mosaicColumn}>
-        <Tile>{photos[1]}</Tile>
-        <Tile more={count > 3 ? count - 3 : undefined}>{photos[2]}</Tile>
-      </View>
+      <View style={{ flex: 2 }}>{tile(0)}</View>
+      <View style={styles.mosaicColumn}>{[tile(1), tile(2, count > 3 ? count - 3 : undefined)]}</View>
     </View>
   );
 }
@@ -617,6 +618,7 @@ const styles = StyleSheet.create({
   momentHugsText: { ...text('meta'), fontSize: 13, fontFamily: fontFamily('sans', 800) },
   mosaicRow: { flex: 1, flexDirection: 'row', gap: 3 },
   mosaicColumn: { flex: 1, gap: 3 },
+  tilePress: { flex: 1 },
   tile: { flex: 1, overflow: 'hidden', backgroundColor: color.lilac, alignItems: 'center', justifyContent: 'center' },
   tileMore: { ...StyleSheet.absoluteFill, backgroundColor: `${color.ink}9E` /* ink at 62% */, alignItems: 'center', justifyContent: 'center' },
   tileMoreText: { fontFamily: fontFamily('sticker', 400), fontSize: 22, color: color.white },

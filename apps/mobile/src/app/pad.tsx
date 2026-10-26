@@ -1,7 +1,7 @@
 import { firstLook, leapCard, longDutchDate, possessive, todayInAmsterdam, TRAIL_WEEKS, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Banner, border, Button, Callout, Character, color, fontFamily, Icon, MomentCard, NextUp, radius, space, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 import { Photo } from '@/components/Photo';
@@ -18,8 +18,7 @@ import { byWeek, dayOf, useQueue, useTrailMoments, type TrailMoment } from '@/li
 // T1 Pad (board "T1 · Pad 3.0, grote foto’s"), with X1 (empty trail), X2/X4 (uploads waiting
 // or failed), the one-line "Wat komt eraan" leap card (copy in packages/core/src/leaps.ts,
 // checked by child-development-reviewer) and, right after T8 "Moment verwijderen", a way back.
-// Week by week, each moment as one big photo to swipe through; "Bekijk week" and every photo
-// open the week (T2b) full screen.
+// A timeline of weeks with the moments as album pages; every photo opens the big view (T2b).
 export default function Trail() {
   const { state } = useAuth();
   const { moments, source, refresh } = useTrailMoments();
@@ -67,7 +66,9 @@ export default function Trail() {
               </NextUp>
             ) : null}
           </View>
-          <Timeline moments={shown} week={week} birthDate={trail.birthDate} />
+          <View style={styles.gutter}>
+            <Timeline moments={shown} week={week} birthDate={trail.birthDate} />
+          </View>
         </ScrollView>
       )}
       <Tabs active="trail" />
@@ -75,59 +76,49 @@ export default function Trail() {
   );
 }
 
-/** T2b at a week, or at one photo of a moment. */
-const openWeek = (week: number, at?: { moment: string; photo: number }) =>
-  router.push({ pathname: '/weekweergave/[week]', params: { week: String(week), ...(at ? { moment: at.moment, foto: String(at.photo) } : {}) } });
+/** T2b, the big view, at one photo of a moment. */
+const openPhoto = (week: number, moment: string, photo: number) =>
+  router.push({ pathname: '/weekweergave/[week]', params: { week: String(week), moment, foto: String(photo) } });
 
-/** Above a week's photos: the week, its days, and "Bekijk week". */
-function WeekHeading({ week, now, days, onOpen }: { week: number; now?: boolean; days: string; onOpen?: () => void }) {
-  const focus = useFocusRing();
-  return (
-    <View style={styles.weekHeading}>
-      <Text accessibilityRole="header" style={styles.weekLabel}>
-        {now ? `Week ${week} · nu` : `Week ${week}`}
-      </Text>
-      <Text style={styles.weekMeta}>{days}</Text>
-      {onOpen ? (
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel={`Bekijk week ${week}`}
-          onPress={onOpen}
-          onFocus={focus.onFocus}
-          onBlur={focus.onBlur}
-          style={[styles.weekOpen, focus.ring]}
-        >
-          <Text style={styles.weekOpenText}>Bekijk week</Text>
-          <Icon name="chevron-right" size={16} weight={2.6} color={color.bluebird} />
-        </Pressable>
-      ) : null}
-    </View>
-  );
-}
-
-/** This week first (with a slot if it's still empty), then every week with moments. */
+/**
+ * The trail as a timeline, like a travel diary (owner, 25 October 2026): a dotted path down the
+ * left with a stop for every week that has moments (Bo stands on this week's), the moments as
+ * album pages beside it. A tap on a photo opens the big view there.
+ */
 function Timeline({ moments, week, birthDate }: { moments: TrailMoment[]; week: number; birthDate: CalendarDate }) {
+  const { width } = useWindowDimensions();
   const weeks = byWeek(moments);
   if (!weeks.some(([w]) => w === week)) weeks.unshift([week, []]);
+  // Card width is the screen minus the gutters and the path's column.
+  const photoHeight = Math.round((width - space.space4 * 2 - RAIL) * 0.82);
   return (
     <View style={styles.timeline}>
-      {weeks.map(([w, list]) => {
-        return (
-          <View key={w} style={styles.week}>
-            <View style={styles.gutter}>
-              <WeekHeading week={w} now={w === week} days={weekSpan(birthDate, w)} onOpen={list.length ? () => openWeek(w) : undefined} />
+      <View style={styles.rail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
+      {weeks.map(([w, list]) => (
+        <View key={w} style={styles.week}>
+          <View style={styles.weekHeading}>
+            <View style={styles.marker} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              {w === week ? (
+                <View style={styles.bo}>
+                  <Character name="bo" size={30} decorative />
+                </View>
+              ) : null}
+              <View style={[styles.dot, w === week && styles.dotNow]} />
             </View>
+            <Text accessibilityRole="header" style={styles.weekLabel}>
+              {w === week ? `Week ${w} · nu` : `Week ${w}`}
+            </Text>
+            <Text style={styles.weekMeta}>{weekSpan(birthDate, w)}</Text>
+          </View>
+          <View style={styles.weekBody}>
             {list.length ? (
-              // The photos run edge to edge, like a travel diary; everything else keeps the gutter.
-              list.map((m) => <Card key={m.key} moment={m} onOpen={(photo) => openWeek(w, { moment: m.key, photo })} />)
+              list.map((m) => <Card key={m.key} moment={m} photoHeight={photoHeight} onOpen={(photo) => openPhoto(w, m.key, photo)} />)
             ) : (
-              <View style={styles.gutter}>
-                <EmptyWeek />
-              </View>
+              <EmptyWeek />
             )}
           </View>
-        );
-      })}
+        </View>
+      ))}
     </View>
   );
 }
@@ -152,14 +143,15 @@ function EmptyWeek() {
   );
 }
 
-function Card({ moment: m, onOpen }: { moment: TrailMoment; onOpen: (photo: number) => void }) {
+function Card({ moment: m, photoHeight, onOpen }: { moment: TrailMoment; photoHeight: number; onOpen: (photo: number) => void }) {
   const first = m.isFirst && m.firstLabel ? { label: m.firstLabel, ...firstLook(m.firstLabel) } : undefined;
   return (
     <MomentCard
-      layout="album"
-      photos={m.photos.map((p, i) => (
+      photos={m.photos.slice(0, 3).map((p, i) => (
         <Photo key={i} source={p.view} />
       ))}
+      photoCount={m.photos.length}
+      photoHeight={photoHeight}
       alt={m.photos.length === 1 ? (m.caption ? `Foto: ${m.caption}` : 'Foto van dit moment') : m.caption ? `Foto’s: ${m.caption}` : 'Foto’s van dit moment'}
       caption={m.caption ?? (first ? null : 'Een moment')}
       first={first}
@@ -267,18 +259,27 @@ function OnTheWay({ dueDate }: { dueDate: string }) {
   );
 }
 
+/** The path's column on the left of the timeline. */
+const RAIL = 32;
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
   content: { paddingTop: 4, paddingBottom: 28, gap: 12 },
   gutter: { paddingHorizontal: space.space4, gap: space.space3 },
-  timeline: { gap: space.space5 },
-  week: { gap: space.space4 },
-  weekHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 10, paddingHorizontal: 4, minHeight: 44 },
+  timeline: { gap: space.space5, paddingBottom: 4 },
+  // The path: a 0-wide box with a dotted border all round (one-sided dotted borders draw
+  // unreliably on phones), from the first stop down.
+  rail: { position: 'absolute', left: RAIL / 2 - 1, top: 28, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink, opacity: 0.5 },
+  week: { gap: space.space3 },
+  weekHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingTop: 6 },
+  marker: { width: RAIL, height: 44, alignItems: 'center', justifyContent: 'center', marginRight: -8 },
+  // Bo stands on this week's stop.
+  bo: { position: 'absolute', bottom: 28 },
+  dot: { width: 14, height: 14, borderRadius: 7, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.white },
+  dotNow: { backgroundColor: color.ink },
   weekLabel: { ...text('eyebrow'), fontSize: 12, textTransform: 'uppercase' },
   weekMeta: { ...text('meta'), fontSize: 13, color: color.inkMuted },
-  weekOpen: { marginLeft: 'auto', minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  // Ink text (bluebird on paper is too light for small text); the chevron stays bluebird.
-  weekOpenText: { fontFamily: fontFamily('sans', 800), fontSize: 13, color: color.ink },
+  weekBody: { marginLeft: RAIL, gap: space.space4 },
   emptyWeek: {
     flexDirection: 'row',
     alignItems: 'center',

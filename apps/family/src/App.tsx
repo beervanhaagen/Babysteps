@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTeddyFonts } from '@teddysteps/ui';
 import { api, NoAccess as NoAccessError, TooManyDevices, type FamilyMoment, type FamilyPage } from './api';
-import { usePath } from './route';
+import { navigate, usePath } from './route';
 import { Cards } from './views/Cards';
 import { Join } from './views/Join';
 import { ConfirmEmail, OpenFromMail, Unsubscribe } from './views/MailLinks';
 import { NoAccess, type Problem } from './views/NoAccess';
 import { Sent } from './views/Sent';
 import { Loading } from './views/shared';
+import { Viewer } from './views/Viewer';
+import { View } from 'react-native';
 
 // The family page (F1 to F7) is one light web page without a router package: every
 // kilobyte counts on Oma's old phone. /j#<code> signs in once. Links in mails (step 7):
@@ -18,6 +20,7 @@ import { Loading } from './views/shared';
 //   /             F3 Kaartjes (or F2 first, until Oma has said who she is)
 //   /instellingen F2 again, to change name, e-mail or how often, or to stop
 //   /verstuurd    F4 after a hug
+//   /foto         T2b, the photos big, over the postcards (back returns to the same place)
 
 // The code is read and removed from the address bar before React renders anything, so it
 // never ends up in history, screenshots or a forwarded link (docs/family-email.md). It stays
@@ -71,6 +74,15 @@ export default function App() {
   const [page, setPage] = useState<FamilyPage | null>(null);
   const [loadedAt, setLoadedAt] = useState(0);
   const [problem, setProblem] = useState<Problem | null>(linkCode === '' ? 'no-link' : null);
+  const [viewing, setViewing] = useState<{ moment: string; photo: number } | null>(null);
+  // The photo that opened the big view gets focus back when it closes.
+  const opener = useRef<HTMLElement | null>(null);
+  const showing = path === '/foto' && !!viewing;
+  useEffect(() => {
+    if (showing || !opener.current) return;
+    opener.current.focus({ preventScroll: true });
+    opener.current = null;
+  }, [showing]);
 
   const show = useCallback((next: FamilyPage) => {
     setPage(next);
@@ -135,5 +147,24 @@ export default function App() {
     return <Join page={page} editing={page.me.joined} onSaved={reload} onLeft={() => setProblem('left')} />;
   }
   if (path === '/verstuurd') return <Sent />;
-  return <Cards page={page} onHugged={hugged} onOlder={older} />;
+  const openPhoto = (moment: string, photo: number) => {
+    opener.current = document.activeElement as HTMLElement | null;
+    setViewing({ moment, photo });
+    navigate('/foto', false, false);
+  };
+  // The postcards always stay in the same place, so opening and closing the big view keeps their
+  // state and scroll. After a reload on /foto there is nothing to show big yet: just the postcards.
+  return (
+    <>
+      {/* First in the page, so its heading is the one that gets focus; the postcards stay underneath, inert. */}
+      {showing ? (
+        <View style={{ position: 'fixed' as 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, overscrollBehavior: 'contain' } as object}>
+          <Viewer page={page} start={viewing!} onHugged={hugged} onClose={() => window.history.back()} />
+        </View>
+      ) : null}
+      <View style={{ flex: 1 }} aria-hidden={showing || undefined} {...(showing ? ({ inert: '' } as object) : {})}>
+        <Cards page={page} onHugged={hugged} onOlder={older} onOpen={openPhoto} />
+      </View>
+    </>
+  );
 }

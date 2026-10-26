@@ -7,7 +7,7 @@ import { usePhoto, type PhotoSource } from '@/lib/trail';
  * A private photo: a file on the phone, or a signed link that expo-image caches by its path.
  * Until it's there (offline, still loading), a soft block with Bo keeps the frame from looking broken.
  */
-export function Photo({ source, style }: { source?: PhotoSource; style?: StyleProp<ImageStyle> }) {
+export function Photo({ source, style, fit = 'cover' }: { source?: PhotoSource; style?: StyleProp<ImageStyle>; fit?: 'cover' | 'contain' }) {
   const image = usePhoto(source);
   if (!image) {
     return (
@@ -16,7 +16,7 @@ export function Photo({ source, style }: { source?: PhotoSource; style?: StylePr
       </View>
     );
   }
-  return <Image source={image} contentFit="cover" transition={150} style={style ?? StyleSheet.absoluteFill} accessible={false} />;
+  return <Image source={image} contentFit={fit} transition={150} style={style ?? StyleSheet.absoluteFill} accessible={false} />;
 }
 
 const styles = StyleSheet.create({

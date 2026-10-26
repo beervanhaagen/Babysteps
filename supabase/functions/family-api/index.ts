@@ -1,9 +1,11 @@
 // The family page's only door to the data (docs/family-email.md, "Family page sign-in").
 // Family has no database login: a personal link code is swapped once for a session cookie
 // (__Host-ts, HttpOnly), and every request after that is checked here with the service role.
-// Family only ever gets the view or small version of moments that are ready, 12 at a time,
+// Family only ever gets the view or small version of moments that are ready, 12 at a time (/views: at most 25),
 // through signed links that expire after 15 minutes; never a print version. When the parents
-// allow keeping photos (M6), /keep gives a 60-second download link to the view version.
+// allow keeping photos (M6), /keep gives a 60-second download link to the view version. A phone
+// gets the small version on the postcards; only when the big view (T2b) opens does /views sign the
+// view versions of the postcards already on screen.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { ipHash } from '../_shared/ip.ts';
 import { button, C, COMPANY, frame, send, SERIF, SIGN_OFF, unsubscribeMember } from '../_shared/mail.ts';
@@ -92,7 +94,8 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
   type Row = { id: string; trail_week: number; caption: string | null; is_first: boolean; first_label: string | null; day: string; hugs: number; my_hugs: number; photos: Photo[] | null };
   const all = (rows ?? []) as Row[];
   const moments = all.slice(0, PAGE_SIZE);
-  // Phones get the small version, laptops the view version; never both, never print.
+  // One version per screen: phones the small one, laptops the view one. On a phone, /views adds
+  // the view version only when the big view (T2b) opens. Never print.
   const pathOf = (p: Photo) => (wide ? p.view_path : p.small_path);
   const urls = await signed(moments.flatMap((m) => (m.photos ?? []).map(pathOf)));
   return {
@@ -220,6 +223,19 @@ Deno.serve(async (request) => {
     if (key !== 'ok') return json(200, { ok: true, confirm: 'limited' });
     EdgeRuntime.waitUntil(send({ to: email.toLowerCase(), ...confirmMail(code) }).catch(() => false));
     return json(200, { ok: true, confirm: true });
+  }
+
+  // The big view on a phone: view versions (1280px) of a block of postcards the page has loaded,
+  // at most 25 (the database's own limit). The same database function as /page decides what this
+  // member may see.
+  if (route === '/views' && request.method === 'POST') {
+    const count = typeof body.count === 'number' && Number.isInteger(body.count) ? Math.min(Math.max(body.count, 1), 25) : 0;
+    const skip = typeof body.skip === 'number' && Number.isInteger(body.skip) && body.skip > 0 ? Math.min(body.skip, 10_000) : 0;
+    if (!count) return json(422, { error: 'bad request' });
+    const { data: rows } = await service.rpc('family_page', { member: who.member, skip, page_size: count });
+    const moments = (rows ?? []) as { id: string; photos: { position: number; view_path: string }[] | null }[];
+    const urls = await signed(moments.flatMap((m) => (m.photos ?? []).map((p) => p.view_path)));
+    return json(200, { moments: moments.map((m) => ({ id: m.id, views: (m.photos ?? []).map((p) => urls.get(p.view_path) ?? null) })) });
   }
 
   if (route === '/hug' && request.method === 'POST') {

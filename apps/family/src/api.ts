@@ -60,5 +60,7 @@ export const api = {
   hug: (moment: string) => call<{ mine: number; total: number }>('/hug', { moment }),
   bookList: () => call<{ ok: true }>('/book', {}),
   keep: (moment: string, position: number) => call<{ url: string }>('/keep', { moment, position }),
+  /** The big view on a phone: view versions of a block of at most 25 postcards, by moment. */
+  views: (skip: number, count: number) => call<{ moments: { id: string; views: (string | null)[] }[] }>('/views', { skip, count }),
   leave: () => call<{ ok: true }>('/leave', {}),
 };

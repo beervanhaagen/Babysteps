@@ -27,6 +27,7 @@
     "node": ">=22"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^22.20.5",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~58.0.4",

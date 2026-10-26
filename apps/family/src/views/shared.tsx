@@ -34,7 +34,7 @@ export function TextLink({ children, onPress }: { children: string; onPress: () 
  * A photo that only loads when it comes into view, and decodes off the main thread: a year
  * of postcards stays light on an old phone. The family page is web only, so a plain <img>.
  */
-export function Photo({ uri, label }: { uri?: string; label: string }) {
+export function Photo({ uri, label, fit = 'cover', onError }: { uri?: string; label: string; fit?: 'cover' | 'contain'; onError?: () => void }) {
   if (!uri) return null;
   return (
     <img
@@ -43,11 +43,12 @@ export function Photo({ uri, label }: { uri?: string; label: string }) {
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
+      onError={onError}
       // No "Bewaar afbeelding" on a long press or right click: there is no download unless the
       // parents allow it (M6). A screenshot can't be stopped, and the privacy promise says so.
       draggable={false}
       onContextMenu={(e) => e.preventDefault()}
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', WebkitTouchCallout: 'none', userSelect: 'none' }}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: fit, WebkitTouchCallout: 'none', userSelect: 'none' }}
     />
   );
 }

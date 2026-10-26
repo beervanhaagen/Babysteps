@@ -18,11 +18,12 @@ export function usePath(): string {
   return path;
 }
 
-export function navigate(path: string, replace = false) {
+/** `top: false` keeps the scroll position, for a view that opens over the page (the big view). */
+export function navigate(path: string, replace = false, top = true) {
   if (replace) window.history.replaceState(null, '', path);
   else window.history.pushState(null, '', path);
   window.dispatchEvent(new Event('teddysteps:navigate'));
-  window.scrollTo(0, 0);
+  if (top) window.scrollTo(0, 0);
 }
 
 /** Title for the tab and screen readers, and focus on the view's heading. */

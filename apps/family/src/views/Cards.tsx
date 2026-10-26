@@ -1,7 +1,7 @@
-import { ageLine, longDutchDate, possessive, todayInAmsterdam, trailWeek, type CalendarDate } from '@teddysteps/core';
+import { ageLine, longDutchDate, possessive, todayInAmsterdam, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { useState } from 'react';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { border, Button, Character, color, fontFamily, IconButton, Scallop, shadow, text, Wordmark } from '@teddysteps/ui';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { border, Button, Character, color, fontFamily, IconButton, Scallop, shadow, text, useFocusRing, webAria, Wordmark } from '@teddysteps/ui';
 import { api, NotAllowed, type FamilyMoment, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
 import { Heading, Page, Photo, TextLink } from './shared';
@@ -13,7 +13,8 @@ const FREQUENCY = {
   never: 'Je krijgt geen mailtjes; je kijkt hier mee.',
 } as const;
 
-// F3 Kaartjes, and F7 on a laptop: newest first, grouped by week, big photos, one big button.
+// F3 Kaartjes, and F7 on a laptop: newest first, as a timeline of weeks (owner, 25 October 2026),
+// one big button. A tap on a photo opens the big view (Viewer) at that photo.
 // "Inspreken" (voice notes) comes in step 6. Header in pistachio, the design system's colour for
 // family; the boards' rose is an accent, not a header block. The parents' names aren't asked
 // yet, so F7's "Sam en Alex" reads "de ouders".
@@ -21,9 +22,10 @@ interface CardsProps {
   page: FamilyPage;
   onHugged: (id: string, counts: { mine: number; total: number }) => void;
   onOlder: () => Promise<void>;
+  onOpen: (moment: string, photo: number) => void;
 }
 
-export function Cards({ page, onHugged, onOlder }: CardsProps) {
+export function Cards({ page, onHugged, onOlder, onOpen }: CardsProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const name = page.child.firstName;
@@ -32,11 +34,13 @@ export function Cards({ page, onHugged, onOlder }: CardsProps) {
   const week = birth ? trailWeek(birth, today) : null;
   useView(`${possessive(name)} pad`);
 
-  const groups: { title: string; moments: FamilyMoment[] }[] = [
-    { title: 'Nieuw deze week', moments: page.moments.filter((m) => m.week === week) },
-    { title: 'Vorige week', moments: page.moments.filter((m) => week && m.week === week - 1) },
-    { title: 'Eerder', moments: page.moments.filter((m) => !week || m.week < week - 1) },
-  ].filter((g) => g.moments.length);
+  // Newest week first, the moments of each week together.
+  const weeks: [number, FamilyMoment[]][] = [];
+  for (const m of page.moments) {
+    const last = weeks[weeks.length - 1];
+    if (last && last[0] === m.week) last[1].push(m);
+    else weeks.push([m.week, [m]]);
+  }
 
   const empty = (
     <View style={styles.empty}>
@@ -68,44 +72,44 @@ export function Cards({ page, onHugged, onOlder }: CardsProps) {
         </View>
       </View>
       <Page wide={wide}>
-        {wide ? (
-          <View style={styles.columns}>
-            <View style={styles.main}>
-              {page.moments.length ? (
-                <>
-                  <Text style={[styles.groupTitle, { fontSize: 20 }]}>{page.moments[0].week === week ? 'Nieuw deze week' : 'Het nieuwste moment'}</Text>
-                  <Card moment={page.moments[0]} size="lg" mayKeep={page.mayKeep} onHugged={onHugged} />
-                  {page.moments.length > 1 ? <Text style={[styles.groupTitle, { fontSize: 20 }]}>Eerder</Text> : null}
-                  <View style={styles.grid}>
-                    {page.moments.slice(1).map((m, i) => (
-                      <View key={m.id} style={styles.gridCell}>
-                        <Card moment={m} size="sm" mayKeep={page.mayKeep} onHugged={onHugged} />
+        <View style={wide ? styles.columns : styles.single}>
+          <View style={styles.main}>
+            {weeks.length ? (
+              <>
+                <View style={styles.timeline}>
+                  <View style={styles.rail} aria-hidden />
+                  {weeks.map(([w, moments]) => (
+                    <View key={w} style={styles.week}>
+                      <View style={styles.weekHeading}>
+                        <View style={styles.marker} aria-hidden>
+                          {w === week ? (
+                            <View style={styles.bo}>
+                              <Character name="bo" size={30} decorative />
+                            </View>
+                          ) : null}
+                          <View style={[styles.dot, w === week && styles.dotNow]} />
+                        </View>
+                        <Text role="heading" {...webAria({ 'aria-level': 2 })} style={styles.weekLabel}>
+                          {w === week ? `Week ${w} · nu` : `Week ${w}`}
+                        </Text>
+                        {birth ? <Text style={styles.weekMeta}>{weekSpan(birth, w)}</Text> : null}
                       </View>
-                    ))}
-                  </View>
-                  <Older more={page.more} onOlder={onOlder} />
-                </>
-              ) : (
-                empty
-              )}
-            </View>
-            <Aside page={page} />
+                      <View style={styles.weekBody}>
+                        {moments.map((m) => (
+                          <Card key={m.id} moment={m} size={wide ? 'lg' : 'md'} mayKeep={page.mayKeep} onHugged={onHugged} onOpen={(i) => onOpen(m.id, i)} />
+                        ))}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+                <Older more={page.more} onOlder={onOlder} />
+              </>
+            ) : (
+              empty
+            )}
           </View>
-        ) : groups.length ? (
-          groups.map((group) => (
-            <View key={group.title} style={styles.group}>
-              <Text style={styles.groupTitle}>{group.title}</Text>
-              <View style={styles.cards}>
-                {group.moments.map((m, i) => (
-                  <Card key={m.id} moment={m} size="md" mayKeep={page.mayKeep} onHugged={onHugged} />
-                ))}
-              </View>
-            </View>
-          ))
-        ) : (
-          empty
-        )}
-        {!wide && groups.length ? <Older more={page.more} onOlder={onOlder} /> : null}
+          {wide ? <Aside page={page} /> : null}
+        </View>
       </Page>
     </View>
   );
@@ -151,7 +155,7 @@ function Aside({ page }: { page: FamilyPage }) {
   );
 }
 
-function Card({ moment: m, size, mayKeep, onHugged }: { moment: FamilyMoment; size: 'sm' | 'md' | 'lg'; mayKeep: boolean; onHugged: CardsProps['onHugged'] }) {
+function Card({ moment: m, size, mayKeep, onHugged, onOpen }: { moment: FamilyMoment; size: 'md' | 'lg'; mayKeep: boolean; onHugged: CardsProps['onHugged']; onOpen: (photo: number) => void }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [keeping, setKeeping] = useState(false);
@@ -181,15 +185,28 @@ function Card({ moment: m, size, mayKeep, onHugged }: { moment: FamilyMoment; si
     }
   }
   const title = (m.isFirst ? m.firstLabel : m.caption) ?? `Een moment uit week ${m.week}`;
-  const facts = [m.isFirst && size !== 'sm' ? m.caption : null, longDutchDate(m.day as CalendarDate)];
+  const facts = [m.isFirst ? m.caption : null, longDutchDate(m.day as CalendarDate)];
+  const n = m.photos.length;
+  const tile = (i: number) => <Tile key={i} moment={m} photo={i} more={i === 2 && n > 3 ? n - 3 : 0} title={title} onOpen={onOpen} />;
   return (
     <View style={styles.card}>
-      <View style={[styles.photo, size === 'lg' && { height: 300 }, size === 'sm' && { height: 150 }]}>
-        <Photo uri={m.photos[0]?.url} label={`Foto: ${m.caption ?? title}`} />
-      </View>
+      {n ? (
+        <View style={[styles.photo, size === 'lg' && { height: 360 }]}>
+          {n === 1 ? (
+            tile(0)
+          ) : n === 2 ? (
+            <View style={styles.mosaicRow}>{[tile(0), tile(1)]}</View>
+          ) : (
+            <View style={styles.mosaicRow}>
+              <View style={{ flex: 2 }}>{tile(0)}</View>
+              <View style={styles.mosaicColumn}>{[tile(1), tile(2)]}</View>
+            </View>
+          )}
+        </View>
+      ) : null}
       <View style={styles.words}>
         <Text style={styles.eyebrow}>{`Week ${m.week}${m.isFirst ? ' · eerste keer!' : ''}`}</Text>
-        <Text role="heading" style={[styles.cardTitle, size === 'lg' && { fontSize: 32, lineHeight: 37 }, size === 'sm' && { fontSize: 22, lineHeight: 26 }]}>
+        <Text role="heading" {...webAria({ 'aria-level': 3 })} style={[styles.cardTitle, size === 'lg' && { fontSize: 32, lineHeight: 37 }]}>
           {title}
         </Text>
         <Text style={[styles.meta, size === 'lg' && { fontSize: 18 }]}>{facts.filter(Boolean).join(' · ')}</Text>
@@ -200,11 +217,11 @@ function Card({ moment: m, size, mayKeep, onHugged }: { moment: FamilyMoment; si
         ) : null}
       </View>
       <View style={styles.actions}>
-        <Button icon="heart" block={size !== 'lg'} busy={busy} onPress={hug} accessibilityLabel={`Knuffelen: ${title}`}>
+        <Button icon="heart" block={size === 'md'} busy={busy} onPress={hug} accessibilityLabel={`Knuffelen: ${title}`}>
           {m.myHugs ? 'Nog een knuffel' : 'Knuffelen'}
         </Button>
         {mayKeep && m.photos.length && keepProblem !== 'off' ? (
-          <Button icon="download" variant="paper" block={size !== 'lg'} busy={keeping} onPress={keep} accessibilityLabel={`Bewaar de foto: ${title}`}>
+          <Button icon="download" variant="paper" block={size === 'md'} busy={keeping} onPress={keep} accessibilityLabel={`Bewaar de foto: ${title}`}>
             Bewaar foto
           </Button>
         ) : null}
@@ -222,6 +239,38 @@ function Card({ moment: m, size, mayKeep, onHugged }: { moment: FamilyMoment; si
     </View>
   );
 }
+
+/** One photo of a card: opens the big view at it. The third says "+N" when there are more. */
+function Tile({ moment: m, photo, more, title, onOpen }: { moment: FamilyMoment; photo: number; more: number; title: string; onOpen: (photo: number) => void }) {
+  const focus = useFocusRing();
+  const n = m.photos.length;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={n > 1 ? `Bekijk groot, foto ${photo + 1} van ${n}: ${title}` : `Bekijk groot: ${title}`}
+      onPress={() => onOpen(photo)}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
+      style={styles.tile}
+    >
+      <Photo uri={m.photos[photo]?.url} label="" />
+      {/* The ring sits inside the tile (the frame clips anything outside), ink on a white edge for dark photos. */}
+      {focus.ring ? (
+        <View style={styles.ring}>
+          <View style={styles.ringInner} />
+        </View>
+      ) : null}
+      {more ? (
+        <View style={styles.more}>
+          <Text style={styles.moreText}>+{more}</Text>
+        </View>
+      ) : null}
+    </Pressable>
+  );
+}
+
+/** The path's column on the left of the timeline. */
+const RAIL = 32;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
@@ -248,17 +297,33 @@ const styles = StyleSheet.create({
   peek: { position: 'absolute', right: 64, top: 2, pointerEvents: 'none' },
   peekWide: { right: '20%' },
   columns: { flexDirection: 'row', gap: 40, alignItems: 'flex-start' },
+  single: { gap: 14 },
+  timeline: { gap: 22, paddingTop: 4 },
+  // The path: a 0-wide box with a dotted border all round, from the first stop down.
+  rail: { position: 'absolute', left: RAIL / 2 - 1, top: 26, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink, opacity: 0.5 },
+  week: { gap: 12 },
+  weekHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingTop: 4 },
+  marker: { width: RAIL, height: 44, alignItems: 'center', justifyContent: 'center', marginRight: -8 },
+  // Bo stands on this week's stop.
+  bo: { position: 'absolute', bottom: 28 },
+  dot: { width: 14, height: 14, borderRadius: 7, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.white },
+  dotNow: { backgroundColor: color.ink },
+  weekLabel: { ...text('eyebrow'), fontSize: 14, letterSpacing: 1.7, textTransform: 'uppercase' },
+  weekMeta: { fontFamily: fontFamily('sans', 700), fontSize: 15, color: color.inkMuted },
+  weekBody: { marginLeft: RAIL, gap: 18 },
+  mosaicRow: { flex: 1, flexDirection: 'row', gap: 3 },
+  mosaicColumn: { flex: 1, gap: 3 },
+  tile: { flex: 1, overflow: 'hidden', backgroundColor: color.lilac },
+  ring: { position: 'absolute', inset: 0, borderWidth: 3, borderColor: color.white, zIndex: 1 },
+  ringInner: { flex: 1, borderWidth: 3, borderColor: color.ink },
+  more: { position: 'absolute', inset: 0, backgroundColor: `${color.ink}9E`, alignItems: 'center', justifyContent: 'center' },
+  moreText: { fontFamily: fontFamily('sticker', 400), fontSize: 24, color: color.white },
   main: { flex: 1, minWidth: 0, gap: 14 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -12 },
-  gridCell: { width: '50%', padding: 12 },
   aside: { width: 360, gap: 16, paddingTop: 38 },
   panel: { gap: 8, padding: 18, borderRadius: 22, borderWidth: border.edge, borderColor: color.ink, boxShadow: shadow.shadowMd, alignItems: 'flex-start' },
   panelTitle: { fontFamily: fontFamily('sans', 800), fontSize: 17, color: color.ink },
   panelText: { fontFamily: fontFamily('sans', 700), fontSize: 15, lineHeight: 22, color: color.ink },
   private: { fontFamily: fontFamily('sans', 700), fontSize: 14, lineHeight: 20, color: color.inkMuted },
-  group: { gap: 12, marginTop: 4 },
-  groupTitle: { fontFamily: fontFamily('sans', 800), fontSize: 17, color: color.ink },
-  cards: { gap: 18 },
   card: {
     gap: 10,
     padding: 10,
@@ -268,7 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     boxShadow: shadow.shadowLg,
   },
-  photo: { height: 200, borderRadius: 18, borderWidth: border.edge, borderColor: color.ink, overflow: 'hidden', backgroundColor: color.lilac },
+  photo: { height: 260, borderRadius: 18, borderWidth: border.edge, borderColor: color.ink, overflow: 'hidden', backgroundColor: color.white },
   words: { paddingHorizontal: 8, gap: 2 },
   eyebrow: { ...text('eyebrow'), fontSize: 14, letterSpacing: 1.7, textTransform: 'uppercase' },
   cardTitle: { ...text('titleM'), fontSize: 25, lineHeight: 29 },

@@ -11,3 +11,4 @@ export * from './actions';
 export * from './forms';
 export * from './navigation';
 export * from './content';
+export * from './viewer';
