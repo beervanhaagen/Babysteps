@@ -44,6 +44,8 @@ export interface PhotoViewerProps {
   from?: number;
   /** The child's own animal, standing on the week in view (Bo by default). */
   character?: CharacterName;
+  /** The photo in view changed (its key): e.g. to let new reactions float up. */
+  onShow?: (key: string) => void;
   /** "3 – 9 mrt": the days of a week. */
   span: (week: number) => string;
   /** "Week 31" or "1 jaar en 4 weken", and short under a stop: "31" or "1j 4w" (weekName, weekShort in core). */
@@ -68,7 +70,7 @@ type Page = ViewerPhoto | { key: 'add'; week: number };
 const STOP = 44;
 const GAP_STOP = 14;
 
-export function PhotoViewer({ photos, start, now, from = 1, character = 'bo', span, weekName, weekShort, addPage, onEmptyNow, onClose, closeLabel, banner, waiting, topInset = 0, bottomInset = 0 }: PhotoViewerProps) {
+export function PhotoViewer({ photos, start, now, from = 1, character = 'bo', onShow, span, weekName, weekShort, addPage, onEmptyNow, onClose, closeLabel, banner, waiting, topInset = 0, bottomInset = 0 }: PhotoViewerProps) {
   const { width } = useWindowDimensions();
   const reduced = useReducedMotion();
   const [pos, setPos] = useState(start);
@@ -141,6 +143,13 @@ export function PhotoViewer({ photos, start, now, from = 1, character = 'bo', sp
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  const shownKey = page?.key;
+  useEffect(() => {
+    if (shownKey) onShow?.(shownKey);
+    // Only when the photo changes, not when the parent re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shownKey]);
 
   useAnnounce(
     page && 'photo' in page

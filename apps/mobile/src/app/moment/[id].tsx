@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { border, Button, Character, color, FirstLabel, fontFamily, Icon, IconButton, size, text } from '@teddysteps/ui';
+import { border, Button, Character, color, FirstLabel, fontFamily, IconButton, ReactionCounts, size, text } from '@teddysteps/ui';
 import { Photo } from '@/components/Photo';
 import { Tabs } from '@/components/Tabs';
 import { useTrailMoments } from '@/lib/trail';
@@ -79,12 +79,7 @@ export default function Moment() {
             <Text style={[text('meta'), styles.meta]}>{day}</Text>
           </View>
           {story ? <Text style={styles.story}>{story}</Text> : null}
-          {m.hugs ? (
-            <View style={styles.hugs}>
-              <Icon name="heart" size={18} weight={2.4} />
-              <Text style={styles.hugsText}>{m.hugs === 1 ? '1 knuffel' : `${m.hugs} knuffels`}</Text>
-            </View>
-          ) : null}
+          <ReactionCounts counts={m.reactions} />
           <View style={styles.bizzy}>
             <Character name="bizzy" size={70} rotate={10} decorative />
           </View>

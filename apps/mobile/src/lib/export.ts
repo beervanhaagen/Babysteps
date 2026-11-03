@@ -95,6 +95,9 @@ export async function exportSize() {
   return { moments: moments.length, photos, bytes: photos * ESTIMATE_PER_PHOTO, parts: Math.max(1, Math.ceil(photos / PHOTOS_PER_PART)) };
 }
 
+/** The Dutch name of each reaction in momenten.json. */
+const SOORT: Record<string, string> = { hug: 'knuffel', heart: 'hartje', laugh: 'lachje', wow: 'wauw', star: 'sterretje', sun: 'zonnetje' };
+
 function page(trail: Trail, moments: ExportMoment[], names: Map<string, string[]>) {
   const weeks = new Map<number, ExportMoment[]>();
   for (const m of moments) weeks.set(m.trail_week, [...(weeks.get(m.trail_week) ?? []), m]);
@@ -102,12 +105,13 @@ function page(trail: Trail, moments: ExportMoment[], names: Map<string, string[]
     .map(([week, list]) => {
       const items = list
         .map((m) => {
-          const hugs = m.reactions.filter((r) => r.kind === 'hug' && r.circle_members).map((r) => r.circle_members!.label);
+          // Every bit of love: hugs and icons, by whom.
+          const love = m.reactions.filter((r) => r.circle_members).map((r) => r.circle_members!.label);
           const photos = (names.get(m.id) ?? []).map((n) => `<img src="${escape(n)}" alt="" loading="lazy">`).join('');
           return `<article>
 ${m.is_first && m.first_label ? `<p class="first">Eerste keer · ${escape(m.first_label)}</p>` : ''}
 ${m.caption ? `<h3>${escape(m.caption)}</h3>` : ''}
-<p class="meta">${escape(longDutchDate(dayOf(m)))}${hugs.length ? ` · knuffels van ${escape([...new Set(hugs)].join(', '))}` : ''}</p>
+<p class="meta">${escape(longDutchDate(dayOf(m)))}${love.length ? ` · liefs van ${escape([...new Set(love)].join(', '))}` : ''}</p>
 <div class="photos">${photos}</div>
 </article>`;
         })
@@ -249,6 +253,8 @@ export async function buildExport(trail: Trail, email: string | null, onProgress
             eersteKeer: m.is_first ? m.first_label : null,
             fotos: names.get(m.id) ?? [],
             knuffels: m.reactions.filter((r) => r.kind === 'hug' && r.circle_members).map((r) => ({ van: r.circle_members!.label, op: r.created_at })),
+            // Since 3 November 2026: every reaction, the hug and the icons ("hartje", "lachje", …).
+            reacties: m.reactions.filter((r) => r.circle_members).map((r) => ({ soort: SOORT[r.kind] ?? r.kind, van: r.circle_members!.label, op: r.created_at })),
           })),
         };
         await addBytes(zip, out, 'momenten.json', text.encode(JSON.stringify(data, null, 2)));

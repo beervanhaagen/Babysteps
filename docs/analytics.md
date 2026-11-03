@@ -42,7 +42,7 @@ Targets are assumptions to test, not facts.
 | Assumption (MVP board) | Metric | First target |
 | --- | --- | --- |
 | Parents keep adding | Share of trails with at least 1 moment in week 4 and in week 8 after sign-up | 40% / 30% |
-| Family love keeps parents posting | Share of moments that get a hug or voice note within 24 hours | 70% |
+| Family love keeps parents posting | Share of moments that get a hug, an icon (heart, laugh, wow, star, sun) or voice note within 24 hours | 70% |
 | Sharing brings new parents | Family members joined per trail in week 1; share cards sent per active trail per month; landing visits with `utm_source=card` or `invite` | 2+ / 1+ / tracked |
 | Parents will pay for the book | Share of trails active for 8+ weeks that joined the book list; family sign-ups on the book list | 25% |
 | **North star** | **Loved trails per week**: trails with a new moment *and* a family reaction in the same week | Grows week on week |

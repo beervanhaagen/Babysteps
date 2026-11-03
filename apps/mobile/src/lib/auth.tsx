@@ -3,6 +3,7 @@ import { childLook, type ChildLook } from '@teddysteps/ui';
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { forgetExports } from './export';
+import { forgetReactionsSeen } from './seen';
 import { unregisterDevice } from './push';
 import { supabase } from './supabase';
 
@@ -69,6 +70,7 @@ async function findTrail(): Promise<Trail | null> {
 /** Every sign-out goes through here: first this device stops getting pushes for this account. */
 export async function signOut() {
   forgetExports();
+  forgetReactionsSeen();
   await unregisterDevice().catch(() => undefined);
   await supabase.auth.signOut();
 }

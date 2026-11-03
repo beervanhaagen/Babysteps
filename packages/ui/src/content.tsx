@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Character, Hug, Icon, type CharacterName, type IconName } from './brand';
+import { ReactionCounts, reactionsSpoken, type ReactionKind } from './reactions';
 import { SvgMarkup } from './svg';
 import { useFocusRing } from './focus';
 import { useReducedMotion } from './motion';
@@ -96,6 +97,8 @@ export interface MomentCardProps {
   /** "za 17 okt". */
   date: string;
   hugs?: number;
+  /** Every reaction by kind; shown instead of `hugs` when given. */
+  reactions?: Partial<Record<ReactionKind, number>>;
   /**
    * 'large': photos on top at a fixed height (the timeline, T1). 'compact': one photo beside the words.
    * 'album': one big photo, full-bleed in portrait, to swipe through (Pad 3.0 until 25 October 2026).
@@ -110,10 +113,10 @@ export interface MomentCardProps {
 }
 
 /** A page in a photo album (Pad 2.0): straight, one ink edge, the photos to the edge, your line under it. */
-export function MomentCard({ photos, photoCount = photos.length, alt, caption, first, date, hugs, layout = 'large', context, photoHeight, onPress }: MomentCardProps) {
+export function MomentCard({ photos, photoCount = photos.length, alt, caption, first, date, hugs, reactions, layout = 'large', context, photoHeight, onPress }: MomentCardProps) {
   const focus = useFocusRing();
   const compact = layout === 'compact';
-  const hugText = hugs ? (hugs === 1 ? '1 knuffel' : `${hugs} knuffels`) : null;
+  const hugText = reactions ? reactionsSpoken(reactions) || null : hugs ? (hugs === 1 ? '1 knuffel' : `${hugs} knuffels`) : null;
   const words = (
     <View style={[styles.momentBody, !compact && styles.momentBodyLarge, layout === 'album' && styles.albumBody]}>
       {first ? <FirstLabel {...first} /> : null}
@@ -124,7 +127,9 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
       ) : null}
       <View style={[styles.momentFoot, layout === 'large' && styles.momentFootRule]}>
         <Text style={styles.momentDate}>{date}</Text>
-        {hugText ? (
+        {reactions ? (
+          <ReactionCounts counts={reactions} />
+        ) : hugText ? (
           <View style={styles.momentHugs}>
             <Icon name="heart" size={16} weight={2.6} color={color.tomato} />
             <Text style={styles.momentHugsText}>{hugs}</Text>

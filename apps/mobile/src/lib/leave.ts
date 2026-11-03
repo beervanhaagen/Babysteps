@@ -1,4 +1,5 @@
 import { forgetExports } from './export';
+import { forgetReactionsSeen } from './seen';
 import { supabase } from './supabase';
 
 // M7 "Pad en account verwijderen" (supabase/migrations/20261025140000_deletion.sql, function
@@ -21,5 +22,6 @@ export async function restoreDeletion() {
 /** Signs out on every device, after asking to leave. */
 export async function signOutEverywhere() {
   forgetExports();
+  forgetReactionsSeen();
   await supabase.auth.signOut({ scope: 'global' }).catch(() => supabase.auth.signOut());
 }

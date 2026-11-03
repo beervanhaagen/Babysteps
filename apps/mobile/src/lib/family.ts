@@ -1,3 +1,4 @@
+import type { ReactionKind } from '@teddysteps/ui';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { supabase } from './supabase';
@@ -108,6 +109,8 @@ export async function revokeDevice(deviceId: string) {
 export interface ActivityItem {
   key: string;
   kind: 'hug' | 'joined';
+  /** For reactions: which one (the hug or an icon). */
+  reaction?: ReactionKind;
   at: string;
   who: string;
   /** For hugs: the moment, for "Bij week 30: geklapt". */
@@ -118,7 +121,7 @@ export interface ActivityItem {
   seen: boolean;
 }
 
-/** T6: hugs and people who joined, newest first. Hugs are marked seen once shown. */
+/** T6: hugs, icons and people who joined, newest first. Reactions are marked seen once shown. */
 export function useActivity() {
   const [items, setItems] = useState<ActivityItem[] | null>(null);
   const refresh = useCallback(async () => {
@@ -127,14 +130,14 @@ export function useActivity() {
     const [hugs, joined] = await Promise.all([
       supabase
         .from('reactions')
-        .select('id, created_at, seen_at, circle_members(label), moments!inner(id, trail_week, caption, first_label, is_first)')
-        .eq('kind', 'hug')
+        .select('id, kind, created_at, seen_at, circle_members(label), moments!inner(id, trail_week, caption, first_label, is_first)')
         .order('created_at', { ascending: false })
         .limit(100),
       supabase.from('circle_members').select('id, label, joined_at, email_frequency').not('joined_at', 'is', null).is('revoked_at', null),
     ]);
     type Hug = {
       id: string;
+      kind: ReactionKind;
       created_at: string;
       seen_at: string | null;
       circle_members: { label: string } | null;
@@ -144,6 +147,7 @@ export function useActivity() {
       ...((hugs.data ?? []) as unknown as Hug[]).map((h) => ({
         key: h.id,
         kind: 'hug' as const,
+        reaction: h.kind,
         at: h.created_at,
         who: h.circle_members?.label ?? 'Iemand',
         week: h.moments?.trail_week,

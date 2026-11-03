@@ -70,7 +70,7 @@ export default function Download() {
   return (
     <Screen header={{ title: 'Alles downloaden', color: 'lilac', onBack: progress ? undefined : router.back, character: 'bo' }}>
       <Text style={styles.body}>
-        Alle foto’s van {possessive(trail.childName)} pad in printkwaliteit, met de bijschriften, eerste keren en knuffels erbij. Je opent het in elke browser, ook zonder
+        Alle foto’s van {possessive(trail.childName)} pad in printkwaliteit, met de bijschriften, eerste keren, knuffels en andere reacties erbij. Je opent het in elke browser, ook zonder
         TeddySteps.
       </Text>
       {estimate ? (

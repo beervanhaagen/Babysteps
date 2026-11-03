@@ -1,9 +1,31 @@
 import { ageLine, longDutchDate, possessive, todayInAmsterdam, trailWeek, weekMonth, weekName, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { border, Button, Character, ChildAvatar, color, fontFamily, Icon, MonthBar, radius, Scallop, shadow, space, text, useFocusRing, useReducedMotion, webAria, Wordmark, type MonthChip } from '@teddysteps/ui';
+import {
+  border,
+  Button,
+  Character,
+  ChildAvatar,
+  color,
+  fontFamily,
+  Icon,
+  MonthBar,
+  radius,
+  ReactionCounts,
+  Scallop,
+  shadow,
+  space,
+  text,
+  useFocusRing,
+  useReducedMotion,
+  webAria,
+  Wordmark,
+  type MonthChip,
+  type ReactionKind,
+} from '@teddysteps/ui';
 import { api, NotAllowed, type FamilyMoment, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
+import { Love } from './Love';
 import { Heading, Photo, TextLink } from './shared';
 
 const WIDE = 900;
@@ -21,7 +43,8 @@ const FREQUENCY = {
 // yet, so F7's "Sam en Alex" reads "de ouders".
 interface CardsProps {
   page: FamilyPage;
-  onHugged: (id: string, counts: { mine: number; total: number }) => void;
+  /** A hug or icon went out: new counts for the card, and the float. */
+  onReacted: (id: string, kind: ReactionKind, reactions: FamilyMoment['reactions']) => void;
   onOlder: () => Promise<void>;
   /** The keyring's start page, when this browser follows more than one child. */
   onSwitch?: () => void;
@@ -30,7 +53,7 @@ interface CardsProps {
   onOpen: (moment: string, photo: number) => void;
 }
 
-export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen, onSwitch }: CardsProps) {
+export function Cards({ page, onReacted, onOlder, onOlderUntil, onOpen, onSwitch }: CardsProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const name = page.child.firstName;
@@ -185,7 +208,7 @@ export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen, onSwitch 
                           </View>
                           <View style={styles.weekBody}>
                             {moments.map((m) => (
-                              <Card key={m.id} moment={m} size={wide ? 'lg' : 'md'} mayKeep={page.mayKeep} onHugged={onHugged} onOpen={(i) => onOpen(m.id, i)} />
+                              <Card key={m.id} moment={m} size={wide ? 'lg' : 'md'} mayKeep={page.mayKeep} onReacted={onReacted} onOpen={(i) => onOpen(m.id, i)} />
                             ))}
                           </View>
                         </View>
@@ -257,9 +280,19 @@ function Aside({ page }: { page: FamilyPage }) {
   );
 }
 
-function Card({ moment: m, size, mayKeep, onHugged, onOpen }: { moment: FamilyMoment; size: 'md' | 'lg'; mayKeep: boolean; onHugged: CardsProps['onHugged']; onOpen: (photo: number) => void }) {
-  const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+function Card({
+  moment: m,
+  size,
+  mayKeep,
+  onReacted,
+  onOpen,
+}: {
+  moment: FamilyMoment;
+  size: 'md' | 'lg';
+  mayKeep: boolean;
+  onReacted: CardsProps['onReacted'];
+  onOpen: (photo: number) => void;
+}) {
   const [keeping, setKeeping] = useState(false);
   const [keepProblem, setKeepProblem] = useState<'failed' | 'off'>();
   // M6: only when the parents allow it; the browser downloads the photo on this card (1280px).
@@ -274,17 +307,6 @@ function Card({ moment: m, size, mayKeep, onHugged, onOpen }: { moment: FamilyMo
       setKeepProblem(e instanceof NotAllowed ? 'off' : 'failed');
     }
     setKeeping(false);
-  }
-  async function hug() {
-    setBusy(true);
-    setFailed(false);
-    try {
-      onHugged(m.id, await api.hug(m.id));
-      navigate('/verstuurd');
-    } catch {
-      setBusy(false);
-      setFailed(true);
-    }
   }
   const title = (m.isFirst ? m.firstLabel : m.caption) ?? (m.week <= 52 ? `Een moment uit week ${m.week}` : `Een moment op ${weekName(m.week)}`);
   const facts = [m.isFirst ? m.caption : null, longDutchDate(m.day as CalendarDate)];
@@ -318,16 +340,10 @@ function Card({ moment: m, size, mayKeep, onHugged, onOpen }: { moment: FamilyMo
           {title}
         </Text>
         <Text style={[styles.meta, size === 'lg' && { fontSize: 18 }]}>{facts.filter(Boolean).join(' · ')}</Text>
-        {m.myHugs ? (
-          <Text style={styles.mine}>{m.myHugs === 1 ? 'Je knuffelde dit' : `Je knuffelde dit ${m.myHugs} keer`}</Text>
-        ) : m.hugs ? (
-          <Text style={styles.meta}>{m.hugs === 1 ? '1 knuffel' : `${m.hugs} knuffels`}</Text>
-        ) : null}
+        <ReactionCounts counts={Object.fromEntries(Object.entries(m.reactions).map(([k, v]) => [k, v?.total ?? 0]))} />
       </View>
       <View style={styles.actions}>
-        <Button icon="heart" block={size === 'md'} busy={busy} onPress={hug} accessibilityLabel={`Knuffelen: ${title}`}>
-          {m.myHugs ? 'Nog een knuffel' : 'Knuffelen'}
-        </Button>
+        <Love moment={m} title={title} block={size === 'md'} onReacted={onReacted} />
         {mayKeep && m.photos.length && keepProblem !== 'off' ? (
           <Button icon="download" variant="paper" block={size === 'md'} busy={keeping} onPress={keep} accessibilityLabel={`Bewaar de foto: ${title}`}>
             Bewaar foto
@@ -337,11 +353,6 @@ function Card({ moment: m, size, mayKeep, onHugged, onOpen }: { moment: FamilyMo
       {keepProblem ? (
         <Text role="alert" style={styles.error}>
           {keepProblem === 'off' ? 'Foto’s bewaren kan nu niet meer: de ouders hebben het uitgezet.' : 'Bewaren lukte even niet. Probeer het zo nog eens.'}
-        </Text>
-      ) : null}
-      {failed ? (
-        <Text role="alert" style={styles.error}>
-          Je knuffel kwam niet aan. Probeer het zo nog eens.
         </Text>
       ) : null}
     </View>

@@ -1,6 +1,6 @@
 // Talks to family-api on the same address (/api/*), so the HttpOnly session cookie goes along.
 // No other host is ever called from this page (connect-src 'self').
-import { childLook, type ChildLook } from '@teddysteps/ui';
+import { childLook, type ChildLook, type ReactionKind } from '@teddysteps/ui';
 
 export interface FamilyPhoto {
   width: number;
@@ -19,6 +19,8 @@ export interface FamilyMoment {
   photos: FamilyPhoto[];
   hugs: number;
   myHugs: number;
+  /** Per kind (hug and the icons), the total and my own; only kinds that were sent. */
+  reactions: Partial<Record<ReactionKind, { total: number; mine: number }>>;
 }
 
 /** A child this browser follows (the keyring's start page). */
@@ -99,11 +101,13 @@ export const api = {
     call<FamilyPage>(`/page?wide=${wide ? 1 : 0}${skip ? `&skip=${skip}` : ''}`).then((p) => ({
       ...p,
       child: { ...p.child, look: childLook(p.child.look?.animal, p.child.look?.tone) },
+      moments: p.moments.map((m) => ({ ...m, reactions: m.reactions ?? {} })),
     })),
   join: (label: string, email: string, frequency: string) => call<{ ok: true; confirm: boolean | 'limited' }>('/join', { label, email, frequency }),
   confirm: (code: string) => call<{ ok: true }>('/confirm', { code }),
   unsubscribe: (token: string) => call<{ ok: true }>(`/afmelden/${token}`, {}),
   hug: (moment: string) => call<{ mine: number; total: number }>('/hug', { moment }),
+  react: (moment: string, kind: ReactionKind) => call<{ reactions: FamilyMoment['reactions'] }>('/react', { moment, kind }),
   bookList: () => call<{ ok: true }>('/book', {}),
   keep: (moment: string, position: number) => call<{ url: string }>('/keep', { moment, position }),
   /** The big view on a phone: view versions of a block of at most 25 postcards, by moment. */

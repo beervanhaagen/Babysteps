@@ -1,9 +1,10 @@
 import { firstLook, longDutchDate, possessive, weekName, weekShort, todayInAmsterdam, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { Button, color, fontFamily, PhotoViewer, type ViewerPhoto } from '@teddysteps/ui';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { PhotoViewer, ReactionCounts, type ReactionKind, type ViewerPhoto } from '@teddysteps/ui';
 import { api, type FamilyMoment, type FamilyPage } from '../api';
+import { Love } from './Love';
 import { Photo } from './shared';
 
 const WIDE = 900;
@@ -16,11 +17,11 @@ const REFRESH_MS = 12 * 60 * 1000;
 interface ViewerProps {
   page: FamilyPage;
   start: { moment: string; photo: number };
-  onHugged: (id: string, counts: { mine: number; total: number }) => void;
+  onReacted: (id: string, kind: ReactionKind, reactions: FamilyMoment['reactions']) => void;
   onClose: () => void;
 }
 
-export function Viewer({ page, start, onHugged, onClose }: ViewerProps) {
+export function Viewer({ page, start, onReacted, onClose }: ViewerProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const birth = page.child.birthDate as CalendarDate | null;
@@ -72,8 +73,7 @@ export function Viewer({ page, start, onHugged, onClose }: ViewerProps) {
         caption: m.caption,
         first: m.isFirst && m.firstLabel ? { label: m.firstLabel, ...firstLook(m.firstLabel) } : undefined,
         date: longDutchDate(m.day as CalendarDate),
-        hugs: m.hugs || undefined,
-        below: <Hug moment={m} onHugged={onHugged} />,
+        below: <Hug moment={m} onReacted={onReacted} />,
       });
     });
   }
@@ -102,41 +102,16 @@ function Big({ uri, small, label }: { uri?: string; small?: string; label: strin
   return <Photo uri={big ?? small} label={label} fit="contain" onError={big ? () => setFailed(big) : undefined} />;
 }
 
-/** Under the big photo: a hug, right there, without leaving the photos. */
-function Hug({ moment: m, onHugged }: { moment: FamilyMoment; onHugged: ViewerProps['onHugged'] }) {
-  const [busy, setBusy] = useState(false);
-  const [state, setState] = useState<'sent' | 'failed'>();
-  async function hug() {
-    setBusy(true);
-    setState(undefined);
-    try {
-      onHugged(m.id, await api.hug(m.id));
-      setState('sent');
-    } catch {
-      setState('failed');
-    }
-    setBusy(false);
-  }
+/** Under the big photo: what's been sent, and a hug or an icon right there. */
+function Hug({ moment: m, onReacted }: { moment: FamilyMoment; onReacted: ViewerProps['onReacted'] }) {
   return (
     <View style={styles.hug}>
-      <Button icon="heart" size="md" busy={busy} onPress={hug} accessibilityLabel={m.myHugs ? 'Nog een knuffel sturen' : 'Knuffelen'}>
-        {m.myHugs ? 'Nog een knuffel' : 'Knuffelen'}
-      </Button>
-      {/* Always there, so a screen reader reads it out when it fills. */}
-      <Text role="status" style={styles.sent}>
-        {state === 'sent' ? 'Knuffel verstuurd!' : ''}
-      </Text>
-      {state === 'failed' ? (
-        <Text role="alert" style={styles.error}>
-          Je knuffel kwam niet aan. Probeer het zo nog eens.
-        </Text>
-      ) : null}
+      <ReactionCounts counts={Object.fromEntries(Object.entries(m.reactions).map(([k, v]) => [k, v?.total ?? 0]))} />
+      <Love moment={m} onReacted={onReacted} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  hug: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, paddingTop: 4 },
-  sent: { fontFamily: fontFamily('sans', 800), fontSize: 15, color: color.ink },
-  error: { fontFamily: fontFamily('sans', 700), fontSize: 15, color: color.plum },
+  hug: { gap: 10, paddingTop: 4 },
 });

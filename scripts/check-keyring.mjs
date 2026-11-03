@@ -78,6 +78,16 @@ check(jar.split('=')[1].split('.').length === 1, 'and its key leaves the cookie'
 const stillLotte = await family('/page?wide=0');
 check(stillLotte.status === 200 && stillLotte.json.child.firstName === 'Lotte', 'Lotte still opens');
 
+// Reacting with icons, as Oma on Lotte's page.
+const moment = crypto.randomUUID();
+sql(`insert into public.moments (id, trail_id, created_by, client_id, trail_week, photo_count, status) select '${moment}', trail_id, user_id, gen_random_uuid(), 1, 1, 'ready' from public.trail_parents where user_id = '${lotte.parent}'`);
+const heart = await family('/react', { body: { moment, kind: 'heart' }, kring: lotte.member });
+check(heart.status === 200 && heart.json.reactions?.heart?.mine === 1, 'Oma sends a heart');
+const odd = await family('/react', { body: { moment, kind: 'poop' }, kring: lotte.member });
+check(odd.status === 422, 'only our own icons');
+const shown = await family('/page?wide=0', { kring: lotte.member });
+check(shown.json.moments?.find((m) => m.id === moment)?.reactions?.heart?.total === 1, 'the page shows the heart');
+
 // "Ik wil niet meer meekijken" for Lotte takes only Lotte's key.
 await family('/claim', { body: { code: stranger.code } });
 await family('/leave', { body: {}, kring: lotte.member });

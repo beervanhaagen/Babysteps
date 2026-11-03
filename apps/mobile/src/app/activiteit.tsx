@@ -1,7 +1,7 @@
 import { daysBetween, todayInAmsterdam, weekName } from '@teddysteps/core';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Avatar, border, color, fontFamily, Hug, text, useFocusRing } from '@teddysteps/ui';
+import { Avatar, border, color, fontFamily, Hug, ReactionIcon, REACTIONS, text, useFocusRing } from '@teddysteps/ui';
 import { Screen } from '@/components/Screen';
 import { Tabs } from '@/components/Tabs';
 import { TextLink } from '@/components/TextLink';
@@ -47,7 +47,8 @@ export default function Activity() {
 
 function Row({ item }: { item: ActivityItem }) {
   const focus = useFocusRing();
-  const title = item.kind === 'hug' ? `${item.who} stuurde een knuffel` : `${item.who} loopt nu mee`;
+  const one = !item.reaction || item.reaction === 'hug' ? 'een knuffel' : (REACTIONS.find((r) => r.kind === item.reaction)?.one ?? 'iets liefs');
+  const title = item.kind === 'hug' ? `${item.who} stuurde ${one}` : `${item.who} loopt nu mee`;
   const sub =
     item.kind === 'hug'
       ? `Bij ${weekName(item.week ?? 1).toLowerCase()}${item.caption ? `: ${item.caption}` : ''}`
@@ -70,7 +71,7 @@ function Row({ item }: { item: ActivityItem }) {
     >
       {item.kind === 'hug' ? (
         <View style={[styles.badge, !item.seen && styles.badgeNew]}>
-          <Hug size={40} decorative />
+          {!item.reaction || item.reaction === 'hug' ? <Hug size={40} decorative /> : <ReactionIcon kind={item.reaction} size={30} />}
         </View>
       ) : (
         <Avatar name={item.who} size={46} tone="butter" decorative />

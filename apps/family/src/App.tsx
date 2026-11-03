@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTeddyFonts } from '@teddysteps/ui';
+import { Dwarrel, useTeddyFonts, type ReactionKind } from '@teddysteps/ui';
 import { api, chooseChild, chosenChild, NoAccess as NoAccessError, TooManyDevices, type FamilyMoment, type FamilyPage, type KeyringChild } from './api';
 import { navigate, usePath } from './route';
 import { Cards } from './views/Cards';
@@ -143,11 +143,19 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [loadedAt, reload]);
 
-  // A hug updates its own card; nothing else is loaded again.
-  const hugged = useCallback((id: string, counts: { mine: number; total: number }) => {
-    setPage((current) =>
-      current && { ...current, moments: current.moments.map((m) => (m.id === id ? { ...m, myHugs: counts.mine, hugs: counts.total } : m)) },
+  // A hug or an icon updates its own card (nothing else is loaded again) and floats up the screen.
+  const [burst, setBurst] = useState<{ kind: ReactionKind; count: number; id: number } | null>(null);
+  const reacted = useCallback((id: string, kind: ReactionKind, reactions: FamilyMoment['reactions']) => {
+    setPage(
+      (current) =>
+        current && {
+          ...current,
+          moments: current.moments.map((m) =>
+            m.id === id ? { ...m, reactions, hugs: reactions.hug?.total ?? m.hugs, myHugs: reactions.hug?.mine ?? m.myHugs } : m,
+          ),
+        },
     );
+    setBurst({ kind, count: 8, id: Date.now() });
   }, []);
 
   const older = useCallback(async () => {
@@ -225,18 +233,21 @@ export default function App() {
       {/* First in the page, so its heading is the one that gets focus; the postcards stay underneath, inert. */}
       {showing ? (
         <View style={{ position: 'fixed' as 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, overscrollBehavior: 'contain' } as object}>
-          <Viewer page={page} start={viewing!} onHugged={hugged} onClose={() => window.history.back()} />
+          <Viewer page={page} start={viewing!} onReacted={reacted} onClose={() => window.history.back()} />
         </View>
       ) : null}
       <View style={{ flex: 1 }} aria-hidden={showing || undefined} {...(showing ? ({ inert: '' } as object) : {})}>
         <Cards
           page={page}
-          onHugged={hugged}
+          onReacted={reacted}
           onOlder={older}
           onOlderUntil={olderUntil}
           onOpen={openPhoto}
           onSwitch={ring.length > 1 ? () => navigate('/kies') : undefined}
         />
+      </View>
+      <View pointerEvents="none" style={{ position: 'fixed' as 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 20 }}>
+        <Dwarrel burst={burst} />
       </View>
     </>
   );

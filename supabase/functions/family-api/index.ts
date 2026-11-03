@@ -114,7 +114,18 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
     service.rpc('family_page', { member: who.member, skip, page_size: PAGE_SIZE + 1 }),
   ]);
   type Photo = { position: number; width: number; height: number; view_path: string; small_path: string };
-  type Row = { id: string; trail_week: number; caption: string | null; is_first: boolean; first_label: string | null; day: string; hugs: number; my_hugs: number; photos: Photo[] | null };
+  type Row = {
+    id: string;
+    trail_week: number;
+    caption: string | null;
+    is_first: boolean;
+    first_label: string | null;
+    day: string;
+    hugs: number;
+    my_hugs: number;
+    photos: Photo[] | null;
+    reactions: Record<string, { total: number; mine: number }> | null;
+  };
   const all = (rows ?? []) as Row[];
   const moments = all.slice(0, PAGE_SIZE);
   // One version per screen: phones the small one, laptops the view one. On a phone, /views adds
@@ -141,6 +152,7 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
       photos: (m.photos ?? []).map((p) => ({ width: p.width, height: p.height, url: urls.get(pathOf(p)) })),
       hugs: m.hugs,
       myHugs: m.my_hugs,
+      reactions: m.reactions ?? {},
     })),
     more: all.length > PAGE_SIZE,
     // M6 "Familie mag foto's bewaren": shows the "Bewaar" button; /keep checks it again.
@@ -300,6 +312,17 @@ Deno.serve(async (request) => {
     const moments = (rows ?? []) as { id: string; photos: { position: number; view_path: string }[] | null }[];
     const urls = await signed(moments.flatMap((m) => (m.photos ?? []).map((p) => p.view_path)));
     return json(200, { moments: moments.map((m) => ({ id: m.id, views: (m.photos ?? []).map((p) => urls.get(p.view_path) ?? null) })) });
+  }
+
+  // A hug or one of the icons (heart, laugh, wow, star, sun): the counts per kind come back.
+  if (route === '/react' && request.method === 'POST') {
+    const kinds = ['hug', 'heart', 'laugh', 'wow', 'star', 'sun'];
+    if (typeof body.moment !== 'string' || !/^[0-9a-f-]{36}$/.test(body.moment) || !kinds.includes(body.kind)) return json(422, { error: 'bad request' });
+    const { data, error } = await service.rpc('family_react', { member: who.member, reacted_moment: body.moment, reaction: body.kind });
+    if (error) return json(404, { error: 'unknown moment' });
+    const reactions: Record<string, { total: number; mine: number }> = {};
+    for (const r of (data ?? []) as { kind: string; mine: number; total: number }[]) reactions[r.kind] = { total: r.total, mine: r.mine };
+    return json(200, { reactions });
   }
 
   if (route === '/hug' && request.method === 'POST') {
