@@ -23,12 +23,14 @@ interface CardsProps {
   page: FamilyPage;
   onHugged: (id: string, counts: { mine: number; total: number }) => void;
   onOlder: () => Promise<void>;
+  /** The keyring's start page, when this browser follows more than one child. */
+  onSwitch?: () => void;
   /** Loads older moments until this week is in (a month chip further back). */
   onOlderUntil: (week: number) => Promise<void>;
   onOpen: (moment: string, photo: number) => void;
 }
 
-export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen }: CardsProps) {
+export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen, onSwitch }: CardsProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const name = page.child.firstName;
@@ -136,6 +138,7 @@ export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen }: CardsPr
                 <Heading style={{ ...styles.title, ...(wide ? styles.titleWide : null) }}>{`${possessive(name)} pad`}</Heading>
               </View>
               {birth ? <Text style={[styles.age, wide && { fontSize: 18 }]}>{ageLine(birth, today)}</Text> : null}
+              {onSwitch ? <Switch onPress={onSwitch} /> : null}
             </View>
             {/* On a laptop one of the gang peeks in: never the child's own animal twice. */}
             {wide ? <Character name={page.child.look.animal === 'puddle' ? 'tiggy' : 'puddle'} size={80} rotate={-6} decorative /> : null}
@@ -200,6 +203,17 @@ export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen }: CardsPr
         </View>
       </View>
     </ScrollView>
+  );
+}
+
+/** Oma with more grandchildren: back to "Wie wil je zien?" (/kies). */
+function Switch({ onPress }: { onPress: () => void }) {
+  const focus = useFocusRing();
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[styles.switch, focus.ring]}>
+      <Icon name="swap" size={16} weight={2.6} />
+      <Text style={styles.switchText}>Ander kindje kiezen</Text>
+    </Pressable>
   );
 }
 
@@ -380,6 +394,8 @@ const styles = StyleSheet.create({
   titleShadow: { position: 'absolute', left: 2, top: 2, right: -2, color: color.paper },
   titleWide: { fontSize: 42, lineHeight: 50 },
   age: { fontFamily: fontFamily('sans', 800), fontSize: 16, color: color.ink },
+  switch: { flexDirection: 'row', alignItems: 'center', gap: space.space2, minHeight: 44, alignSelf: 'flex-start' },
+  switchText: { ...text('meta'), fontFamily: fontFamily('sans', 800), color: color.ink, textDecorationLine: 'underline' },
   column: { width: '100%', maxWidth: 520, alignSelf: 'center', paddingHorizontal: space.space5, paddingTop: space.space3, paddingBottom: space.space6, gap: 14 },
   columnWide: { maxWidth: 1120, paddingHorizontal: space.space6 },
   loading: { fontFamily: fontFamily('sans', 800), fontSize: 15, color: color.inkMuted, textAlign: 'center' },

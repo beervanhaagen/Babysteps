@@ -44,24 +44,24 @@ set local role authenticated;
 select throws_ok($$select * from public.family_claim('x', 'y', 'z', '1.2.3.4', null)$$, '42501', null, 'a parent cannot call family functions');
 reset role;
 set local role anon;
-select throws_ok($$select * from public.family_member('x')$$, '42501', null, 'nobody signed in can call family functions');
+select throws_ok($$select * from public.family_member_in(array['x'], null)$$, '42501', null, 'nobody signed in can call family functions');
 select is((select count(*) from information_schema.role_table_grants where grantee = 'anon' and table_schema = 'public'), 0::bigint, 'anon still has no table rights');
 reset role;
 
 -- Opening the link: a session; again on the same device: the same session.
 set local role service_role;
 select is((select status from public.family_claim(pg_temp.h((select code from invite)), pg_temp.h('s1'), 'iPhone · Safari', '1.2.3.4', null)), 'ok', 'a valid code opens a session');
-select is((select status from public.family_claim(pg_temp.h((select code from invite)), pg_temp.h('s1b'), 'iPhone · Safari', '1.2.3.4', pg_temp.h('s1'))), 'same', 'the same device opening the link again gets no new session');
+select is((select status from public.family_claim(pg_temp.h((select code from invite)), pg_temp.h('s1b'), 'iPhone · Safari', '1.2.3.4', array[pg_temp.h('s1')])), 'same', 'the same device opening the link again gets no new session');
 select is((select status from public.family_claim(pg_temp.h('wrong'), pg_temp.h('sx'), null, '9.9.9.9', null)), 'unknown', 'a wrong code opens nothing');
-select is((select count(*) from public.family_member(pg_temp.h('s1'))), 1::bigint, 'the session finds its member');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s1')], null) where chosen), 1::bigint, 'the session finds its member');
 select is((select count from public.family_visits_daily where trail_id = (select lotte from trail_of)), 1, 'a visit is one number per trail per day');
-select is((select count(*) from public.family_member(pg_temp.h('s1'))), 1::bigint, 'a second visit the same day');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s1')], null) where chosen), 1::bigint, 'a second visit the same day');
 select is((select count from public.family_visits_daily where trail_id = (select lotte from trail_of)), 1, '... is not counted twice');
 
 -- Five devices at most; a sixth is refused, nobody is pushed out.
 select public.family_claim(pg_temp.h((select code from invite)), pg_temp.h('s' || i), null, '1.2.3.4', null) from generate_series(2, 5) i;
 select is((select status from public.family_claim(pg_temp.h((select code from invite)), pg_temp.h('s6'), null, '1.2.3.4', null)), 'full', 'a sixth device is refused');
-select is((select count(*) from public.family_member(pg_temp.h('s1'))), 1::bigint, 'and the first device is still in');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s1')], null) where chosen), 1::bigint, 'and the first device is still in');
 
 -- What family sees.
 select is((select count(*) from public.family_page((select member_id from invite), 0, 12)), 1::bigint, 'family sees only ready moments of their own trail');
@@ -82,7 +82,7 @@ select is((select email from public.circle_members where id = (select member_id 
 reset role;
 update private.family_sessions set last_used_on = current_date - 181 where token_hash = pg_temp.h('s2');
 set local role service_role;
-select is((select count(*) from public.family_member(pg_temp.h('s2'))), 0::bigint, 'a session unused for 180 days has expired');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s2')], null) where chosen), 0::bigint, 'a session unused for 180 days has expired');
 
 -- Too many wrong codes from one address: even the right code is refused for a while.
 select public.family_claim(pg_temp.h('wrong-' || i), pg_temp.h('w-' || i), null, '6.6.6.6', null) from generate_series(1, 20) i;
@@ -93,7 +93,7 @@ select is((select count(*) from private.claim_failures where ip_hash = '6.6.6.6'
 -- A paused trail: no way in.
 update public.trails set paused_at = now() where id = (select lotte from trail_of);
 set local role service_role;
-select is((select count(*) from public.family_member(pg_temp.h('s1'))), 0::bigint, 'nobody gets in while a trail is paused');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s1')], null) where chosen), 0::bigint, 'nobody gets in while a trail is paused');
 reset role;
 update public.trails set paused_at = null where id = (select lotte from trail_of);
 
@@ -111,13 +111,13 @@ grant select on fresh to service_role;
 reset role;
 set local role service_role;
 select is((select status from public.family_claim(pg_temp.h((select code from invite)), pg_temp.h('s8'), null, '1.2.3.4', null)), 'unknown', 'the old link stops after a new one is sent');
-select is((select count(*) from public.family_member(pg_temp.h('s1'))), 0::bigint, 'and so do the devices that used it');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s1')], null) where chosen), 0::bigint, 'and so do the devices that used it');
 select is((select status from public.family_claim(pg_temp.h((select code from fresh)), pg_temp.h('s9'), null, '1.2.3.4', null)), 'ok', 'the new link works');
 
 -- Oma stops herself: out, and her address is gone.
 select is(public.family_join((select member_id from invite), 'Oma Ria', 'ria@voorbeeld.nl', 'weekly'), 'confirm', 'a new address asks for a confirmation mail');
 select public.family_leave((select member_id from invite));
-select is((select count(*) from public.family_member(pg_temp.h('s9'))), 0::bigint, 'after leaving, the page is closed');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s9')], null) where chosen), 0::bigint, 'after leaving, the page is closed');
 select is((select email from public.circle_members where id = (select member_id from invite)), null, 'and no e-mail address stays behind');
 reset role;
 select is((select count(*) from private.family_sessions where circle_member_id = (select member_id from invite)), 0::bigint, 'her devices are deleted, not just blocked');

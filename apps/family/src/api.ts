@@ -21,7 +21,20 @@ export interface FamilyMoment {
   myHugs: number;
 }
 
+/** A child this browser follows (the keyring's start page). */
+export interface KeyringChild {
+  member: string;
+  /** How the child calls this person there ("Oma Ria"). */
+  label: string;
+  firstName: string;
+  birthDate: string | null;
+  look: ChildLook;
+  newThisWeek: number;
+}
+
 export interface FamilyPage {
+  /** The circle member this page is for: the child chosen on this browser. */
+  member?: string;
   child: { firstName: string; birthDate: string | null; look: ChildLook };
   me: { label: string; relation: string | null; email: string | null; frequency: 'each' | 'weekly' | 'never'; joined: boolean; onBookList: boolean };
   moments: FamilyMoment[];
@@ -38,11 +51,36 @@ export class TooManyDevices extends Error {}
 /** Not allowed (any more), e.g. the parents just switched keeping photos off. */
 export class NotAllowed extends Error {}
 
+// The child this tab is looking at, sent as X-Kring. Kept for this tab only: a new tab starts at
+// the start page again when the browser follows more than one child.
+const KRING = 'teddysteps.kring';
+let kring: string | null = (() => {
+  try {
+    return sessionStorage.getItem(KRING);
+  } catch {
+    return null;
+  }
+})();
+
+export const chosenChild = () => kring;
+export function chooseChild(member: string | null) {
+  kring = member;
+  try {
+    if (member) sessionStorage.setItem(KRING, member);
+    else sessionStorage.removeItem(KRING);
+  } catch {
+    // Private mode without storage: the choice lasts until the page reloads.
+  }
+}
+
 async function call<T>(path: string, body?: unknown): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (kring) headers['X-Kring'] = kring;
   const response = await fetch(`/api${path}`, {
     method: body === undefined ? 'GET' : 'POST',
     credentials: 'same-origin',
-    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    headers,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (response.status === 401 || response.status === 404) throw new NoAccess();
@@ -53,7 +91,9 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
 }
 
 export const api = {
-  claim: (code: string) => call<{ ok: true }>('/claim', { code }),
+  claim: (code: string) => call<{ ok: true; member?: string }>('/claim', { code }),
+  kinderen: () =>
+    call<{ children: KeyringChild[] }>('/kinderen').then((r) => r.children.map((c) => ({ ...c, look: childLook(c.look?.animal, c.look?.tone) }))),
   // A missing or unknown look (an older or newer family-api) shows Bo on lilac.
   page: (wide: boolean, skip = 0) =>
     call<FamilyPage>(`/page?wide=${wide ? 1 : 0}${skip ? `&skip=${skip}` : ''}`).then((p) => ({

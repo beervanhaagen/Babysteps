@@ -33,7 +33,7 @@ select public.revoke_device('a5555555-0000-0000-0000-000000000001');
 select is((select count(*) from public.member_devices((select member_id from ria))), 1::bigint, 'one device logged out');
 reset role;
 set local role service_role;
-select is((select count(*) from public.family_member(pg_temp.h('sessie-1'))), 0::bigint, 'and that device can no longer open the page');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('sessie-1')], null) where chosen), 0::bigint, 'and that device can no longer open the page');
 reset role;
 
 select * from finish();

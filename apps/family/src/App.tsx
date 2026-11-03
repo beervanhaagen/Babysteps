@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTeddyFonts } from '@teddysteps/ui';
-import { api, NoAccess as NoAccessError, TooManyDevices, type FamilyMoment, type FamilyPage } from './api';
+import { api, chooseChild, chosenChild, NoAccess as NoAccessError, TooManyDevices, type FamilyMoment, type FamilyPage, type KeyringChild } from './api';
 import { navigate, usePath } from './route';
 import { Cards } from './views/Cards';
 import { Join } from './views/Join';
@@ -8,6 +8,7 @@ import { ConfirmEmail, OpenFromMail, Unsubscribe } from './views/MailLinks';
 import { NoAccess, type Problem } from './views/NoAccess';
 import { Sent } from './views/Sent';
 import { Loading } from './views/shared';
+import { Picker } from './views/Picker';
 import { Viewer } from './views/Viewer';
 import { View } from 'react-native';
 
@@ -21,6 +22,7 @@ import { View } from 'react-native';
 //   /instellingen F2 again as "Jouw profiel": name, e-mail, how often, or stop
 //   /verstuurd    F4 after a hug
 //   /foto         T2b, the photos big, over the postcards (back returns to the same place)
+//   /kies         "Wie wil je zien?" when this browser follows more than one child
 
 // The code is read and removed from the address bar before React renders anything, so it
 // never ends up in history, screenshots or a forwarded link (docs/family-email.md). It stays
@@ -43,20 +45,44 @@ const isWide = () => window.innerWidth >= WIDE;
 // Signed photo links last 15 minutes; refresh well before that when Oma comes back to the tab.
 const STALE_MS = 10 * 60 * 1000;
 
-async function open(): Promise<FamilyPage> {
+/** The page, or the keyring's start page when this browser follows several children. */
+type Opened = FamilyPage | { choose: KeyringChild[] };
+
+async function open(): Promise<Opened> {
   if (linkCode) {
     try {
-      await api.claim(linkCode);
+      // The link just opened is the child to show.
+      const claimed = await api.claim(linkCode);
+      chooseChild(claimed.member ?? null);
     } catch (error) {
-      // An old link on a device that is already in: just show the page.
+      // An old link on a device that is already in: we can't tell whose it was, so with several
+      // children the start page asks; with one, that child's page.
       if (!(error instanceof NoAccessError)) throw error;
-      return api.page(isWide()).catch(() => {
+      chooseChild(null);
+      return chooseOrPage().catch(() => {
         throw error;
       });
     }
     linkCode = undefined;
   }
-  return api.page(isWide());
+  return chooseOrPage();
+}
+
+async function chooseOrPage(): Promise<Opened> {
+  if (!chosenChild()) {
+    const children = await api.kinderen().catch(() => []);
+    if (children.length > 1) return { choose: children };
+  }
+  try {
+    return await api.page(isWide());
+  } catch (error) {
+    // The child chosen in this tab is no longer there (taken off the circle): start over.
+    if (error instanceof NoAccessError && chosenChild()) {
+      chooseChild(null);
+      return chooseOrPage();
+    }
+    throw error;
+  }
 }
 
 function problemOf(error: unknown): Problem {
@@ -75,6 +101,9 @@ export default function App() {
   const [loadedAt, setLoadedAt] = useState(0);
   const [problem, setProblem] = useState<Problem | null>(linkCode === '' ? 'no-link' : null);
   const [viewing, setViewing] = useState<{ moment: string; photo: number } | null>(null);
+  // The keyring: the start page while choosing, and the children for "Ander kindje".
+  const [choosing, setChoosing] = useState<KeyringChild[] | null>(null);
+  const [ring, setRing] = useState<KeyringChild[]>([]);
   // The photo that opened the big view gets focus back when it closes.
   const opener = useRef<HTMLElement | null>(null);
   const showing = path === '/foto' && !!viewing;
@@ -84,10 +113,18 @@ export default function App() {
     opener.current = null;
   }, [showing]);
 
-  const show = useCallback((next: FamilyPage) => {
+  const show = useCallback((next: Opened) => {
+    setProblem(null);
+    if ('choose' in next) {
+      setRing(next.choose);
+      return setChoosing(next.choose);
+    }
+    // From now on this tab asks for this child, also after a link for another one was opened.
+    if (next.member) chooseChild(next.member);
+    setChoosing(null);
     setPage(next);
     setLoadedAt(Date.now());
-    setProblem(null);
+    api.kinderen().then(setRing, () => undefined);
   }, []);
 
   const reload = useCallback(() => {
@@ -151,14 +188,27 @@ export default function App() {
     return (
       <OpenFromMail
         onOpen={async () => {
-          await api.claim(mailCode);
+          const claimed = await api.claim(mailCode);
+          chooseChild(claimed.member ?? null);
           show(await api.page(isWide()));
         }}
       />
     );
   }
   if (problem) return <NoAccess reason={problem} onRetry={problem === 'offline' ? reload : undefined} />;
+  // Another child: its page loads fresh; the same child just goes back.
+  const pick = (member: string) => {
+    setChoosing(null);
+    if (page && member === page.member) return navigate('/', true);
+    chooseChild(member);
+    setPage(null);
+    navigate('/', true);
+    reload();
+  };
+  if (choosing) return <Picker choices={choosing} onPick={pick} />;
   if (!page) return <Loading />;
+  // "Ander kindje kiezen": its own address, so the browser's Back returns to the child.
+  if (path === '/kies' && ring.length > 1) return <Picker choices={ring} current={page.member} onPick={pick} />;
   if (!page.me.joined || path === '/instellingen') {
     return <Join page={page} editing={page.me.joined} onSaved={reload} onLeft={() => setProblem('left')} />;
   }
@@ -179,7 +229,14 @@ export default function App() {
         </View>
       ) : null}
       <View style={{ flex: 1 }} aria-hidden={showing || undefined} {...(showing ? ({ inert: '' } as object) : {})}>
-        <Cards page={page} onHugged={hugged} onOlder={older} onOlderUntil={olderUntil} onOpen={openPhoto} />
+        <Cards
+          page={page}
+          onHugged={hugged}
+          onOlder={older}
+          onOlderUntil={olderUntil}
+          onOpen={openPhoto}
+          onSwitch={ring.length > 1 ? () => navigate('/kies') : undefined}
+        />
       </View>
     </>
   );

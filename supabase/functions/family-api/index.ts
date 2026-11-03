@@ -41,9 +41,16 @@ function newToken(): string {
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function cookie(request: Request): string | null {
+// The keyring (docs/family-email.md): the cookie holds up to six session tokens, joined by dots,
+// one per child this browser follows. Each is still one person in one circle.
+const KEYRING = 6;
+
+function cookie(request: Request): string[] {
   const match = request.headers.get('cookie')?.match(new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`));
-  return match ? match[1] : null;
+  return (match?.[1] ?? '')
+    .split('.')
+    .filter((t) => /^[A-Za-z0-9_-]{20,100}$/.test(t))
+    .slice(-KEYRING);
 }
 
 /** Writes only from the family page itself: blocks other sites posting on Oma's behalf. */
@@ -61,12 +68,28 @@ function deviceHint(userAgent: string): string {
   return browser ? `${device} · ${browser}` : device;
 }
 
-async function member(request: Request): Promise<{ member: string; trail: string } | null> {
-  const token = cookie(request);
-  if (!token) return null;
-  const { data } = await service.rpc('family_member', { session_hash: await sha256(token) });
-  const row = (data as { member: string; member_trail: string }[] | null)?.[0];
-  return row ? { member: row.member, trail: row.member_trail } : null;
+type Who = { member: string; trail: string; token: string; tokens: string[]; changed: boolean };
+
+/**
+ * The person this request is for: the child asked for in X-Kring (a circle member id), if its
+ * token is on this browser, else the last one opened. A made-up id gets nothing. Tokens that no
+ * longer work are dropped from the cookie (`changed`).
+ */
+async function member(request: Request): Promise<{ who: Who | null; tokens: string[]; changed: boolean; failed?: boolean }> {
+  const tokens = cookie(request);
+  if (!tokens.length) return { who: null, tokens, changed: false };
+  const hashes = await Promise.all(tokens.map(sha256));
+  const asked = request.headers.get('x-kring');
+  const wanted = asked && /^[0-9a-f-]{36}$/.test(asked) ? asked : null;
+  const { data, error } = await service.rpc('family_member_in', { session_hashes: hashes, wanted });
+  // A hiccup on our side never touches the cookie: Oma would lose every child on the ring.
+  if (error) return { who: null, tokens, changed: false, failed: true };
+  const rows = (data ?? []) as { member: string; member_trail: string; session_hash: string; chosen: boolean }[];
+  const valid = tokens.filter((_, i) => rows.some((r) => r.session_hash === hashes[i]));
+  const changed = valid.length !== tokens.length;
+  const pick = rows.find((r) => r.chosen);
+  if (!pick) return { who: null, tokens: valid, changed };
+  return { who: { member: pick.member, trail: pick.member_trail, token: tokens[hashes.indexOf(pick.session_hash)], tokens: valid, changed }, tokens: valid, changed };
 }
 
 async function signed(paths: string[]): Promise<Map<string, string>> {
@@ -153,7 +176,10 @@ ${SIGN_OFF}`,
   return { subject: 'Bevestig je e-mailadres voor de nieuwe momenten', text, html };
 }
 
-const sessionCookie = (token: string) => `${COOKIE}=${token}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`;
+const sessionCookie = (tokens: string[]) =>
+  tokens.length
+    ? `${COOKIE}=${tokens.slice(-KEYRING).join('.')}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`
+    : `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
 
 Deno.serve(async (request) => {
   const route = new URL(request.url).pathname.split('/family-api')[1] || '/';
@@ -188,25 +214,63 @@ Deno.serve(async (request) => {
       session_hash: await sha256(token),
       device: deviceHint(request.headers.get('user-agent') ?? ''),
       ip: await ipHash(request),
-      existing_session_hash: existing ? await sha256(existing) : null,
+      existing_session_hashes: await Promise.all(existing.map(sha256)),
     });
     const result = (data as { member: string | null; status: string }[] | null)?.[0];
     // The same device opening its link again keeps its session (and renews the cookie).
-    if (result?.status === 'same' && existing) return json(200, { ok: true }, { 'Set-Cookie': sessionCookie(existing) });
-    if (result?.status === 'ok') return json(200, { ok: true }, { 'Set-Cookie': sessionCookie(token) });
+    if (result?.status === 'same') return json(200, { ok: true, member: result.member }, { 'Set-Cookie': sessionCookie(existing) });
+    if (result?.status === 'ok') {
+      // A link for another child adds a key to the ring, next to the keys that still exist. Past
+      // six the oldest goes, and its session ends, so it no longer counts as a device.
+      const hashes = await Promise.all(existing.map(sha256));
+      const { data: alive, error: aliveError } = await service.rpc('family_keys_alive', { session_hashes: hashes });
+      const kept = aliveError ? existing : existing.filter((_, i) => ((alive ?? []) as string[]).includes(hashes[i]));
+      const ring = [...kept, token];
+      for (const old of ring.slice(0, Math.max(0, ring.length - KEYRING))) {
+        await service.rpc('family_forget_session', { session_hash: await sha256(old) });
+      }
+      return json(200, { ok: true, member: result.member }, { 'Set-Cookie': sessionCookie(ring.slice(-KEYRING)) });
+    }
     if (result?.status === 'full') return json(409, { error: 'five devices' });
     return json(404, { error: 'unknown link' });
   }
 
-  const who = await member(request);
-  if (!who) return json(401, { error: 'no access' });
+  const found = await member(request);
+  if (found.failed) return json(503, { error: 'try again' });
+  // Dead keys leave the cookie with any answer.
+  const tidy = (response: Response) => {
+    if (found.changed && !response.headers.has('Set-Cookie')) response.headers.set('Set-Cookie', sessionCookie(found.tokens));
+    return response;
+  };
+
+  // The start page: every child this browser follows. Opening it is no visit to any trail.
+  if (route === '/kinderen' && request.method === 'GET') {
+    if (!found.tokens.length) return tidy(json(401, { error: 'no access' }));
+    const { data } = await service.rpc('family_keyring', { session_hashes: await Promise.all(found.tokens.map(sha256)) });
+    type Child = { member: string; label: string; first_name: string; birth_date: string | null; avatar_animal: string; avatar_tone: string; new_this_week: number };
+    return tidy(
+      json(200, {
+        children: ((data ?? []) as Child[]).map((c) => ({
+          member: c.member,
+          label: c.label,
+          firstName: c.first_name,
+          birthDate: c.birth_date,
+          look: { animal: c.avatar_animal, tone: c.avatar_tone },
+          newThisWeek: c.new_this_week,
+        })),
+      }),
+    );
+  }
+
+  const who = found.who;
+  if (!who) return tidy(json(401, { error: 'no access' }));
 
   if (route === '/page' && request.method === 'GET') {
     const params = new URL(request.url).searchParams;
     const skip = Number(params.get('skip'));
     const data = await page(who, Number.isInteger(skip) && skip > 0 ? Math.min(skip, 10_000) : 0, params.get('wide') === '1');
     // Every visit renews the cookie, so a session lasts 180 days after its last use.
-    return json(200, data, { 'Set-Cookie': sessionCookie(cookie(request)!) });
+    return json(200, { ...data, member: who.member }, { 'Set-Cookie': sessionCookie(who.tokens) });
   }
 
   if (route === '/join' && request.method === 'POST') {
@@ -274,8 +338,9 @@ Deno.serve(async (request) => {
 
   if (route === '/leave' && request.method === 'POST') {
     await service.rpc('family_leave', { member: who.member });
-    return json(200, { ok: true }, { 'Set-Cookie': `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
+    // Only this child's key goes; the others on the ring stay.
+    return json(200, { ok: true }, { 'Set-Cookie': sessionCookie(who.tokens.filter((t) => t !== who.token)) });
   }
 
-  return json(404, { error: 'not found' });
+  return tidy(json(404, { error: 'not found' }));
 });

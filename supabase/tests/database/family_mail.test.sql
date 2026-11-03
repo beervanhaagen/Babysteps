@@ -90,7 +90,7 @@ set local role service_role;
 select from public.family_unsubscribe((select member_id from ria));
 reset role;
 select is((select coalesce(email, 'weg') || ' ' || email_frequency from public.circle_members where id = (select member_id from ria)), 'weg never', 'unsubscribing wipes the address');
-select is((select count(*) from public.family_member(pg_temp.h('s-mail'))), 1::bigint, 'and the family page stays open');
+select is((select count(*) from public.family_member_in(array[pg_temp.h('s-mail')], null) where chosen), 1::bigint, 'and the family page stays open');
 
 -- Unconfirmed addresses go after 7 days.
 update public.circle_members set email_requested_at = now() - interval '8 days' where id = (select member_id from henk);
