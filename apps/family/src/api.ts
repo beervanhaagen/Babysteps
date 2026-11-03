@@ -24,7 +24,7 @@ export interface FamilyPage {
   child: { firstName: string; birthDate: string | null };
   me: { label: string; relation: string | null; email: string | null; frequency: 'each' | 'weekly' | 'never'; joined: boolean; onBookList: boolean };
   moments: FamilyMoment[];
-  /** Older postcards exist ("Eerdere kaartjes"). */
+  /** Older moments exist ("Eerdere momenten"). */
   more: boolean;
   /** The parents allow keeping photos (M6): show "Bewaar foto". */
   mayKeep: boolean;

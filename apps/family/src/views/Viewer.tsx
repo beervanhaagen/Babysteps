@@ -1,4 +1,4 @@
-import { firstLook, longDutchDate, possessive, todayInAmsterdam, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
+import { firstLook, longDutchDate, possessive, weekName, weekShort, todayInAmsterdam, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -66,9 +66,9 @@ export function Viewer({ page, start, onHugged, onClose }: ViewerProps) {
       photos.push({
         key: `${m.id}-${i}`,
         week: m.week,
-        index: 0,
-        count: 0,
-        photo: <Big uri={views.get(m.id)?.[i] ?? undefined} small={p.url} label={m.caption ? `Foto: ${m.caption}` : `Foto uit week ${m.week}`} />,
+        index: i,
+        count: m.photos.length,
+        photo: <Big uri={views.get(m.id)?.[i] ?? undefined} small={p.url} label={m.caption ? `Foto: ${m.caption}` : `Foto uit ${weekName(m.week).toLowerCase()}`} />,
         caption: m.caption,
         first: m.isFirst && m.firstLabel ? { label: m.firstLabel, ...firstLook(m.firstLabel) } : undefined,
         date: longDutchDate(m.day as CalendarDate),
@@ -76,11 +76,6 @@ export function Viewer({ page, start, onHugged, onClose }: ViewerProps) {
         below: <Hug moment={m} onHugged={onHugged} />,
       });
     });
-  }
-  for (const p of photos) {
-    const week = photos.filter((q) => q.week === p.week);
-    p.index = week.indexOf(p);
-    p.count = week.length;
   }
 
   return (
@@ -91,8 +86,10 @@ export function Viewer({ page, start, onHugged, onClose }: ViewerProps) {
       start={{ key: `${start.moment}-${start.photo}`, week: now }}
       now={Math.max(now, ...photos.map((p) => p.week))}
       span={(w) => weekSpan(birth, w)}
+      weekName={weekName}
+      weekShort={weekShort}
       onClose={onClose}
-      closeLabel="Terug naar de kaartjes"
+      closeLabel={`Terug naar ${possessive(name)} pad`}
     />
   );
 }

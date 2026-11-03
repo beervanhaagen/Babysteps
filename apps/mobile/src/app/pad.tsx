@@ -1,8 +1,8 @@
-import { firstLook, leapCard, longDutchDate, possessive, todayInAmsterdam, TRAIL_WEEKS, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
+import { type CalendarDate, firstLook, leapCard, longDutchDate, possessive, todayInAmsterdam, TRAIL_WEEKS, trailWeek, weekMonth, weekName, weekSpan } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { Banner, border, Button, Callout, Character, color, fontFamily, Icon, MomentCard, NextUp, radius, space, text, useAnnounce, useFocusRing } from '@teddysteps/ui';
+import { Banner, border, Button, Callout, Character, color, fontFamily, Icon, MomentCard, MonthBar, NextUp, radius, space, text, useAnnounce, useFocusRing, useReducedMotion, type MonthChip } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 import { Photo } from '@/components/Photo';
 import { TextLink } from '@/components/TextLink';
@@ -24,6 +24,13 @@ export default function Trail() {
   const { moments, source, refresh } = useTrailMoments();
   const { queue, online } = useQueue();
   const [leapOpen, setLeapOpen] = useState(false);
+  // The month chips (owner, 3 November 2026): where each month starts, and the one in view.
+  const scroller = useRef<ComponentRef<typeof ScrollView>>(null);
+  const places = useRef({ timeline: 0, months: new Map<string, number>() });
+  const [current, setCurrent] = useState<string>();
+  const [jumped, setJumped] = useState<string>();
+  const reduced = useReducedMotion();
+  useAnnounce(jumped);
   if (state.status !== 'ready') return null;
   const { trail } = state;
   const today = todayInAmsterdam();
@@ -31,16 +38,30 @@ export default function Trail() {
   const leap = trail.birthDate && trail.leapCardsOn ? leapCard(trail.childName, trail.dueDate, trail.birthDate, today) : null;
   // A moment still uploading shows in the upload status above, not twice.
   const shown = moments.filter((m) => !m.queued || m.queued.stage === 'visible');
+  const chips = trail.birthDate && week ? months(trail.birthDate, week, shown) : [];
 
   return (
     <View style={styles.screen}>
-      <TrailHeader childName={trail.childName} week={week ? `Week ${week} van ${TRAIL_WEEKS}` : null} />
+      <TrailHeader childName={trail.childName} week={week ? (week <= 52 ? `Week ${week} van ${TRAIL_WEEKS}` : weekName(week)) : null} />
       {!week || !trail.birthDate ? (
         <OnTheWay dueDate={longDutchDate(trail.dueDate, { weekday: false, year: true })} />
       ) : source === 'server' && !moments.length ? (
         <EmptyTrail week={week} />
       ) : (
-        <ScrollView contentContainerStyle={styles.content} alwaysBounceHorizontal={false} showsHorizontalScrollIndicator={false}>
+        <ScrollView
+          ref={scroller}
+          contentContainerStyle={styles.content}
+          alwaysBounceHorizontal={false}
+          showsHorizontalScrollIndicator={false}
+          stickyHeaderIndices={[1]}
+          scrollEventThrottle={100}
+          onScroll={(e) => {
+            const y = e.nativeEvent.contentOffset.y + 70;
+            let top: string | undefined;
+            for (const [key, at] of places.current.months) if (places.current.timeline + at <= y && (!top || at > places.current.months.get(top)!)) top = key;
+            setCurrent(top);
+          }}
+        >
           <View style={styles.gutter}>
             {source === 'failed' || (source === 'cached' && !queue.length) ? (
               <Banner tone="sunshine" character="bizzy" title="Je bent offline">
@@ -66,8 +87,23 @@ export default function Trail() {
               </NextUp>
             ) : null}
           </View>
-          <View style={styles.gutter}>
-            <Timeline moments={shown} week={week} birthDate={trail.birthDate} />
+          {chips.length > 1 ? (
+            <MonthBar
+              months={chips}
+              current={current ?? weekMonth(trail.birthDate, week).key}
+              onPick={(key) => {
+                const at = places.current.months.get(key);
+                if (at === undefined) return;
+                scroller.current?.scrollTo({ y: places.current.timeline + at - 60, animated: !reduced });
+                // Focus stays on the chip: say where the timeline went.
+                setJumped(chips.find((c) => c.key === key)?.name);
+              }}
+            />
+          ) : (
+            <View />
+          )}
+          <View style={styles.gutter} onLayout={(e) => (places.current.timeline = e.nativeEvent.layout.y)}>
+            <Timeline moments={shown} week={week} birthDate={trail.birthDate} onMonth={(key, y) => places.current.months.set(key, y)} />
           </View>
         </ScrollView>
       )}
@@ -80,43 +116,69 @@ export default function Trail() {
 const openPhoto = (week: number, moment: string, photo: number) =>
   router.push({ pathname: '/weekweergave/[week]', params: { week: String(week), moment, foto: String(photo) } });
 
+/** Every month from the birth to now, as chips; months without moments can't be picked. */
+function months(birthDate: CalendarDate, week: number, moments: TrailMoment[]): MonthChip[] {
+  const full = new Set(moments.map((m) => weekMonth(birthDate, m.trailWeek).key));
+  const chips: MonthChip[] = [];
+  for (let w = 1; w <= week; w++) {
+    const m = weekMonth(birthDate, w);
+    if (chips[chips.length - 1]?.key === m.key) continue;
+    chips.push({ key: m.key, label: m.short, name: m.name, available: full.has(m.key) || w === week });
+  }
+  return chips;
+}
+
 /**
  * The trail as a timeline, like a travel diary (owner, 25 October 2026): a dotted path down the
  * left with a stop for every week that has moments (Bo stands on this week's), the moments as
- * album pages beside it. A tap on a photo opens the big view there.
+ * album pages beside it, under a heading per month. A tap on a photo opens the big view there.
  */
-function Timeline({ moments, week, birthDate }: { moments: TrailMoment[]; week: number; birthDate: CalendarDate }) {
+function Timeline({ moments, week, birthDate, onMonth }: { moments: TrailMoment[]; week: number; birthDate: CalendarDate; onMonth: (key: string, y: number) => void }) {
   const { width } = useWindowDimensions();
   const weeks = byWeek(moments);
   if (!weeks.some(([w]) => w === week)) weeks.unshift([week, []]);
+  const sections: { key: string; name: string; weeks: typeof weeks }[] = [];
+  for (const entry of weeks) {
+    const m = weekMonth(birthDate, entry[0]);
+    const last = sections[sections.length - 1];
+    if (last && last.key === m.key) last.weeks.push(entry);
+    else sections.push({ key: m.key, name: m.name, weeks: [entry] });
+  }
   // Card width is the screen minus the gutters and the path's column.
   const photoHeight = Math.round((width - space.space4 * 2 - RAIL) * 0.82);
   return (
     <View style={styles.timeline}>
       <View style={styles.rail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
-      {weeks.map(([w, list]) => (
-        <View key={w} style={styles.week}>
-          <View style={styles.weekHeading}>
-            <View style={styles.marker} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-              {w === week ? (
-                <View style={styles.bo}>
-                  <Character name="bo" size={30} decorative />
+      {sections.map((section) => (
+        <View key={section.key} style={styles.month} onLayout={(e) => onMonth(section.key, e.nativeEvent.layout.y)}>
+          <Text accessibilityRole="header" style={styles.monthTitle}>
+            {section.name}
+          </Text>
+          {section.weeks.map(([w, list]) => (
+            <View key={w} style={styles.week}>
+              <View style={styles.weekHeading}>
+                <View style={styles.marker} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  {w === week ? (
+                    <View style={styles.bo}>
+                      <Character name="bo" size={30} decorative />
+                    </View>
+                  ) : null}
+                  <View style={[styles.dot, w === week && styles.dotNow]} />
                 </View>
-              ) : null}
-              <View style={[styles.dot, w === week && styles.dotNow]} />
+                <Text accessibilityRole="header" style={styles.weekLabel}>
+                  {w === week ? `${weekName(w)} · nu` : weekName(w)}
+                </Text>
+                <Text style={styles.weekMeta}>{weekSpan(birthDate, w)}</Text>
+              </View>
+              <View style={styles.weekBody}>
+                {list.length ? (
+                  list.map((m) => <Card key={m.key} moment={m} photoHeight={photoHeight} onOpen={(photo) => openPhoto(w, m.key, photo)} />)
+                ) : (
+                  <EmptyWeek />
+                )}
+              </View>
             </View>
-            <Text accessibilityRole="header" style={styles.weekLabel}>
-              {w === week ? `Week ${w} · nu` : `Week ${w}`}
-            </Text>
-            <Text style={styles.weekMeta}>{weekSpan(birthDate, w)}</Text>
-          </View>
-          <View style={styles.weekBody}>
-            {list.length ? (
-              list.map((m) => <Card key={m.key} moment={m} photoHeight={photoHeight} onOpen={(photo) => openPhoto(w, m.key, photo)} />)
-            ) : (
-              <EmptyWeek />
-            )}
-          </View>
+          ))}
         </View>
       ))}
     </View>
@@ -152,12 +214,12 @@ function Card({ moment: m, photoHeight, onOpen }: { moment: TrailMoment; photoHe
       ))}
       photoCount={m.photos.length}
       photoHeight={photoHeight}
-      alt={m.photos.length === 1 ? (m.caption ? `Foto: ${m.caption}` : 'Foto van dit moment') : m.caption ? `Foto’s: ${m.caption}` : 'Foto’s van dit moment'}
+      alt={m.photos.length === 1 ? (m.caption ? `Foto: ${m.caption}` : 'Foto van dit moment') : `${m.photos.length} foto’s${m.caption ? `: ${m.caption}` : ' van dit moment'}`}
       caption={m.caption ?? (first ? null : 'Een moment')}
       first={first}
       date={dayOf(m)}
       hugs={m.hugs || undefined}
-      context={`Week ${m.trailWeek}`}
+      context={weekName(m.trailWeek)}
       onPress={m.momentId ? onOpen : undefined}
     />
   );
@@ -221,7 +283,7 @@ function EmptyTrail({ week }: { week: number }) {
       <Doodles />
       <Character name="bo" size={130} decorative />
       <Text accessibilityRole="header" style={[text('titleL'), styles.centerText]}>
-        Week {week} wacht op je!
+        {week <= 52 ? `Week ${week} wacht op je!` : 'Deze week wacht op je!'}
       </Text>
       <Text style={[styles.body, styles.centerText]}>Elk pad begint met één moment. Een slaperige foto telt helemaal mee.</Text>
       <View style={styles.actions}>
@@ -266,12 +328,14 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
   content: { paddingTop: 4, paddingBottom: 28, gap: 12 },
   gutter: { paddingHorizontal: space.space4, gap: space.space3 },
-  timeline: { gap: space.space5, paddingBottom: 4 },
+  timeline: { gap: space.space6, paddingBottom: 4 },
+  month: { gap: space.space5 },
+  monthTitle: { ...text('titleM'), marginLeft: RAIL, marginTop: 4 },
   // The path: a 0-wide box with a dotted border all round (one-sided dotted borders draw
   // unreliably on phones), from the first stop down.
-  rail: { position: 'absolute', left: RAIL / 2 - 1, top: 28, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink, opacity: 0.5 },
+  rail: { position: 'absolute', left: RAIL / 2 - 1, top: 78, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink, opacity: 0.5 },
   week: { gap: space.space3 },
-  weekHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingTop: 6 },
+  weekHeading: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 8, minHeight: 44, paddingTop: 6 },
   marker: { width: RAIL, height: 44, alignItems: 'center', justifyContent: 'center', marginRight: -8 },
   // Bo stands on this week's stop.
   bo: { position: 'absolute', bottom: 28 },

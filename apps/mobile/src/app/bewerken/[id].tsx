@@ -1,4 +1,4 @@
-import { firstLook } from '@teddysteps/core';
+import { firstLook, weekName } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
@@ -51,7 +51,7 @@ export default function EditMoment() {
 
   return (
     <Screen
-      header={{ title: 'Bijschrift', subtitle: `Week ${m.trailWeek}`, color: 'cornflower', onBack: router.back, character: 'puddle' }}
+      header={{ title: 'Bijschrift', subtitle: weekName(m.trailWeek), color: 'cornflower', onBack: router.back, character: 'puddle' }}
       footer={
         <Button block onPress={save} busy={busy}>
           Opslaan

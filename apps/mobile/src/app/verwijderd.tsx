@@ -1,3 +1,4 @@
+import { atWeek, weekName } from '@teddysteps/core';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -48,7 +49,7 @@ export default function RecentlyDeleted() {
     setMessage(undefined);
     try {
       await restoreMoment(item.id);
-      setMessage(`Terug op het pad, in week ${item.trail_week}.`);
+      setMessage(`Terug op het pad, ${atWeek(item.trail_week)}.`);
       await load();
     } catch (e) {
       setMessage(friendlyError(e));
@@ -66,7 +67,7 @@ export default function RecentlyDeleted() {
           return (
             <ListRow
               key={item.id}
-              title={`Week ${item.trail_week} · ${title}`}
+              title={`${weekName(item.trail_week)} · ${title}`}
               subtitle={item.left === 1 ? 'Nog 1 dag' : `Nog ${item.left} dagen`}
               accessory={
                 <Button variant="paper" size="md" onPress={() => restore(item)} busy={busy === item.id}>

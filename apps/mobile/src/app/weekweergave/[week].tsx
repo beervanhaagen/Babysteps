@@ -1,4 +1,4 @@
-import { firstLook, todayInAmsterdam, trailWeek, weekSpan } from '@teddysteps/core';
+import { firstLook, todayInAmsterdam, trailWeek, weekName, weekShort, weekSpan } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,11 +23,11 @@ export default function WeekView() {
     .reverse()
     .flatMap(([week, list]) => {
       const all = [...list].reverse().flatMap((m) => m.photos.map((p, i) => ({ m, p, i })));
-      return all.map(({ m, p, i }, index) => ({
+      return all.map(({ m, p, i }) => ({
         key: `${m.key}-${i}`,
         week,
-        index,
-        count: all.length,
+        index: i,
+        count: m.photos.length,
         photo: <Photo source={p.view} fit="contain" />,
         caption: m.caption,
         first: m.isFirst && m.firstLabel ? { label: m.firstLabel, ...firstLook(m.firstLabel) } : undefined,
@@ -44,6 +44,8 @@ export default function WeekView() {
       start={{ week: Number(params.week) || now, key: params.moment ? `${params.moment}-${Number(params.foto) || 0}` : undefined }}
       now={now}
       span={(w) => weekSpan(birth, w)}
+      weekName={weekName}
+      weekShort={weekShort}
       // Only the server says this week is really empty; before that, or offline, we don't know yet.
       addPage={source === 'server' ? <AddPage /> : undefined}
       onEmptyNow={() => router.push('/toevoegen')}

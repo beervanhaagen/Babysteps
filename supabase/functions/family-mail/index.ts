@@ -4,6 +4,7 @@
 // One 7-day sign-in link per mail, one-click unsubscribe, sent once (row first, then the mail).
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { button, C, COMPANY, escapeHtml, frame, send, SERIF, sha256, SIGN_OFF, signinCode, unsubscribeToken } from '../_shared/mail.ts';
+import { weekName } from '../_shared/names.ts';
 
 const service = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const CRON_SECRET = Deno.env.get('CRON_SECRET');
@@ -22,7 +23,7 @@ function sundayMail(row: Row, code: string, unsubscribe: string) {
   const more = row.moment_count > SHOWN ? row.moment_count - SHOWN : 0;
   const andMore = more === 1 ? 'En nog 1 moment.' : `En nog ${more} momenten.`;
   const title = (m: Moment) => (m.first ? m.label : m.caption) || 'Een moment';
-  const eyebrow = (m: Moment) => `Week ${m.week}${m.first ? ' · eerste keer!' : ''}`;
+  const eyebrow = (m: Moment) => `${weekName(m.week)}${m.first ? ' · eerste keer!' : ''}`;
 
   const text = `Hoi ${row.label},
 

@@ -1,4 +1,4 @@
-import { firstLook, longDutchDate, todayInAmsterdam } from '@teddysteps/core';
+import { firstLook, longDutchDate, todayInAmsterdam, weekName } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -27,14 +27,14 @@ export default function Moment() {
   // The parent's line is the heading (Pad 2.0); a long one reads better as text under a plain
   // heading. A first shows as a label above it.
   const longCaption = !!m?.caption && m.caption.length > 60;
-  const title = m ? ((longCaption ? null : m.caption) ?? (m.isFirst ? m.firstLabel : null) ?? `Een moment uit week ${m.trailWeek}`) : '';
+  const title = m ? ((longCaption ? null : m.caption) ?? (m.isFirst ? m.firstLabel : null) ?? (m.trailWeek <= 52 ? `Een moment uit week ${m.trailWeek}` : `Een moment op ${weekName(m.trailWeek)}`)) : '';
   const story = longCaption ? m!.caption : null;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={styles.bar}>
         <IconButton icon="back" label="Terug" onPress={router.back} />
-        <Text style={styles.week}>{m ? `Week ${m.trailWeek}` : ''}</Text>
+        <Text style={styles.week}>{m ? weekName(m.trailWeek) : ''}</Text>
         {m?.momentId ? (
           <IconButton icon="more" label="Opties voor dit moment" onPress={() => router.push(`/opties/${m.momentId}`)} />
         ) : (

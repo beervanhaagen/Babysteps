@@ -136,6 +136,13 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
   const pictures = (
     <View accessible={!!alt} accessibilityRole={alt ? 'image' : undefined} accessibilityLabel={alt} style={compact ? styles.momentThumb : [styles.momentPhotos, photoHeight ? { height: photoHeight } : null]}>
       {compact ? <Tile>{photos[0]}</Tile> : <Mosaic photos={photos} count={photoCount} onTile={onPress} />}
+      {/* More than one photo: a count top right, so you know there's more to see (owner, 3 November 2026). */}
+      {!compact && photoCount > 1 ? (
+        <View style={styles.photoCount} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Icon name="photos" size={14} weight={2.4} />
+          <Text style={styles.photoCountText}>{photoCount}</Text>
+        </View>
+      ) : null}
     </View>
   );
   const body = (
@@ -619,6 +626,21 @@ const styles = StyleSheet.create({
   mosaicRow: { flex: 1, flexDirection: 'row', gap: 3 },
   mosaicColumn: { flex: 1, gap: 3 },
   tilePress: { flex: 1 },
+  photoCount: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: radius.radiusPill,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    backgroundColor: color.white,
+  },
+  photoCountText: { fontFamily: fontFamily('sans', 800), fontSize: 12, lineHeight: 16, color: color.ink },
   tile: { flex: 1, overflow: 'hidden', backgroundColor: color.lilac, alignItems: 'center', justifyContent: 'center' },
   tileMore: { ...StyleSheet.absoluteFill, backgroundColor: `${color.ink}9E` /* ink at 62% */, alignItems: 'center', justifyContent: 'center' },
   tileMoreText: { fontFamily: fontFamily('sticker', 400), fontSize: 22, color: color.white },

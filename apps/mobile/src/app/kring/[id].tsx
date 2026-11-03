@@ -87,7 +87,7 @@ export default function CircleMemberScreen() {
       <Avatar name={member.label} size={64} decorative />
       <Text style={styles.body}>
         {since ? `Kijkt mee sinds ${since}.` : 'Heeft de uitnodiging nog niet geopend.'}{' '}
-        {member.frequency === 'never' ? 'Krijgt geen kaartjes in de mail.' : member.frequency === 'each' ? 'Krijgt bij elk moment een kaartje.' : 'Krijgt elke zondag een kaartje.'}
+        {member.frequency === 'never' ? 'Krijgt geen mailtjes.' : member.frequency === 'each' ? 'Krijgt bij elk moment een mailtje.' : 'Krijgt elke zondag een mailtje met de nieuwe momenten.'}
       </Text>
       {devices?.length ? (
         <View>

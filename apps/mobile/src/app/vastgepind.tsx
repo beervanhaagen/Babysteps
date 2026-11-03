@@ -1,4 +1,4 @@
-import { possessive } from '@teddysteps/core';
+import { atWeek, possessive, weekName } from '@teddysteps/core';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -49,13 +49,13 @@ export default function Pinned() {
         <IconButton icon="close" label="Sluiten" onPress={toTrail} />
       </View>
       <View style={styles.middle}>
-        <View style={styles.art} accessible accessibilityRole="image" accessibilityLabel={`Foto: ${title}, week ${moment.trailWeek}`}>
+        <View style={styles.art} accessible accessibilityRole="image" accessibilityLabel={`Foto: ${title}, ${weekName(moment.trailWeek).toLowerCase()}`}>
           <View style={styles.card}>
             <View style={styles.photo}>
               <Photo source={{ local: moment.photos[0].view }} />
             </View>
             <View style={styles.cardText}>
-              <Text style={styles.eyebrow}>{`Week ${moment.trailWeek}${moment.isFirst ? ' · eerste keer!' : ''}`}</Text>
+              <Text style={styles.eyebrow}>{`${weekName(moment.trailWeek)}${moment.isFirst ? ' · eerste keer!' : ''}`}</Text>
               <Text style={styles.cardTitle} numberOfLines={2}>
                 {title}
               </Text>
@@ -69,7 +69,7 @@ export default function Pinned() {
           </View>
         </View>
         <Text accessibilityRole="header" style={[text('display'), styles.center]}>
-          Vastgepind in week {moment.trailWeek}!
+          Vastgepind {atWeek(moment.trailWeek)}!
         </Text>
         <Text style={[styles.body, styles.center]}>
           {moment.isFirst ? 'Een eerste keer! Tiggy kwam kijken.' : `Het staat op ${possessive(name)} pad.`}

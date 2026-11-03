@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ageLine, checkChildDates, formatDutchDate, longDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate } from './dates.ts';
+import { ageLine, weekMonth, checkChildDates, formatDutchDate, longDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate } from './dates.ts';
 
 test('reads Dutch dates and rejects impossible ones', () => {
   assert.equal(parseDutchDate('12-03-2026'), '2026-03-12');
@@ -50,4 +50,16 @@ test('age line for the family page', () => {
   assert.equal(ageLine('2026-10-01', '2026-10-22'), '3 weken');
   assert.equal(ageLine('2026-10-01', '2026-10-08'), '1 week');
   assert.equal(ageLine('2026-01-31', '2026-04-30'), 'Vandaag 3 maanden!');
+});
+
+test('from one year, the age in years and months', () => {
+  assert.equal(ageLine('2025-09-28', '2026-11-03'), '1 jaar en 1 maand');
+  assert.equal(ageLine('2025-09-28', '2026-09-28'), 'Vandaag 1 jaar!');
+  assert.equal(ageLine('2025-03-01', '2026-11-03'), '1 jaar en 8 maanden');
+  assert.equal(ageLine('2024-11-03', '2026-11-04'), '2 jaar');
+});
+
+test('the month a trail week starts in', () => {
+  assert.deepEqual(weekMonth('2026-03-19', 1), { key: '2026-03', name: 'Maart 2026', short: 'mrt ’26' });
+  assert.equal(weekMonth('2026-03-19', 3).name, 'April 2026');
 });

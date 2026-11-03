@@ -87,8 +87,26 @@ export function ageLine(birth: CalendarDate, today: CalendarDate): string {
     return weeks === 1 ? '1 week' : `${weeks} weken`;
   }
   const birthday = td === birthdayThisMonth;
-  return birthday ? `Vandaag ${months} maanden!` : `${months} maanden`;
+  if (months < 12) return birthday ? `Vandaag ${months} maanden!` : `${months} maanden`;
+  // From one year on, years and months (owner, 3 November 2026): "1 jaar en 1 maand".
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  const age = rest ? `${years} jaar en ${rest} ${rest === 1 ? 'maand' : 'maanden'}` : `${years} jaar`;
+  return birthday ? `Vandaag ${age}!` : age;
 }
+
+/** "Oktober 2026": the month a trail week starts in, for the month headings on the timeline. */
+export function weekMonth(birthDate: CalendarDate, week: number): { key: string; name: string; short: string } {
+  const from = addDays(birthDate, (week - 1) * 7);
+  const month = from.getUTCMonth();
+  return {
+    key: `${from.getUTCFullYear()}-${String(month + 1).padStart(2, '0')}`,
+    name: `${LONG_MONTHS[month][0].toUpperCase()}${LONG_MONTHS[month].slice(1)} ${from.getUTCFullYear()}`,
+    short: `${MONTHS[month]} ’${String(from.getUTCFullYear()).slice(2)}`,
+  };
+}
+
+const LONG_MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
 
 // Short Dutch names, written out so every platform says the same (Intl adds dots on some).
 const MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];

@@ -11,14 +11,14 @@ import { fontFamily, text } from './text';
 import { border, color, radius, shadow, space } from './tokens';
 
 // T2b, the big view (owner, 25 October 2026), for the parents' app and the family page alike:
-// every photo of the trail in one row, oldest first. Swipe, tap the left or right edge of the
+// every photo of the trail in one row, oldest first. Swipe, tap the left or right of the
 // photo, or use the buttons below; at the end of a week it runs straight on to the next week with
 // photos, so empty weeks never stop you. The strip on top scrolls through all weeks and follows.
 
 export interface ViewerPhoto {
   key: string;
   week: number;
-  /** Its place in the week, and how many photos the week has. */
+  /** Its place in its moment, and how many photos the moment has. */
   index: number;
   count: number;
   /** The photo itself, filling its box (the app passes an expo-image, the family page an <img>). */
@@ -44,6 +44,9 @@ export interface PhotoViewerProps {
   from?: number;
   /** "3 – 9 mrt": the days of a week. */
   span: (week: number) => string;
+  /** "Week 31" or "1 jaar en 4 weken", and short under a stop: "31" or "1j 4w" (weekName, weekShort in core). */
+  weekName: (week: number) => string;
+  weekShort: (week: number) => string;
   /** When this week has no photos yet: a last page, e.g. to add a moment. */
   addPage?: ReactNode;
   /** A tap on this week while it has no page (yet). */
@@ -63,7 +66,7 @@ type Page = ViewerPhoto | { key: 'add'; week: number };
 const STOP = 44;
 const GAP_STOP = 14;
 
-export function PhotoViewer({ photos, start, now, from = 1, span, addPage, onEmptyNow, onClose, closeLabel, banner, waiting, topInset = 0, bottomInset = 0 }: PhotoViewerProps) {
+export function PhotoViewer({ photos, start, now, from = 1, span, weekName, weekShort, addPage, onEmptyNow, onClose, closeLabel, banner, waiting, topInset = 0, bottomInset = 0 }: PhotoViewerProps) {
   const { width } = useWindowDimensions();
   const reduced = useReducedMotion();
   const [pos, setPos] = useState(start);
@@ -139,9 +142,9 @@ export function PhotoViewer({ photos, start, now, from = 1, span, addPage, onEmp
 
   useAnnounce(
     page && 'photo' in page
-      ? `Week ${page.week}, foto ${page.index + 1} van ${page.count}${page.caption ? `: ${page.caption}` : ''}`
+      ? `${weekName(page.week)}${page.count > 1 ? `, foto ${page.index + 1} van ${page.count}` : ''}${page.caption ? `: ${page.caption}` : ''}`
       : page
-        ? `Week ${page.week}, nog leeg`
+        ? `${weekName(page.week)}, nog leeg`
         : undefined,
   );
 
@@ -155,10 +158,10 @@ export function PhotoViewer({ photos, start, now, from = 1, span, addPage, onEmp
           <IconButton icon="back" label={closeLabel} tone="white" onPress={onClose} />
           <View style={styles.heading}>
             <Text role="heading" accessibilityRole="header" {...webAria({ 'aria-level': 1 })} style={styles.title}>
-              Week {week}
+              {weekName(week)}
             </Text>
             <Text style={styles.meta}>
-              {page && 'photo' in page && page.count > 1 ? `${span(week)} · foto ${page.index + 1} van ${page.count}` : span(week)}
+              {span(week)}
             </Text>
           </View>
           <View style={styles.side} />
@@ -176,6 +179,8 @@ export function PhotoViewer({ photos, start, now, from = 1, span, addPage, onEmp
             full.has(w) || (w === now && (addPage || onEmptyNow)) ? (
               <Stop
                 key={w}
+                name={weekName(w)}
+                short={weekShort(w)}
                 week={w}
                 now={w === now}
                 on={w === week}
@@ -235,15 +240,15 @@ export function PhotoViewer({ photos, start, now, from = 1, span, addPage, onEmp
       {pages.length ? (
         <View style={[styles.footer, { paddingBottom: Math.max(14, bottomInset) }]}>
           {before ? (
-            <Button variant="paper" size="md" icon="back" accessibilityLabel={before.week === week ? 'Vorige foto' : `Naar week ${before.week}`} onPress={() => show(at - 1)}>
-              {before.week === week ? 'Vorige' : `Week ${before.week}`}
+            <Button variant="paper" size="md" icon="back" accessibilityLabel={before.week === week ? 'Vorige foto' : `Naar ${weekName(before.week).toLowerCase()}`} onPress={() => show(at - 1)}>
+              {before.week === week ? 'Vorige' : before.week <= 52 ? weekName(before.week) : weekShort(before.week)}
             </Button>
           ) : (
             <View />
           )}
           {after ? (
-            <Button variant="paper" size="md" iconAfter="chevron-right" accessibilityLabel={after.week === week ? 'Volgende foto' : `Naar week ${after.week}`} onPress={() => show(at + 1)}>
-              {after.week === week ? 'Volgende' : `Week ${after.week}`}
+            <Button variant="paper" size="md" iconAfter="chevron-right" accessibilityLabel={after.week === week ? 'Volgende foto' : `Naar ${weekName(after.week).toLowerCase()}`} onPress={() => show(at + 1)}>
+              {after.week === week ? 'Volgende' : after.week <= 52 ? weekName(after.week) : weekShort(after.week)}
             </Button>
           ) : (
             <View />
@@ -254,22 +259,33 @@ export function PhotoViewer({ photos, start, now, from = 1, span, addPage, onEmp
   );
 }
 
-/** A photo with its moment: the week's progress on top, tap the edges to go on, the words below. */
+/**
+ * A photo with its moment: on top the moment's photos as segments and "2/3", the words below.
+ * Like a story: tap the right of the photo for the next one, the left for the one before.
+ */
 function PhotoPage({ item, onBack, onOn }: { item: ViewerPhoto; onBack?: () => void; onOn?: () => void }) {
   return (
     <View style={styles.card}>
       <View style={styles.photo}>
         {item.photo}
-        {item.count > 1 ? (
-          <View style={styles.segments} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-            {Array.from({ length: item.count }, (_, i) => (
-              <View key={i} style={[styles.segment, i <= item.index && styles.segmentOn]} />
-            ))}
-          </View>
-        ) : null}
-        {/* The edges of the photo, like turning a page; the buttons below do the same for everyone. */}
+        {/* Like turning a page; the buttons below do the same for everyone. */}
         {onBack ? <Edge side="left" onPress={onBack} /> : null}
         {onOn ? <Edge side="right" onPress={onOn} /> : null}
+        {item.count > 1 ? (
+          <View style={styles.top} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+            <View style={styles.segments}>
+              {Array.from({ length: item.count }, (_, i) => (
+                <View key={i} style={[styles.segment, i <= item.index && styles.segmentOn]} />
+              ))}
+            </View>
+            <View style={styles.counter}>
+              <Icon name="photos" size={14} weight={2.4} />
+              <Text style={styles.counterText}>
+                {item.index + 1}/{item.count}
+              </Text>
+            </View>
+          </View>
+        ) : null}
         {item.first ? (
           <View style={styles.first}>
             <FirstLabel {...item.first} />
@@ -305,18 +321,18 @@ function Edge({ side, onPress }: { side: 'left' | 'right'; onPress: () => void }
       focusable={false}
       tabIndex={-1}
       aria-hidden
-      style={[styles.edge, side === 'left' ? { left: 0 } : { right: 0 }]}
+      style={[styles.edge, side === 'left' ? styles.edgeLeft : styles.edgeRight]}
     />
   );
 }
 
 /** A week in the strip: a dot on the trail, Bo standing on the one you're looking at. */
-function Stop({ week, now, on, empty, onPress }: { week: number; now: boolean; on: boolean; empty: boolean; onPress: () => void }) {
+function Stop({ name, short, now, on, empty, onPress }: { name: string; short: string; week: number; now: boolean; on: boolean; empty: boolean; onPress: () => void }) {
   const focus = useFocusRing();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Week ${week}${now ? ', deze week' : ''}${empty ? ', nog leeg' : ''}`}
+      accessibilityLabel={`${name}${now ? ', deze week' : ''}${empty ? ', nog leeg' : ''}`}
       accessibilityState={{ selected: on }}
       onPress={onPress}
       onFocus={focus.onFocus}
@@ -325,7 +341,7 @@ function Stop({ week, now, on, empty, onPress }: { week: number; now: boolean; o
     >
       <View style={styles.bo}>{on ? <Character name="bo" size={30} decorative /> : null}</View>
       <View style={[styles.dot, on && styles.dotOn, empty && !on && styles.dotEmpty]} />
-      <Text style={[styles.stopLabel, on && styles.stopLabelOn]}>{now ? 'nu' : String(week)}</Text>
+      <Text style={[styles.stopLabel, on && styles.stopLabelOn]}>{now ? 'nu' : short}</Text>
     </Pressable>
   );
 }
@@ -365,11 +381,26 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
   },
   photo: { flex: 1, backgroundColor: color.ink },
-  segments: { position: 'absolute', left: 14, right: 14, top: 12, flexDirection: 'row', gap: 4 },
+  top: { position: 'absolute', left: 14, right: 12, top: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  segments: { flex: 1, flexDirection: 'row', gap: 4 },
+  counter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: radius.radiusPill,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    backgroundColor: color.white,
+  },
+  counterText: { fontFamily: fontFamily('sans', 800), fontSize: 12, lineHeight: 16, color: color.ink },
   // A thin ink ring keeps the bars visible on light photos.
   segment: { flex: 1, height: 4, borderRadius: 2, borderWidth: 0.5, borderColor: `${color.ink}59`, backgroundColor: `${color.white}80` },
   segmentOn: { backgroundColor: color.white },
-  edge: { position: 'absolute', top: 28, bottom: 64, width: '28%' },
+  edge: { position: 'absolute', top: 0, bottom: 0 },
+  edgeLeft: { left: 0, width: '35%' },
+  edgeRight: { right: 0, width: '65%' },
   first: { position: 'absolute', left: 12, bottom: 14 },
   overlay: {
     position: 'absolute',

@@ -1,4 +1,4 @@
-import { longDutchDate, possessive, todayInAmsterdam, ZipWriter, type CalendarDate } from '@teddysteps/core';
+import { type CalendarDate, longDutchDate, possessive, todayInAmsterdam, weekName, ZipWriter } from '@teddysteps/core';
 import { Directory, File, FileMode, Paths, type FileHandle } from 'expo-file-system';
 import type { Trail } from './auth';
 import { supabase } from './supabase';
@@ -112,7 +112,7 @@ ${m.caption ? `<h3>${escape(m.caption)}</h3>` : ''}
 </article>`;
         })
         .join('\n');
-      return `<section><h2>Week ${week}</h2>\n${items}</section>`;
+      return `<section><h2>${weekName(week)}</h2>\n${items}</section>`;
     })
     .join('\n');
   return `<!doctype html>

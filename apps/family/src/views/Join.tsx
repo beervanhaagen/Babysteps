@@ -1,7 +1,7 @@
 import { possessive } from '@teddysteps/core';
 import { useState } from 'react';
 import { Animated, Linking, StyleSheet, Text, View } from 'react-native';
-import { Button, ChoiceChip, ChoiceGroup, color, fontFamily, Hug, TextField, useAnnounce, useLoop } from '@teddysteps/ui';
+import { Button, ChoiceChip, ChoiceGroup, color, fontFamily, Hug, IconButton, TextField, useAnnounce, useLoop } from '@teddysteps/ui';
 import { api, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
 import { Heading, Page, TextLink } from './shared';
@@ -10,7 +10,7 @@ type Frequency = FamilyPage['me']['frequency'];
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
 
-// F2 Uitnodiging geaccepteerd, also "Kaartjes instellen" later (`editing`), with the way out:
+// F2 Uitnodiging geaccepteerd, also "Jouw profiel" later (`editing`, owner 3 November 2026), with the way out:
 // "Ik wil niet meer meekijken". The board says "Sam nodigt je uit"; the parent's first name
 // isn't asked yet.
 export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; editing?: boolean; onSaved: () => void; onLeft: () => void }) {
@@ -24,7 +24,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
   const [busy, setBusy] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const bob = useLoop('bob');
-  useView(editing ? 'Je kaartjes' : `Uitnodiging voor ${possessive(name)} pad`);
+  useView(editing ? 'Jouw profiel' : `Uitnodiging voor ${possessive(name)} pad`);
   useAnnounce(checkMail ? `We hebben een mailtje gestuurd naar ${email.trim()}. Kijk even in je mail.` : error);
 
   async function save() {
@@ -68,7 +68,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
         </Animated.View>
         <Heading>Kijk even in je mail</Heading>
         <Text style={styles.lead}>
-          We hebben een mailtje gestuurd naar {email.trim()}. Tik op de knop erin om je adres te bevestigen, dan krijg je elke zondag een kaartje. Staat het niet in je inbox? Kijk dan even in je spam.
+          We hebben een mailtje gestuurd naar {email.trim()}. Tik op de knop erin om je adres te bevestigen, dan krijg je elke zondag een mailtje met de nieuwe momenten. Staat het niet in je inbox? Kijk dan even in je spam.
         </Text>
         <TextLink onPress={() => setCheckMail(false)}>Ander adres? Pas het aan</TextLink>
         <View style={styles.action}>
@@ -79,7 +79,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
               navigate('/', true);
             }}
           >
-            {editing ? 'Terug naar de kaartjes' : `Open ${possessive(name)} pad`}
+            {editing ? `Terug naar ${possessive(name)} pad` : `Open ${possessive(name)} pad`}
           </Button>
         </View>
       </Page>
@@ -88,13 +88,18 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
 
   return (
     <Page background={color.butter}>
+      {editing ? (
+        <View style={styles.back}>
+          <IconButton icon="back" label={`Terug naar ${possessive(name)} pad`} tone="white" onPress={() => navigate('/')} />
+        </View>
+      ) : null}
       <Animated.View style={[styles.hug, { transform: bob }]}>
         <Hug size={150} />
       </Animated.View>
-      <Heading>{editing ? 'Je kaartjes' : `Je bent uitgenodigd voor ${possessive(name)} pad!`}</Heading>
+      <Heading>{editing ? 'Jouw profiel' : `Je bent uitgenodigd voor ${possessive(name)} pad!`}</Heading>
       {editing ? null : <Text style={styles.lead}>Kijk mee met elk nieuw moment. Geen app, geen wachtwoord.</Text>}
       <TextField size="lg" label={`Hoe noemt ${name} jou?`} value={label} onChangeText={setLabel} maxLength={40} autoComplete="off" />
-      <ChoiceGroup size="lg" label="Hoe vaak wil je een kaartje in je mail?">
+      <ChoiceGroup size="lg" label="Wil je de nieuwe momenten in je mail?">
         <ChoiceChip selected={frequency === 'weekly'} onPress={() => setFrequency('weekly')}>
           Elke zondag
         </ChoiceChip>
@@ -110,7 +115,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
         <TextField
           size="lg"
           label="Je e-mailadres"
-          hint="Hier komen je kaartjes binnen."
+          hint="Hier komen de nieuwe momenten binnen."
           error={error}
           value={email}
           onChangeText={setEmail}
@@ -124,7 +129,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
         </Text>
       ) : null}
       <Text style={styles.small}>
-        De ouders zien hoe {name} jou noemt, je knuffels en of je meekijkt. Je e-mailadres gebruiken we alleen voor je kaartjes.{' '}
+        De ouders zien hoe {name} jou noemt, je knuffels en of je meekijkt. Je e-mailadres gebruiken we alleen voor de mail met nieuwe momenten.{' '}
         <Text accessibilityRole="link" style={styles.smallLink} onPress={() => Linking.openURL('https://teddysteps.nl/privacy#familie')}>
           Onze privacybelofte
         </Text>
@@ -136,7 +141,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
       </View>
       {editing ? (
         <>
-          <TextLink onPress={() => navigate('/')}>Terug naar de kaartjes</TextLink>
+          <TextLink onPress={() => navigate('/')}>{`Terug naar ${possessive(name)} pad`}</TextLink>
           {leaving ? (
             <Text role="alert" style={styles.leaveText}>
               Dan werkt je link niet meer en wissen we je e-mailadres. Weet je het zeker?
@@ -150,7 +155,8 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
 }
 
 const styles = StyleSheet.create({
-  hug: { alignSelf: 'center', marginTop: 16, transformOrigin: '50% 100%' },
+  back: { alignSelf: 'flex-start', marginTop: 14, marginLeft: -8 },
+  hug: { alignSelf: 'center', marginTop: 4, transformOrigin: '50% 100%' },
   lead: { fontFamily: fontFamily('sans', 400), fontSize: 19, lineHeight: 28, color: color.ink },
   error: { fontFamily: fontFamily('sans', 700), fontSize: 14, color: color.plum },
   small: { fontFamily: fontFamily('sans', 700), fontSize: 14, lineHeight: 20, color: color.inkMuted },

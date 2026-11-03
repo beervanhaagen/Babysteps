@@ -1,10 +1,10 @@
-import { ageLine, longDutchDate, possessive, todayInAmsterdam, trailWeek, weekSpan, type CalendarDate } from '@teddysteps/core';
+import { ageLine, longDutchDate, possessive, todayInAmsterdam, trailWeek, weekMonth, weekName, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { border, Button, Character, color, fontFamily, IconButton, Scallop, shadow, text, useFocusRing, webAria, Wordmark } from '@teddysteps/ui';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { border, Button, Character, color, fontFamily, Icon, MonthBar, radius, Scallop, shadow, space, text, useFocusRing, useReducedMotion, webAria, Wordmark, type MonthChip } from '@teddysteps/ui';
 import { api, NotAllowed, type FamilyMoment, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
-import { Heading, Page, Photo, TextLink } from './shared';
+import { Heading, Photo, TextLink } from './shared';
 
 const WIDE = 900;
 const FREQUENCY = {
@@ -13,8 +13,9 @@ const FREQUENCY = {
   never: 'Je krijgt geen mailtjes; je kijkt hier mee.',
 } as const;
 
-// F3 Kaartjes, and F7 on a laptop: newest first, as a timeline of weeks (owner, 25 October 2026),
-// one big button. A tap on a photo opens the big view (Viewer) at that photo.
+// F3 (the moments), and F7 on a laptop: newest first, as a timeline of months and weeks (owner,
+// 25 October and 3 November 2026), with the months as chips on top to jump back to the start.
+// A tap on a photo opens the big view (Viewer) at that photo.
 // "Inspreken" (voice notes) comes in step 6. Header in pistachio, the design system's colour for
 // family; the boards' rose is an accent, not a header block. The parents' names aren't asked
 // yet, so F7's "Sam en Alex" reads "de ouders".
@@ -22,83 +23,171 @@ interface CardsProps {
   page: FamilyPage;
   onHugged: (id: string, counts: { mine: number; total: number }) => void;
   onOlder: () => Promise<void>;
+  /** Loads older moments until this week is in (a month chip further back). */
+  onOlderUntil: (week: number) => Promise<void>;
   onOpen: (moment: string, photo: number) => void;
 }
 
-export function Cards({ page, onHugged, onOlder, onOpen }: CardsProps) {
+export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen }: CardsProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const name = page.child.firstName;
   const today = todayInAmsterdam();
   const birth = page.child.birthDate as CalendarDate | null;
   const week = birth ? trailWeek(birth, today) : null;
+  const [current, setCurrent] = useState<string>();
+  const [jumping, setJumping] = useState(false);
+  const [jumpFailed, setJumpFailed] = useState(false);
+  const reduced = useReducedMotion();
   useView(`${possessive(name)} pad`);
 
-  // Newest week first, the moments of each week together.
-  const weeks: [number, FamilyMoment[]][] = [];
+  // Newest month first, in it the newest week first, the moments of each week together.
+  const months: { key: string; name: string; weeks: [number, FamilyMoment[]][] }[] = [];
   for (const m of page.moments) {
-    const last = weeks[weeks.length - 1];
+    const month = birth ? weekMonth(birth, m.week) : { key: 'all', name: '' };
+    let group = months[months.length - 1];
+    if (!group || group.key !== month.key) months.push((group = { key: month.key, name: month.name, weeks: [] }));
+    const last = group.weeks[group.weeks.length - 1];
     if (last && last[0] === m.week) last[1].push(m);
-    else weeks.push([m.week, [m]]);
+    else group.weeks.push([m.week, [m]]);
   }
+
+  // Every month from the birth to now; months older than what's loaded may still have moments.
+  const loaded = new Set(months.map((m) => m.key));
+  const oldest = months[months.length - 1]?.key ?? '';
+  const chips: MonthChip[] = [];
+  if (birth && week) {
+    for (let w = 1; w <= week; w++) {
+      const m = weekMonth(birth, w);
+      if (chips[chips.length - 1]?.key === m.key) continue;
+      chips.push({ key: m.key, label: m.short, name: m.name, available: loaded.has(m.key) || (page.more && m.key < oldest) });
+    }
+  }
+
+  // The family page is web only: the month headings are found by their id. The heading gets
+  // focus, so a keyboard or screen reader lands where the eyes do.
+  const scrollTo = (key: string) => {
+    const heading = document.getElementById(`maand-${key}`);
+    if (!heading) return false;
+    heading.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+    return true;
+  };
+  async function pick(key: string) {
+    setJumpFailed(false);
+    if (loaded.has(key) || !birth) return void scrollTo(key);
+    // Older months come in first, as many pages as it takes (12 moments each).
+    setJumping(true);
+    let first = 1;
+    while (first < 200 && weekMonth(birth, first).key !== key) first++;
+    try {
+      await onOlderUntil(first);
+    } catch {
+      setJumping(false);
+      return setJumpFailed(true);
+    }
+    setJumping(false);
+    // A month without moments after all: the nearest month before it that has some, else the oldest.
+    requestAnimationFrame(() => {
+      const ids = [...document.querySelectorAll<HTMLElement>('[id^="maand-"]')].map((el) => el.id.slice(6));
+      if (!scrollTo(key)) scrollTo(ids.filter((k) => k < key).sort().pop() ?? ids[ids.length - 1]);
+    });
+  }
+  // The month at the top of the screen is the filled chip.
+  const onScroll = () => {
+    let top: string | undefined;
+    for (const m of months) {
+      const el = document.getElementById(`maand-${m.key}`);
+      if (el && el.getBoundingClientRect().top < 160) top = m.key;
+    }
+    setCurrent(top ?? months[0]?.key);
+  };
 
   const empty = (
     <View style={styles.empty}>
       <Character name="bo" size={110} decorative />
-      <Text style={[text('titleM'), { textAlign: 'center' }]}>Nog geen kaartjes</Text>
+      <Text style={[text('titleM'), { textAlign: 'center' }]}>Nog geen momenten</Text>
       <Text style={styles.emptyText}>Zodra er een moment op {possessive(name)} pad staat, zie je het hier.</Text>
     </View>
   );
 
   return (
-    <View style={styles.screen}>
+    <ScrollView style={styles.screen} stickyHeaderIndices={chips.length > 1 ? [1] : undefined} onScroll={onScroll} scrollEventThrottle={100}>
       <View style={styles.header}>
+        {/* The website's logo on top (owner, 3 November 2026), then the child, like a book's cover. */}
+        <View style={styles.top}>
+          <View style={[styles.topInner, wide && styles.inner]}>
+            <Wordmark size={wide ? 30 : 24} />
+            <Button variant="paper" size="md" icon="me" onPress={() => navigate('/instellingen')}>
+              Jouw profiel
+            </Button>
+          </View>
+        </View>
         <View style={[styles.band, wide && styles.bandWide]}>
           <View style={[styles.bar, wide && styles.inner]}>
-            {wide ? <Wordmark size={26} tone="header" /> : null}
-            <View style={styles.avatar}>
-              <Character name="bo" size={44} motion={null} decorative />
+            <View style={[styles.avatar, wide && styles.avatarWide]}>
+              <Character name="bo" size={wide ? 70 : 54} motion={null} decorative />
             </View>
             <View style={styles.grow}>
-              <Heading style={wide ? styles.titleWide : styles.title}>{wide ? `${possessive(name)} pad` : name}</Heading>
+              {/* Lettered like the wordmark: ink letters on a hard paper print. */}
+              <View>
+                <Text aria-hidden style={[styles.title, wide && styles.titleWide, styles.titleShadow]}>
+                  {possessive(name)} pad
+                </Text>
+                <Heading style={{ ...styles.title, ...(wide ? styles.titleWide : null) }}>{`${possessive(name)} pad`}</Heading>
+              </View>
               {birth ? <Text style={[styles.age, wide && { fontSize: 18 }]}>{ageLine(birth, today)}</Text> : null}
             </View>
-            <IconButton icon="settings" label="Kaartjes instellen" tone="white" onPress={() => navigate('/instellingen')} />
+            {wide ? <Character name="puddle" size={80} rotate={-6} decorative /> : null}
           </View>
         </View>
         <Scallop color="pistachio" />
-        <View style={[styles.peek, wide && styles.peekWide]}>
-          <Character name="puddle" size={70} rotate={-6} decorative />
-        </View>
       </View>
-      <Page wide={wide}>
+      {chips.length > 1 ? <MonthBar months={chips} current={current ?? months[0]?.key} onPick={pick} /> : <View />}
+      <View style={[styles.column, wide && styles.columnWide]}>
+        <Text role="status" style={styles.loading}>
+          {jumping ? 'Eerdere momenten ophalen…' : ''}
+        </Text>
+        {jumpFailed ? (
+          <Text role="alert" style={styles.error}>
+            Dat lukte even niet. Probeer het zo nog eens.
+          </Text>
+        ) : null}
         <View style={wide ? styles.columns : styles.single}>
           <View style={styles.main}>
-            {weeks.length ? (
+            {months.length ? (
               <>
                 <View style={styles.timeline}>
                   <View style={styles.rail} aria-hidden />
-                  {weeks.map(([w, moments]) => (
-                    <View key={w} style={styles.week}>
-                      <View style={styles.weekHeading}>
-                        <View style={styles.marker} aria-hidden>
-                          {w === week ? (
-                            <View style={styles.bo}>
-                              <Character name="bo" size={30} decorative />
+                  {months.map((month) => (
+                    <View key={month.key} style={styles.month}>
+                      <Text nativeID={`maand-${month.key}`} role="heading" {...webAria({ 'aria-level': 2 })} style={styles.monthTitle}>
+                        {month.name}
+                      </Text>
+                      {month.weeks.map(([w, moments]) => (
+                        <View key={w} style={styles.week}>
+                          <View style={styles.weekHeading}>
+                            <View style={styles.marker} aria-hidden>
+                              {w === week ? (
+                                <View style={styles.bo}>
+                                  <Character name="bo" size={30} decorative />
+                                </View>
+                              ) : null}
+                              <View style={[styles.dot, w === week && styles.dotNow]} />
                             </View>
-                          ) : null}
-                          <View style={[styles.dot, w === week && styles.dotNow]} />
+                            <Text role="heading" {...webAria({ 'aria-level': 3 })} style={styles.weekLabel}>
+                              {w === week ? `${weekName(w)} · nu` : weekName(w)}
+                            </Text>
+                            {birth ? <Text style={styles.weekMeta}>{weekSpan(birth, w)}</Text> : null}
+                          </View>
+                          <View style={styles.weekBody}>
+                            {moments.map((m) => (
+                              <Card key={m.id} moment={m} size={wide ? 'lg' : 'md'} mayKeep={page.mayKeep} onHugged={onHugged} onOpen={(i) => onOpen(m.id, i)} />
+                            ))}
+                          </View>
                         </View>
-                        <Text role="heading" {...webAria({ 'aria-level': 2 })} style={styles.weekLabel}>
-                          {w === week ? `Week ${w} · nu` : `Week ${w}`}
-                        </Text>
-                        {birth ? <Text style={styles.weekMeta}>{weekSpan(birth, w)}</Text> : null}
-                      </View>
-                      <View style={styles.weekBody}>
-                        {moments.map((m) => (
-                          <Card key={m.id} moment={m} size={wide ? 'lg' : 'md'} mayKeep={page.mayKeep} onHugged={onHugged} onOpen={(i) => onOpen(m.id, i)} />
-                        ))}
-                      </View>
+                      ))}
                     </View>
                   ))}
                 </View>
@@ -110,12 +199,12 @@ export function Cards({ page, onHugged, onOlder, onOpen }: CardsProps) {
           </View>
           {wide ? <Aside page={page} /> : null}
         </View>
-      </Page>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 
-/** Twelve postcards at a time; older ones on request, so a full year stays light. */
+/** Twelve moments at a time; older ones on request, so a full year stays light. */
 function Older({ more, onOlder }: { more: boolean; onOlder: () => Promise<void> }) {
   const [busy, setBusy] = useState(false);
   if (!more) return null;
@@ -130,7 +219,7 @@ function Older({ more, onOlder }: { more: boolean; onOlder: () => Promise<void> 
         setBusy(false);
       }}
     >
-      Eerdere kaartjes
+      Eerdere momenten
     </Button>
   );
 }
@@ -146,7 +235,7 @@ function Aside({ page }: { page: FamilyPage }) {
         <Text style={styles.panelText}>De ouders zien elke knuffel terug.</Text>
       </View>
       <View style={[styles.panel, { backgroundColor: color.white }]}>
-        <Text style={styles.panelTitle}>Je kaartjes</Text>
+        <Text style={styles.panelTitle}>Jouw mail</Text>
         <Text style={styles.panelText}>{FREQUENCY[page.me.frequency]}</Text>
         <TextLink onPress={() => navigate('/instellingen')}>Wijzig hoe vaak</TextLink>
       </View>
@@ -184,7 +273,7 @@ function Card({ moment: m, size, mayKeep, onHugged, onOpen }: { moment: FamilyMo
       setFailed(true);
     }
   }
-  const title = (m.isFirst ? m.firstLabel : m.caption) ?? `Een moment uit week ${m.week}`;
+  const title = (m.isFirst ? m.firstLabel : m.caption) ?? (m.week <= 52 ? `Een moment uit week ${m.week}` : `Een moment op ${weekName(m.week)}`);
   const facts = [m.isFirst ? m.caption : null, longDutchDate(m.day as CalendarDate)];
   const n = m.photos.length;
   const tile = (i: number) => <Tile key={i} moment={m} photo={i} more={i === 2 && n > 3 ? n - 3 : 0} title={title} onOpen={onOpen} />;
@@ -202,10 +291,16 @@ function Card({ moment: m, size, mayKeep, onHugged, onOpen }: { moment: FamilyMo
               <View style={styles.mosaicColumn}>{[tile(1), tile(2)]}</View>
             </View>
           )}
+          {n > 1 ? (
+            <View style={styles.count} aria-hidden pointerEvents="none">
+              <Icon name="photos" size={15} weight={2.4} />
+              <Text style={styles.countText}>{n}</Text>
+            </View>
+          ) : null}
         </View>
       ) : null}
       <View style={styles.words}>
-        <Text style={styles.eyebrow}>{`Week ${m.week}${m.isFirst ? ' · eerste keer!' : ''}`}</Text>
+        {m.isFirst ? <Text style={styles.eyebrow}>Eerste keer!</Text> : null}
         <Text role="heading" {...webAria({ 'aria-level': 3 })} style={[styles.cardTitle, size === 'lg' && { fontSize: 32, lineHeight: 37 }]}>
           {title}
         </Text>
@@ -274,8 +369,10 @@ const RAIL = 32;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
-  header: { position: 'relative', zIndex: 1 },
-  band: { backgroundColor: color.pistachio, paddingHorizontal: 20, paddingBottom: 6 },
+  header: { position: 'relative' },
+  top: { backgroundColor: color.paper, paddingHorizontal: 20, paddingVertical: 10 },
+  topInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  band: { backgroundColor: color.pistachio, paddingHorizontal: 20, paddingBottom: 8 },
   bandWide: { paddingHorizontal: 80, paddingBottom: 10 },
   inner: { width: '100%', maxWidth: 1120, alignSelf: 'center' },
   bar: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 14 },
@@ -291,18 +388,39 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   grow: { flex: 1, minWidth: 0 },
-  title: { fontSize: 24, lineHeight: 28 },
-  titleWide: { fontSize: 34, lineHeight: 38 },
+  title: { fontFamily: fontFamily('sticker', 400), fontSize: 30, lineHeight: 36, letterSpacing: 0, color: color.ink, outlineStyle: 'none' } as object,
+  titleShadow: { position: 'absolute', left: 2, top: 2, right: -2, color: color.paper },
+  titleWide: { fontSize: 42, lineHeight: 50 },
+  avatarWide: { width: 84, height: 84, borderRadius: 42 },
   age: { fontFamily: fontFamily('sans', 800), fontSize: 16, color: color.ink },
-  peek: { position: 'absolute', right: 64, top: 2, pointerEvents: 'none' },
-  peekWide: { right: '20%' },
+  column: { width: '100%', maxWidth: 520, alignSelf: 'center', paddingHorizontal: space.space5, paddingTop: space.space3, paddingBottom: space.space6, gap: 14 },
+  columnWide: { maxWidth: 1120, paddingHorizontal: space.space6 },
+  loading: { fontFamily: fontFamily('sans', 800), fontSize: 15, color: color.inkMuted, textAlign: 'center' },
+  month: { gap: 22 },
+  // Under the sticky month chips when jumped to.
+  monthTitle: { ...text('titleM'), marginLeft: RAIL, scrollMarginTop: 72, outlineStyle: 'none' } as object,
+  count: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: radius.radiusPill,
+    borderWidth: border.edge,
+    borderColor: color.ink,
+    backgroundColor: color.white,
+  },
+  countText: { fontFamily: fontFamily('sans', 800), fontSize: 12, lineHeight: 16, color: color.ink },
   columns: { flexDirection: 'row', gap: 40, alignItems: 'flex-start' },
   single: { gap: 14 },
   timeline: { gap: 22, paddingTop: 4 },
   // The path: a 0-wide box with a dotted border all round, from the first stop down.
-  rail: { position: 'absolute', left: RAIL / 2 - 1, top: 26, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink, opacity: 0.5 },
+  rail: { position: 'absolute', left: RAIL / 2 - 1, top: 74, bottom: 0, width: 0, borderWidth: 1, borderStyle: 'dotted', borderColor: color.ink, opacity: 0.5 },
   week: { gap: 12 },
-  weekHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingTop: 4 },
+  weekHeading: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 8, minHeight: 44, paddingTop: 4 },
   marker: { width: RAIL, height: 44, alignItems: 'center', justifyContent: 'center', marginRight: -8 },
   // Bo stands on this week's stop.
   bo: { position: 'absolute', bottom: 28 },

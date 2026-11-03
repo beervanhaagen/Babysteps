@@ -1,4 +1,4 @@
-import { daysBetween, todayInAmsterdam } from '@teddysteps/core';
+import { daysBetween, todayInAmsterdam, weekName } from '@teddysteps/core';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar, border, color, fontFamily, Hug, text, useFocusRing } from '@teddysteps/ui';
@@ -50,12 +50,12 @@ function Row({ item }: { item: ActivityItem }) {
   const title = item.kind === 'hug' ? `${item.who} stuurde een knuffel` : `${item.who} loopt nu mee`;
   const sub =
     item.kind === 'hug'
-      ? `Bij week ${item.week}${item.caption ? `: ${item.caption}` : ''}`
+      ? `Bij ${weekName(item.week ?? 1).toLowerCase()}${item.caption ? `: ${item.caption}` : ''}`
       : item.frequency === 'never'
         ? 'Kijkt mee zonder mail'
         : item.frequency === 'each'
-          ? 'Krijgt bij elk moment een kaartje'
-          : 'Krijgt elke zondag een kaartje';
+          ? 'Krijgt bij elk moment een mailtje'
+          : 'Krijgt elke zondag een mailtje';
   const isNew = item.kind === 'hug' && !item.seen;
   const open = item.momentId ? () => router.push(`/moment/${item.momentId}`) : undefined;
   return (

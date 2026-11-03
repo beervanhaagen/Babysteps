@@ -1,3 +1,4 @@
+import { weekName } from '@teddysteps/core';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { Banner, border, Button, color, radius, text } from '@teddysteps/ui';
 import { Photo } from '@/components/Photo';
@@ -61,13 +62,13 @@ function Item({ item, online }: { item: QueuedMoment; online: boolean }) {
   const trouble = online && !!item.failedAt;
   return (
     <View style={styles.item}>
-      <View style={styles.row} accessible accessibilityLabel={`${name}, week ${item.trailWeek}. ${status}`}>
+      <View style={styles.row} accessible accessibilityLabel={`${name}, ${weekName(item.trailWeek).toLowerCase()}. ${status}`}>
         <View style={styles.thumb}>
           <Photo source={{ local: item.photos[0].small }} />
         </View>
         <View style={[styles.grow, { gap: 8 }]}>
           <Text style={text('rowTitle')} numberOfLines={1}>
-            {name} · week {item.trailWeek}
+            {name} · {weekName(item.trailWeek).toLowerCase()}
           </Text>
           <View style={styles.track}>
             <View style={[styles.fill, { width: `${progress * 100}%`, backgroundColor: trouble ? color.plum : color.bluebird }]} />

@@ -1,4 +1,4 @@
-import { daysBetween, firstLook, todayInAmsterdam, trailWeek } from '@teddysteps/core';
+import { daysBetween, firstLook, todayInAmsterdam, trailWeek, weekName } from '@teddysteps/core';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -53,7 +53,7 @@ export default function Details() {
       header={{ title: 'Vertel er iets over', color: 'lilac', onBack: router.back, character: 'puddle' }}
       footer={
         <Button block onPress={save} busy={busy}>
-          {`Vastpinnen in week ${week}!`}
+          {week <= 52 ? `Vastpinnen in week ${week}!` : 'Vastpinnen!'}
         </Button>
       }
     >
@@ -101,7 +101,7 @@ export default function Details() {
                 setPicking(false);
               }}
             >
-              {`Week ${w}`}
+              {weekName(w)}
             </ChoiceChip>
           ))}
           </ScrollView>
@@ -146,7 +146,7 @@ function WeekRow({ week, open, onPress }: { week: number; open: boolean; onPress
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Week ${week}. Andere week kiezen`}
+      accessibilityLabel={`${weekName(week)}. Andere week kiezen`}
       accessibilityState={{ expanded: open }}
       onPress={onPress}
       onFocus={focus.onFocus}
@@ -154,7 +154,7 @@ function WeekRow({ week, open, onPress }: { week: number; open: boolean; onPress
       style={[styles.weekRow, focus.ring]}
     >
       <Icon name="trail" />
-      <Text style={styles.weekText}>Week {week}</Text>
+      <Text style={styles.weekText}>{weekName(week)}</Text>
       <Text style={[text('meta'), styles.muted]}>{open ? 'kies een week' : 'andere week'}</Text>
       <View style={{ transform: [{ rotate: open ? '-90deg' : '90deg' }] }}>
         <Icon name="chevron-right" size={20} color={color.inkMuted} />

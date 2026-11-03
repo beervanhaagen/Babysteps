@@ -130,7 +130,7 @@ function confirmMail(code: string) {
   const link = `${FAMILY_URL}/bevestig#${code}`;
   const text = `Hoi!
 
-Iemand heeft dit adres opgegeven om elke zondag een kaartje van TeddySteps te krijgen. Was jij dat? Bevestig het hier:
+Iemand heeft dit adres opgegeven om elke zondag een mailtje met de nieuwe momenten van TeddySteps te krijgen. Was jij dat? Bevestig het hier:
 
 ${link}
 
@@ -143,14 +143,14 @@ ${COMPANY}`;
     'Bevestig je e-mailadres',
     `<p style="margin:0 0 6px;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${C.inkMuted};">Nog één tik</p>
 <h1 style="margin:0 0 14px;font-family:${SERIF};font-size:28px;line-height:32px;font-weight:bold;color:${C.ink};">Klopt dit adres?</h1>
-<p style="margin:0 0 22px;">Iemand heeft dit adres opgegeven om elke zondag een kaartje van TeddySteps te krijgen. Was jij dat? Tik dan op de knop.</p>
+<p style="margin:0 0 22px;">Iemand heeft dit adres opgegeven om elke zondag een mailtje met de nieuwe momenten van TeddySteps te krijgen. Was jij dat? Tik dan op de knop.</p>
 ${button(link, 'Ja, dit is mijn adres')}
 <p style="margin:22px 0 0;font-size:14px;line-height:21px;color:${C.inkMuted};">Was jij dit niet? Dan hoef je niets te doen: zonder bevestiging wissen we het adres na 7 dagen.</p>
 ${SIGN_OFF}`,
     COMPANY,
-    'Eén tik, dan krijg je elke zondag een kaartje.',
+    'Eén tik, dan krijg je elke zondag de nieuwe momenten.',
   );
-  return { subject: 'Bevestig je e-mailadres voor de kaartjes', text, html };
+  return { subject: 'Bevestig je e-mailadres voor de nieuwe momenten', text, html };
 }
 
 const sessionCookie = (token: string) => `${COOKIE}=${token}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`;

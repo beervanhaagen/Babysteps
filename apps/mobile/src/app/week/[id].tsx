@@ -1,4 +1,4 @@
-import { todayInAmsterdam, trailWeek } from '@teddysteps/core';
+import { atWeek, todayInAmsterdam, trailWeek, weekName } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
@@ -45,10 +45,10 @@ export default function MoveMoment() {
 
   return (
     <Screen
-      header={{ title: 'Andere week', subtitle: `Staat nu bij week ${m.trailWeek}`, color: 'cornflower', onBack: router.back, character: 'bizzy' }}
+      header={{ title: 'Andere week', subtitle: `Staat nu ${atWeek(m.trailWeek)}`, color: 'cornflower', onBack: router.back, character: 'bizzy' }}
       footer={
         <Button block onPress={save} busy={busy} disabled={week === m.trailWeek}>
-          {`Naar week ${week}`}
+          {`Naar ${weekName(week).toLowerCase()}`}
         </Button>
       }
     >
@@ -56,7 +56,7 @@ export default function MoveMoment() {
       <ChoiceGroup label="Kies de week">
         {weeks.map((w) => (
           <ChoiceChip key={w} selected={w === week} onPress={() => setWeek(w)}>
-            {w === now ? `Week ${w} (nu)` : `Week ${w}`}
+            {w === now ? `${weekName(w)} (nu)` : weekName(w)}
           </ChoiceChip>
         ))}
       </ChoiceGroup>

@@ -5,7 +5,8 @@ import { color, fontFamily, size, space, text, useFocusRing, webAria } from '@te
 /** The one heading of a view: level 1, focused on arrival (route.ts). */
 export function Heading({ children, style }: { children: ReactNode; style?: TextStyle }) {
   return (
-    <Text role="heading" {...webAria({ 'aria-level': 1 })} style={[text('display'), style]}>
+    // Focused on arrival for screen readers, so no ring around it (owner, 3 November 2026).
+    <Text role="heading" {...webAria({ 'aria-level': 1 })} style={[text('display'), styles.heading, style]}>
       {children}
     </Text>
   );
@@ -20,7 +21,7 @@ export function Page({ background = color.paper, children, wide }: { background?
   );
 }
 
-/** A bold text link with a 44px target, like "Terug naar de kaartjes". */
+/** A bold text link with a 44px target, like "Terug naar Lottes pad". */
 export function TextLink({ children, onPress }: { children: string; onPress: () => void }) {
   const focus = useFocusRing();
   return (
@@ -54,6 +55,7 @@ export function Photo({ uri, label, fit = 'cover', onError }: { uri?: string; la
 }
 
 const styles = StyleSheet.create({
+  heading: { outlineStyle: 'none' } as unknown as TextStyle,
   scroll: { flexGrow: 1 },
   column: { flexGrow: 1, width: '100%', maxWidth: 520, alignSelf: 'center', paddingHorizontal: space.space6, paddingBottom: space.space6, gap: 14 },
   wide: { maxWidth: 1120 },

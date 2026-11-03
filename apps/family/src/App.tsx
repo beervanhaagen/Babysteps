@@ -17,8 +17,8 @@ import { View } from 'react-native';
 //   /bevestig#<code>   "Ja, dit is mijn adres"
 //   /afmelden#<token>  no more Sunday mails
 // Then:
-//   /             F3 Kaartjes (or F2 first, until Oma has said who she is)
-//   /instellingen F2 again, to change name, e-mail or how often, or to stop
+//   /             F3 the moments (or F2 first, until Oma has said who she is)
+//   /instellingen F2 again as "Jouw profiel": name, e-mail, how often, or stop
 //   /verstuurd    F4 after a hug
 //   /foto         T2b, the photos big, over the postcards (back returns to the same place)
 
@@ -126,6 +126,22 @@ export default function App() {
     );
   }, [page]);
 
+  // A month chip further back: load older moments (12 at a time) until that week is in.
+  const olderUntil = useCallback(
+    async (week: number) => {
+      if (!page) return;
+      let moments = page.moments;
+      let more = page.more;
+      while (more && moments.length && moments[moments.length - 1].week > week && moments.length < 2000) {
+        const next = await api.page(isWide(), moments.length);
+        moments = [...moments, ...next.moments.filter((m: FamilyMoment) => !moments.some((c) => c.id === m.id))];
+        more = next.more;
+        if (!next.moments.length) break;
+      }
+      setPage((current) => current && { ...current, moments, more });
+    },
+    [page],
+  );
 
   if (!fontsReady) return <Loading />;
   if (startPath === '/bevestig') return <ConfirmEmail code={hashCode ?? ''} />;
@@ -146,7 +162,7 @@ export default function App() {
   if (!page.me.joined || path === '/instellingen') {
     return <Join page={page} editing={page.me.joined} onSaved={reload} onLeft={() => setProblem('left')} />;
   }
-  if (path === '/verstuurd') return <Sent />;
+  if (path === '/verstuurd') return <Sent name={page.child.firstName} />;
   const openPhoto = (moment: string, photo: number) => {
     opener.current = document.activeElement as HTMLElement | null;
     setViewing({ moment, photo });
@@ -163,7 +179,7 @@ export default function App() {
         </View>
       ) : null}
       <View style={{ flex: 1 }} aria-hidden={showing || undefined} {...(showing ? ({ inert: '' } as object) : {})}>
-        <Cards page={page} onHugged={hugged} onOlder={older} onOpen={openPhoto} />
+        <Cards page={page} onHugged={hugged} onOlder={older} onOlderUntil={olderUntil} onOpen={openPhoto} />
       </View>
     </>
   );

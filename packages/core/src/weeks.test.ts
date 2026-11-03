@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { daysBetween, leapWeek, trailWeek } from './weeks.ts';
+import { atWeek, daysBetween, leapWeek, trailWeek, weekName, weekShort } from './weeks.ts';
 
 test('the birth day is week 1', () => {
   assert.equal(trailWeek('2026-03-01', '2026-03-01'), 1);
@@ -25,4 +25,16 @@ test('leaps count from the due date, not the birth date', () => {
 
 test('days before the start give week 0 or less', () => {
   assert.equal(leapWeek('2026-03-15', '2026-03-10'), 0);
+});
+
+test('from the first birthday the trail says the age, not the week', () => {
+  assert.equal(weekName(31), 'Week 31');
+  assert.equal(weekName(52), 'Week 52');
+  assert.equal(weekName(53), '1 jaar');
+  assert.equal(weekName(54), '1 jaar en 1 week');
+  assert.equal(weekName(60), '1 jaar en 7 weken');
+  assert.equal(atWeek(31), 'in week 31');
+  assert.equal(atWeek(57), 'op 1 jaar en 4 weken');
+  assert.equal(weekShort(31), '31');
+  assert.equal(weekShort(57), '1j 4w');
 });

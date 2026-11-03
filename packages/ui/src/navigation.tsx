@@ -1,5 +1,5 @@
-import { type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState, type ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { webAria } from './a11y';
 import { IconButton } from './actions';
 import { Character, Icon, type CharacterName, type IconName } from './brand';
@@ -10,16 +10,25 @@ import { border, color, shadow, size, space } from './tokens';
 
 export type SoftBlock = 'lilac' | 'pistachio' | 'butter' | 'cornflower' | 'sunshine' | 'apricot';
 
-const SCALLOP = (() => {
-  let d = 'M0 0 H1000 V8';
-  for (let x = 1000; x > 0; x -= 50) d += ` Q${x - 12.5} 18 ${x - 25} 8 Q${x - 37.5} 6 ${x - 50} 8`;
+/** `count` scallops of 50 by 24: the path for a viewBox of count × 50 wide. */
+function scallops(count: number) {
+  let d = `M0 0 H${count * 50} V8`;
+  for (let x = count * 50; x > 0; x -= 50) d += ` Q${x - 12.5} 18 ${x - 25} 8 Q${x - 37.5} 6 ${x - 50} 8`;
   return `${d} Z`;
-})();
+}
 
-/** The scalloped bottom edge of every header band. */
+/**
+ * The scalloped bottom edge of every header band. The scallops keep their size (about 30px) at
+ * every width, so they look the same on a small phone and on a laptop (owner, 3 November 2026).
+ */
 export function Scallop({ color: band }: { color: SoftBlock }) {
+  const window = useWindowDimensions();
+  const [width, setWidth] = useState(window.width);
+  const count = Math.max(4, Math.round(width / 30));
   return (
-    <SvgMarkup markup={`<path d="${SCALLOP}" fill="${color[band]}"/>`} viewBox="0 0 1000 24" width="100%" height={22} preserveAspectRatio="none" style={{ marginTop: -1 }} />
+    <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)} style={{ marginTop: -1 }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <SvgMarkup markup={`<path d="${scallops(count)}" fill="${color[band]}"/>`} viewBox={`0 0 ${count * 50} 24`} width="100%" height={20} preserveAspectRatio="none" />
+    </View>
   );
 }
 

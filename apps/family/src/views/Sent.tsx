@@ -1,3 +1,4 @@
+import { possessive } from '@teddysteps/core';
 import { StyleSheet, Text, View } from 'react-native';
 import { color, fontFamily, Hug, Scallop, text } from '@teddysteps/ui';
 import { navigate, useView } from '../route';
@@ -7,7 +8,7 @@ import { Heading, Page, TextLink } from './shared';
 // reloading this page never sends another). No book list while the year book is out of the MVP.
 // Voice notes come in step 6. "Naar Sam en Alex" needs the parents' first names, which aren't
 // asked yet.
-export function Sent() {
+export function Sent({ name }: { name: string }) {
   useView('Knuffel verstuurd');
   return (
     <View style={styles.screen}>
@@ -20,7 +21,7 @@ export function Sent() {
       <Scallop color="pistachio" />
       <Page>
         <Text style={styles.body}>De ouders zien je knuffel meteen terug.</Text>
-        <TextLink onPress={() => navigate('/')}>Terug naar de kaartjes</TextLink>
+        <TextLink onPress={() => navigate('/')}>{`Terug naar ${possessive(name)} pad`}</TextLink>
       </Page>
     </View>
   );

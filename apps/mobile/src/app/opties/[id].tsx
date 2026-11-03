@@ -1,3 +1,4 @@
+import { atWeek, weekName } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
@@ -74,13 +75,13 @@ export default function MomentOptions() {
   }
 
   return (
-    <Screen header={{ title: 'Opties', subtitle: `Week ${m.trailWeek} · ${short}`, color: 'cornflower', onBack: router.back, character: 'bo' }}>
+    <Screen header={{ title: 'Opties', subtitle: `${weekName(m.trailWeek)} · ${short}`, color: 'cornflower', onBack: router.back, character: 'bo' }}>
       <View style={styles.thumb} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <Photo source={m.photos[0]?.small} />
       </View>
       <View>
         <ListRow icon="edit" title="Bijschrift aanpassen" onPress={() => router.push(`/bewerken/${id}`)} />
-        <ListRow icon="trail" title="Naar een andere week" subtitle={`Staat nu bij week ${m.trailWeek}`} onPress={() => router.push(`/week/${id}`)} />
+        <ListRow icon="trail" title="Naar een andere week" subtitle={`Staat nu ${atWeek(m.trailWeek)}`} onPress={() => router.push(`/week/${id}`)} />
         <ListRow
           icon="family"
           title="Wie dit kan zien"

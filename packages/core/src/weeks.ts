@@ -30,3 +30,28 @@ export function leapWeek(dueDate: CalendarDate, on: CalendarDate): number {
 }
 
 export const TRAIL_WEEKS = 78;
+
+// The first year counts in weeks ("Week 31"); from the first birthday (week 53) the trail says
+// the age instead (owner, 3 November 2026): "1 jaar", "1 jaar en 4 weken".
+function afterOneYear(week: number) {
+  return { years: Math.floor((week - 1) / 52), weeks: (week - 1) % 52 };
+}
+
+/** "Week 31", or from week 53 "1 jaar en 4 weken". */
+export function weekName(week: number): string {
+  if (week <= 52) return `Week ${week}`;
+  const { years, weeks } = afterOneYear(week);
+  return weeks ? `${years} jaar en ${weeks} ${weeks === 1 ? 'week' : 'weken'}` : `${years} jaar`;
+}
+
+/** "in week 31", or "op 1 jaar en 4 weken": after "Vastgepind", "Staat nu". */
+export function atWeek(week: number): string {
+  return week <= 52 ? `in week ${week}` : `op ${weekName(week)}`;
+}
+
+/** Under a stop in the week strip: "31", or "1j 4w". */
+export function weekShort(week: number): string {
+  if (week <= 52) return String(week);
+  const { years, weeks } = afterOneYear(week);
+  return weeks ? `${years}j ${weeks}w` : `${years} jaar`;
+}

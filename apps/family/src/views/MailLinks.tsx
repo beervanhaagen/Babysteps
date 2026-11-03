@@ -43,7 +43,7 @@ export function ConfirmEmail({ code }: { code: string }) {
   if (state === 'done') {
     return (
       <Frame title="Gelukt!" character="bo">
-        <Text style={styles.body}>Vanaf nu krijg je elke zondag een kaartje met de nieuwe momenten van die week.</Text>
+        <Text style={styles.body}>Vanaf nu krijg je elke zondag een mailtje met de nieuwe momenten van die week.</Text>
         <TextLink onPress={toFamilyPage}>Naar de familiepagina</TextLink>
       </Frame>
     );
@@ -51,14 +51,14 @@ export function ConfirmEmail({ code }: { code: string }) {
   if (state === 'failed') {
     return (
       <Frame title="Deze link werkt niet meer" character="puddle">
-        <Text style={styles.body}>Hij is al gebruikt, of ouder dan 7 dagen. Vul je e-mailadres gerust opnieuw in bij je kaartjes op de familiepagina.</Text>
+        <Text style={styles.body}>Hij is al gebruikt, of ouder dan 7 dagen. Vul je e-mailadres gerust opnieuw in bij ‘Jouw profiel’ op de familiepagina.</Text>
         <TextLink onPress={toFamilyPage}>Naar de familiepagina</TextLink>
       </Frame>
     );
   }
   return (
     <Frame title="Klopt dit adres?" character="puddle">
-      <Text style={styles.body}>Tik op de knop, dan krijg je elke zondag een kaartje met de nieuwe momenten.</Text>
+      <Text style={styles.body}>Tik op de knop, dan krijg je elke zondag een mailtje met de nieuwe momenten.</Text>
       {state === 'offline' ? <Text role="alert" style={styles.note}>{OFFLINE}</Text> : null}
       <Button block onPress={confirm} busy={state === 'busy'}>
         Ja, dit is mijn adres
@@ -82,7 +82,7 @@ export function Unsubscribe({ token }: { token: string }) {
   if (state === 'done') {
     return (
       <Frame title="Je bent afgemeld" character="puddle">
-        <Text style={styles.body}>Je krijgt geen kaartjes meer en we hebben je e-mailadres gewist. De familiepagina blijft gewoon open met je eigen link.</Text>
+        <Text style={styles.body}>Je krijgt geen mailtjes meer en we hebben je e-mailadres gewist. De familiepagina blijft gewoon open met je eigen link.</Text>
       </Frame>
     );
   }
@@ -100,7 +100,7 @@ export function Unsubscribe({ token }: { token: string }) {
     );
   }
   return (
-    <Frame title="Geen kaartjes meer?" character="puddle">
+    <Frame title="Geen mailtjes meer?" character="puddle">
       <Text style={styles.body}>Dan krijg je op zondag geen mailtje meer en wissen we je e-mailadres. De familiepagina blijft open.</Text>
       {state === 'offline' ? <Text role="alert" style={styles.note}>{OFFLINE}</Text> : null}
       <Button block onPress={unsubscribe} busy={state === 'busy'}>
@@ -132,7 +132,7 @@ export function OpenFromMail({ onOpen }: { onOpen: () => Promise<void> }) {
   if (state === 'failed') {
     return (
       <Frame title="Deze link werkt niet meer" character="puddle">
-        <Text style={styles.body}>De knop in een kaartje werkt één keer en 7 dagen lang. Open de familiepagina met je eigen link uit de uitnodiging, of wacht op het kaartje van zondag.</Text>
+        <Text style={styles.body}>De knop in de mail werkt één keer en 7 dagen lang. Open de familiepagina met je eigen link uit de uitnodiging, of wacht op de mail van zondag.</Text>
       </Frame>
     );
   }
