@@ -13,3 +13,4 @@ export * from './navigation';
 export * from './content';
 export * from './viewer';
 export * from './months';
+export * from './child';

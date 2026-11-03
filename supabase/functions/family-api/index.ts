@@ -84,7 +84,7 @@ const PAGE_SIZE = 12;
 /** One page of postcards: at most 12, links only for the version this screen shows. */
 async function page(who: { member: string; trail: string }, skip: number, wide: boolean) {
   const [{ data: child }, { data: trail }, { data: me }, { data: rows }] = await Promise.all([
-    service.from('children').select('first_name, birth_date').eq('trail_id', who.trail).single(),
+    service.from('children').select('first_name, birth_date, avatar_animal, avatar_tone').eq('trail_id', who.trail).single(),
     service.from('trails').select('family_may_keep_photos').eq('id', who.trail).single(),
     service.from('circle_members').select('label, relation, email, email_frequency, joined_at, book_list_at').eq('id', who.member).single(),
     // One more than shown, to know whether there are older ones.
@@ -99,7 +99,7 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
   const pathOf = (p: Photo) => (wide ? p.view_path : p.small_path);
   const urls = await signed(moments.flatMap((m) => (m.photos ?? []).map(pathOf)));
   return {
-    child: { firstName: child?.first_name, birthDate: child?.birth_date },
+    child: { firstName: child?.first_name, birthDate: child?.birth_date, look: { animal: child?.avatar_animal ?? 'bo', tone: child?.avatar_tone ?? 'lilac' } },
     me: {
       label: me?.label,
       relation: me?.relation,

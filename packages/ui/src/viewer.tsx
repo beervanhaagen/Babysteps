@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ComponentRef, type ReactNode } from '
 import { FlatList, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { Button, IconButton } from './actions';
 import { useAnnounce, webAria } from './a11y';
-import { Character, Icon } from './brand';
+import { Character, Icon, type CharacterName } from './brand';
 import { FirstLabel, type FirstMark } from './content';
 import { useFocusRing } from './focus';
 import { useReducedMotion } from './motion';
@@ -42,6 +42,8 @@ export interface PhotoViewerProps {
   now: number;
   /** The first week in the strip, when the weeks before it aren't loaded (family page). */
   from?: number;
+  /** The child's own animal, standing on the week in view (Bo by default). */
+  character?: CharacterName;
   /** "3 – 9 mrt": the days of a week. */
   span: (week: number) => string;
   /** "Week 31" or "1 jaar en 4 weken", and short under a stop: "31" or "1j 4w" (weekName, weekShort in core). */
@@ -66,7 +68,7 @@ type Page = ViewerPhoto | { key: 'add'; week: number };
 const STOP = 44;
 const GAP_STOP = 14;
 
-export function PhotoViewer({ photos, start, now, from = 1, span, weekName, weekShort, addPage, onEmptyNow, onClose, closeLabel, banner, waiting, topInset = 0, bottomInset = 0 }: PhotoViewerProps) {
+export function PhotoViewer({ photos, start, now, from = 1, character = 'bo', span, weekName, weekShort, addPage, onEmptyNow, onClose, closeLabel, banner, waiting, topInset = 0, bottomInset = 0 }: PhotoViewerProps) {
   const { width } = useWindowDimensions();
   const reduced = useReducedMotion();
   const [pos, setPos] = useState(start);
@@ -180,6 +182,7 @@ export function PhotoViewer({ photos, start, now, from = 1, span, weekName, week
               <Stop
                 key={w}
                 name={weekName(w)}
+                character={character}
                 short={weekShort(w)}
                 week={w}
                 now={w === now}
@@ -327,7 +330,24 @@ function Edge({ side, onPress }: { side: 'left' | 'right'; onPress: () => void }
 }
 
 /** A week in the strip: a dot on the trail, Bo standing on the one you're looking at. */
-function Stop({ name, short, now, on, empty, onPress }: { name: string; short: string; week: number; now: boolean; on: boolean; empty: boolean; onPress: () => void }) {
+function Stop({
+  name,
+  short,
+  character,
+  now,
+  on,
+  empty,
+  onPress,
+}: {
+  name: string;
+  short: string;
+  character: CharacterName;
+  week: number;
+  now: boolean;
+  on: boolean;
+  empty: boolean;
+  onPress: () => void;
+}) {
   const focus = useFocusRing();
   return (
     <Pressable
@@ -339,7 +359,7 @@ function Stop({ name, short, now, on, empty, onPress }: { name: string; short: s
       onBlur={focus.onBlur}
       style={[styles.stop, focus.ring]}
     >
-      <View style={styles.bo}>{on ? <Character name="bo" size={30} decorative /> : null}</View>
+      <View style={styles.bo}>{on ? <Character name={character} size={30} decorative /> : null}</View>
       <View style={[styles.dot, on && styles.dotOn, empty && !on && styles.dotEmpty]} />
       <Text style={[styles.stopLabel, on && styles.stopLabelOn]}>{now ? 'nu' : short}</Text>
     </Pressable>

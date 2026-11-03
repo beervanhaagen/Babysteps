@@ -1,4 +1,5 @@
 import type { CalendarDate } from '@teddysteps/core';
+import { childLook, type ChildLook } from '@teddysteps/ui';
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { forgetExports } from './export';
@@ -13,6 +14,8 @@ export interface Trail {
   /** Null while the baby is still on the way. */
   birthDate: CalendarDate | null;
   dueDate: CalendarDate;
+  /** The child's own animal and colour (M1). */
+  look: ChildLook;
 }
 
 /** M7: what is being deleted, and until when "Toch bewaren" works. */
@@ -45,9 +48,22 @@ function isNetworkError(error: { message?: string; code?: string }) {
 
 async function findTrail(): Promise<Trail | null> {
   // RLS only returns the trail this parent belongs to.
-  const { data, error } = await supabase.from('children').select('trail_id, first_name, birth_date, due_date, leap_cards_on').limit(1).maybeSingle();
+  const { data, error } = await supabase
+    .from('children')
+    .select('trail_id, first_name, birth_date, due_date, leap_cards_on, avatar_animal, avatar_tone')
+    .limit(1)
+    .maybeSingle();
   if (error) throw error;
-  return data ? { id: data.trail_id, childName: data.first_name, birthDate: data.birth_date, dueDate: data.due_date, leapCardsOn: data.leap_cards_on } : null;
+  return data
+    ? {
+        id: data.trail_id,
+        childName: data.first_name,
+        birthDate: data.birth_date,
+        dueDate: data.due_date,
+        leapCardsOn: data.leap_cards_on,
+        look: childLook(data.avatar_animal, data.avatar_tone),
+      }
+    : null;
 }
 
 /** Every sign-out goes through here: first this device stops getting pushes for this account. */

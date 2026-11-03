@@ -46,6 +46,7 @@ export default function WeekView() {
       span={(w) => weekSpan(birth, w)}
       weekName={weekName}
       weekShort={weekShort}
+      character={state.status === 'ready' ? state.trail.look.animal : 'bo'}
       // Only the server says this week is really empty; before that, or offline, we don't know yet.
       addPage={source === 'server' ? <AddPage /> : undefined}
       onEmptyNow={() => router.push('/toevoegen')}

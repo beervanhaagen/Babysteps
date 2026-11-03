@@ -88,6 +88,7 @@ export function Viewer({ page, start, onHugged, onClose }: ViewerProps) {
       span={(w) => weekSpan(birth, w)}
       weekName={weekName}
       weekShort={weekShort}
+      character={page.child.look.animal}
       onClose={onClose}
       closeLabel={`Terug naar ${possessive(name)} pad`}
     />

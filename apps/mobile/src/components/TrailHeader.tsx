@@ -1,15 +1,17 @@
 import { possessive } from '@teddysteps/core';
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { border, Character, color, fontFamily, radius, Scallop, shadow, Wordmark } from '@teddysteps/ui';
+import { border, ChildAvatar, color, fontFamily, radius, Scallop, shadow, useFocusRing, Wordmark, type ChildLook } from '@teddysteps/ui';
 
 /**
- * T1's header, compact (Pad 3.0): the child's trail and the week sticker on one line, Bo
- * peeking at the end, so the photos get the room. New hugs show on the Knuffels tab, the
- * account under Ik.
+ * T1's header, compact (Pad 3.0): the child's trail and the week sticker on one line, the
+ * child's own animal at the end (a tap changes it, M1), so the photos get the room. New hugs
+ * show on the Knuffels tab, the account under Ik.
  */
-export function TrailHeader({ childName, week }: { childName: string; week: string | null }) {
+export function TrailHeader({ childName, week, look }: { childName: string; week: string | null; look: ChildLook }) {
   const insets = useSafeAreaInsets();
+  const focus = useFocusRing();
   return (
     <View style={styles.header}>
       {/* The logo from the website on top (owner, 3 November 2026). */}
@@ -32,7 +34,16 @@ export function TrailHeader({ childName, week }: { childName: string; week: stri
           </View>
         ) : null}
         <View style={styles.spacer} />
-        <Character name="bo" size={44} decorative />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Profiel van ${childName}`}
+          onPress={() => router.push('/profiel')}
+          onFocus={focus.onFocus}
+          onBlur={focus.onBlur}
+          style={[styles.avatar, focus.ring]}
+        >
+          <ChildAvatar look={look} size={48} />
+        </Pressable>
       </View>
       <Scallop color="cornflower" />
     </View>
@@ -49,4 +60,5 @@ const styles = StyleSheet.create({
   week: { paddingVertical: 3, paddingHorizontal: 10, borderRadius: radius.radiusS, borderWidth: border.edge, borderColor: color.ink, backgroundColor: color.sunshine, boxShadow: shadow.shadowSm },
   weekText: { fontFamily: fontFamily('sans', 800), fontSize: 12, lineHeight: 16, color: color.ink },
   spacer: { flex: 1 },
+  avatar: { borderRadius: 999, marginBottom: 2 },
 });

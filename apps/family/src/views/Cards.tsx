@@ -1,7 +1,7 @@
 import { ageLine, longDutchDate, possessive, todayInAmsterdam, trailWeek, weekMonth, weekName, weekSpan, type CalendarDate } from '@teddysteps/core';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { border, Button, Character, color, fontFamily, Icon, MonthBar, radius, Scallop, shadow, space, text, useFocusRing, useReducedMotion, webAria, Wordmark, type MonthChip } from '@teddysteps/ui';
+import { border, Button, Character, ChildAvatar, color, fontFamily, Icon, MonthBar, radius, Scallop, shadow, space, text, useFocusRing, useReducedMotion, webAria, Wordmark, type MonthChip } from '@teddysteps/ui';
 import { api, NotAllowed, type FamilyMoment, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
 import { Heading, Photo, TextLink } from './shared';
@@ -126,9 +126,7 @@ export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen }: CardsPr
         </View>
         <View style={[styles.band, wide && styles.bandWide]}>
           <View style={[styles.bar, wide && styles.inner]}>
-            <View style={[styles.avatar, wide && styles.avatarWide]}>
-              <Character name="bo" size={wide ? 70 : 54} motion={null} decorative />
-            </View>
+            <ChildAvatar look={page.child.look} size={wide ? 84 : 64} still />
             <View style={styles.grow}>
               {/* Lettered like the wordmark: ink letters on a hard paper print. */}
               <View>
@@ -139,7 +137,8 @@ export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen }: CardsPr
               </View>
               {birth ? <Text style={[styles.age, wide && { fontSize: 18 }]}>{ageLine(birth, today)}</Text> : null}
             </View>
-            {wide ? <Character name="puddle" size={80} rotate={-6} decorative /> : null}
+            {/* On a laptop one of the gang peeks in: never the child's own animal twice. */}
+            {wide ? <Character name={page.child.look.animal === 'puddle' ? 'tiggy' : 'puddle'} size={80} rotate={-6} decorative /> : null}
           </View>
         </View>
         <Scallop color="pistachio" />
@@ -171,7 +170,7 @@ export function Cards({ page, onHugged, onOlder, onOlderUntil, onOpen }: CardsPr
                             <View style={styles.marker} aria-hidden>
                               {w === week ? (
                                 <View style={styles.bo}>
-                                  <Character name="bo" size={30} decorative />
+                                  <Character name={page.child.look.animal} size={30} decorative />
                                 </View>
                               ) : null}
                               <View style={[styles.dot, w === week && styles.dotNow]} />
@@ -376,22 +375,10 @@ const styles = StyleSheet.create({
   bandWide: { paddingHorizontal: 80, paddingBottom: 10 },
   inner: { width: '100%', maxWidth: 1120, alignSelf: 'center' },
   bar: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 14 },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: border.edgeBold,
-    borderColor: color.ink,
-    backgroundColor: color.lilac,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
   grow: { flex: 1, minWidth: 0 },
   title: { fontFamily: fontFamily('sticker', 400), fontSize: 30, lineHeight: 36, letterSpacing: 0, color: color.ink, outlineStyle: 'none' } as object,
   titleShadow: { position: 'absolute', left: 2, top: 2, right: -2, color: color.paper },
   titleWide: { fontSize: 42, lineHeight: 50 },
-  avatarWide: { width: 84, height: 84, borderRadius: 42 },
   age: { fontFamily: fontFamily('sans', 800), fontSize: 16, color: color.ink },
   column: { width: '100%', maxWidth: 520, alignSelf: 'center', paddingHorizontal: space.space5, paddingTop: space.space3, paddingBottom: space.space6, gap: 14 },
   columnWide: { maxWidth: 1120, paddingHorizontal: space.space6 },

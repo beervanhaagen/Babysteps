@@ -2,7 +2,7 @@ import { type CalendarDate, firstLook, leapCard, longDutchDate, possessive, toda
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { Banner, border, Button, Callout, Character, color, fontFamily, Icon, MomentCard, MonthBar, NextUp, radius, space, text, useAnnounce, useFocusRing, useReducedMotion, type MonthChip } from '@teddysteps/ui';
+import { Banner, border, Button, Callout, Character, color, fontFamily, Icon, MomentCard, MonthBar, NextUp, radius, space, text, useAnnounce, useFocusRing, useReducedMotion, type CharacterName, type MonthChip } from '@teddysteps/ui';
 import { Doodles } from '@/components/Doodles';
 import { Photo } from '@/components/Photo';
 import { TextLink } from '@/components/TextLink';
@@ -42,7 +42,7 @@ export default function Trail() {
 
   return (
     <View style={styles.screen}>
-      <TrailHeader childName={trail.childName} week={week ? (week <= 52 ? `Week ${week} van ${TRAIL_WEEKS}` : weekName(week)) : null} />
+      <TrailHeader childName={trail.childName} look={trail.look} week={week ? (week <= 52 ? `Week ${week} van ${TRAIL_WEEKS}` : weekName(week)) : null} />
       {!week || !trail.birthDate ? (
         <OnTheWay dueDate={longDutchDate(trail.dueDate, { weekday: false, year: true })} />
       ) : source === 'server' && !moments.length ? (
@@ -103,7 +103,7 @@ export default function Trail() {
             <View />
           )}
           <View style={styles.gutter} onLayout={(e) => (places.current.timeline = e.nativeEvent.layout.y)}>
-            <Timeline moments={shown} week={week} birthDate={trail.birthDate} onMonth={(key, y) => places.current.months.set(key, y)} />
+            <Timeline moments={shown} week={week} birthDate={trail.birthDate} animal={trail.look.animal} onMonth={(key, y) => places.current.months.set(key, y)} />
           </View>
         </ScrollView>
       )}
@@ -130,10 +130,23 @@ function months(birthDate: CalendarDate, week: number, moments: TrailMoment[]): 
 
 /**
  * The trail as a timeline, like a travel diary (owner, 25 October 2026): a dotted path down the
- * left with a stop for every week that has moments (Bo stands on this week's), the moments as
+ * left with a stop for every week that has moments (the child's own animal stands on this week's), the moments as
  * album pages beside it, under a heading per month. A tap on a photo opens the big view there.
  */
-function Timeline({ moments, week, birthDate, onMonth }: { moments: TrailMoment[]; week: number; birthDate: CalendarDate; onMonth: (key: string, y: number) => void }) {
+function Timeline({
+  moments,
+  week,
+  birthDate,
+  animal,
+  onMonth,
+}: {
+  moments: TrailMoment[];
+  week: number;
+  birthDate: CalendarDate;
+  /** The child's own animal stands on this week's stop. */
+  animal: CharacterName;
+  onMonth: (key: string, y: number) => void;
+}) {
   const { width } = useWindowDimensions();
   const weeks = byWeek(moments);
   if (!weeks.some(([w]) => w === week)) weeks.unshift([week, []]);
@@ -160,7 +173,7 @@ function Timeline({ moments, week, birthDate, onMonth }: { moments: TrailMoment[
                 <View style={styles.marker} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
                   {w === week ? (
                     <View style={styles.bo}>
-                      <Character name="bo" size={30} decorative />
+                      <Character name={animal} size={30} decorative />
                     </View>
                   ) : null}
                   <View style={[styles.dot, w === week && styles.dotNow]} />

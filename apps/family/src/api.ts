@@ -1,5 +1,6 @@
 // Talks to family-api on the same address (/api/*), so the HttpOnly session cookie goes along.
 // No other host is ever called from this page (connect-src 'self').
+import { childLook, type ChildLook } from '@teddysteps/ui';
 
 export interface FamilyPhoto {
   width: number;
@@ -21,7 +22,7 @@ export interface FamilyMoment {
 }
 
 export interface FamilyPage {
-  child: { firstName: string; birthDate: string | null };
+  child: { firstName: string; birthDate: string | null; look: ChildLook };
   me: { label: string; relation: string | null; email: string | null; frequency: 'each' | 'weekly' | 'never'; joined: boolean; onBookList: boolean };
   moments: FamilyMoment[];
   /** Older moments exist ("Eerdere momenten"). */
@@ -53,7 +54,12 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
 
 export const api = {
   claim: (code: string) => call<{ ok: true }>('/claim', { code }),
-  page: (wide: boolean, skip = 0) => call<FamilyPage>(`/page?wide=${wide ? 1 : 0}${skip ? `&skip=${skip}` : ''}`),
+  // A missing or unknown look (an older or newer family-api) shows Bo on lilac.
+  page: (wide: boolean, skip = 0) =>
+    call<FamilyPage>(`/page?wide=${wide ? 1 : 0}${skip ? `&skip=${skip}` : ''}`).then((p) => ({
+      ...p,
+      child: { ...p.child, look: childLook(p.child.look?.animal, p.child.look?.tone) },
+    })),
   join: (label: string, email: string, frequency: string) => call<{ ok: true; confirm: boolean | 'limited' }>('/join', { label, email, frequency }),
   confirm: (code: string) => call<{ ok: true }>('/confirm', { code }),
   unsubscribe: (token: string) => call<{ ok: true }>(`/afmelden/${token}`, {}),

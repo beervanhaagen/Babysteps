@@ -241,7 +241,7 @@ export async function buildExport(trail: Trail, email: string | null, onProgress
         await addBytes(zip, out, 'momenten.html', text.encode(page(trail, moments, names)));
         const data = {
           versie: 1,
-          kind: { voornaam: trail.childName, geboortedatum: trail.birthDate, uitgerekend: trail.dueDate },
+          kind: { voornaam: trail.childName, geboortedatum: trail.birthDate, uitgerekend: trail.dueDate, dier: trail.look.animal, kleur: trail.look.tone },
           momenten: moments.map((m) => ({
             week: m.trail_week,
             dag: dayOf(m),
