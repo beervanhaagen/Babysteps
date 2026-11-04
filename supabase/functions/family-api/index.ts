@@ -104,6 +104,12 @@ async function signed(paths: string[]): Promise<Map<string, string>> {
 
 const PAGE_SIZE = 12;
 
+// Written reacties (docs/bouwplan.md §10 item 17): plain text, read by the whole circle. They
+// never go in a mail or a push, and the page shows them as text only.
+type CommentRow = { id: string; body: string; author: string; author_kind: 'family' | 'parent'; mine: boolean; can_delete: boolean; created_at: string };
+const comment = (c: CommentRow) => ({ id: c.id, body: c.body, author: c.author, authorKind: c.author_kind, mine: c.mine, canDelete: c.can_delete, at: c.created_at });
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 /** One page of postcards: at most 12, links only for the version this screen shows. */
 async function page(who: { member: string; trail: string }, skip: number, wide: boolean) {
   const [{ data: child }, { data: trail }, { data: me }, { data: rows }] = await Promise.all([
@@ -125,6 +131,8 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
     my_hugs: number;
     photos: Photo[] | null;
     reactions: Record<string, { total: number; mine: number }> | null;
+    comment_count: number | null;
+    comments: CommentRow[] | null;
   };
   const all = (rows ?? []) as Row[];
   const moments = all.slice(0, PAGE_SIZE);
@@ -153,6 +161,8 @@ async function page(who: { member: string; trail: string }, skip: number, wide: 
       hugs: m.hugs,
       myHugs: m.my_hugs,
       reactions: m.reactions ?? {},
+      commentCount: m.comment_count ?? 0,
+      comments: (m.comments ?? []).map(comment),
     })),
     more: all.length > PAGE_SIZE,
     // M6 "Familie mag foto's bewaren": shows the "Bewaar" button; /keep checks it again.
@@ -323,6 +333,44 @@ Deno.serve(async (request) => {
     const reactions: Record<string, { total: number; mine: number }> = {};
     for (const r of (data ?? []) as { kind: string; mine: number; total: number }[]) reactions[r.kind] = { total: r.total, mine: r.mine };
     return json(200, { reactions });
+  }
+
+  // All reacties of one moment, newest first, 30 at a time (`before` is the last one shown).
+  if (route === '/reacties' && request.method === 'GET') {
+    const params = new URL(request.url).searchParams;
+    const moment = params.get('moment') ?? '';
+    const before = params.get('before') ?? '';
+    if (!UUID.test(moment) || (before && !UUID.test(before))) return json(422, { error: 'bad request' });
+    let beforeAt: string | null = null;
+    if (before) {
+      const { data: row } = await service.from('comments').select('created_at').eq('id', before).eq('moment_id', moment).maybeSingle();
+      // Deleted in the meantime: nothing older to give, rather than starting again from the newest.
+      if (!row) return json(200, { comments: [], more: false });
+      beforeAt = row.created_at;
+    }
+    const { data, error } = await service.rpc('family_comments', { member: who.member, commented_moment: moment, before_at: beforeAt, before_id: before || null, n: 31 });
+    if (error) return json(404, { error: 'unknown moment' });
+    const rows = (data ?? []) as CommentRow[];
+    return json(200, { comments: rows.slice(0, 30).map(comment), more: rows.length > 30 });
+  }
+
+  if (route === '/reactie' && request.method === 'POST') {
+    const text = typeof body.body === 'string' ? body.body.trim() : '';
+    if (typeof body.moment !== 'string' || !UUID.test(body.moment) || typeof body.client_id !== 'string' || !UUID.test(body.client_id) || !text || text.length > 2000) {
+      return json(422, { error: 'bad request' });
+    }
+    const { data, error } = await service.rpc('family_comment', { member: who.member, commented_moment: body.moment, comment_body: text, comment_client: body.client_id });
+    if (error?.code === '54000') return json(429, { error: 'too many' });
+    if (error?.code === '22023') return json(422, { error: 'bad request' });
+    if (error) return json(404, { error: 'unknown moment' });
+    const row = ((data ?? []) as CommentRow[])[0];
+    return row ? json(200, { comment: comment(row) }) : json(404, { error: 'unknown moment' });
+  }
+
+  if (route === '/reactie/verwijder' && request.method === 'POST') {
+    if (typeof body.id !== 'string' || !UUID.test(body.id)) return json(422, { error: 'bad request' });
+    const { data } = await service.rpc('family_delete_comment', { member: who.member, comment: body.id });
+    return data ? json(200, { ok: true }) : json(404, { error: 'unknown reactie' });
   }
 
   if (route === '/hug' && request.method === 'POST') {

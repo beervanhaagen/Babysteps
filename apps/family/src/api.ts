@@ -1,6 +1,6 @@
 // Talks to family-api on the same address (/api/*), so the HttpOnly session cookie goes along.
 // No other host is ever called from this page (connect-src 'self').
-import { childLook, type ChildLook, type ReactionKind } from '@teddysteps/ui';
+import { childLook, type ChildLook, type Comment, type ReactionKind } from '@teddysteps/ui';
 
 export interface FamilyPhoto {
   width: number;
@@ -21,6 +21,9 @@ export interface FamilyMoment {
   myHugs: number;
   /** Per kind (hug and the icons), the total and my own; only kinds that were sent. */
   reactions: Partial<Record<ReactionKind, { total: number; mine: number }>>;
+  /** Written reacties: how many, and the newest three (oldest of them first). */
+  commentCount: number;
+  comments: Comment[];
 }
 
 /** A child this browser follows (the keyring's start page). */
@@ -88,6 +91,8 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
   if (response.status === 401 || response.status === 404) throw new NoAccess();
   if (response.status === 409) throw new TooManyDevices();
   if (response.status === 403) throw new NotAllowed();
+  // A limit (e.g. reacties per day): the screen says so in words.
+  if (response.status === 429) throw new Error('too-many');
   if (!response.ok) throw new Error(`family-api ${response.status}`);
   return response.json() as Promise<T>;
 }
@@ -101,13 +106,18 @@ export const api = {
     call<FamilyPage>(`/page?wide=${wide ? 1 : 0}${skip ? `&skip=${skip}` : ''}`).then((p) => ({
       ...p,
       child: { ...p.child, look: childLook(p.child.look?.animal, p.child.look?.tone) },
-      moments: p.moments.map((m) => ({ ...m, reactions: m.reactions ?? {} })),
+      moments: p.moments.map((m) => ({ ...m, reactions: m.reactions ?? {}, commentCount: m.commentCount ?? 0, comments: m.comments ?? [] })),
     })),
   join: (label: string, email: string, frequency: string) => call<{ ok: true; confirm: boolean | 'limited' }>('/join', { label, email, frequency }),
   confirm: (code: string) => call<{ ok: true }>('/confirm', { code }),
   unsubscribe: (token: string) => call<{ ok: true }>(`/afmelden/${token}`, {}),
   hug: (moment: string) => call<{ mine: number; total: number }>('/hug', { moment }),
   react: (moment: string, kind: ReactionKind) => call<{ reactions: FamilyMoment['reactions'] }>('/react', { moment, kind }),
+  /** All reacties of a moment, newest first, 30 at a time. */
+  comments: (moment: string, before?: string) =>
+    call<{ comments: Comment[]; more: boolean }>(`/reacties?moment=${moment}${before ? `&before=${before}` : ''}`),
+  comment: (moment: string, body: string, clientId: string) => call<{ comment: Comment }>('/reactie', { moment, body, client_id: clientId }),
+  deleteComment: (id: string) => call<{ ok: true }>('/reactie/verwijder', { id }),
   bookList: () => call<{ ok: true }>('/book', {}),
   keep: (moment: string, position: number) => call<{ url: string }>('/keep', { moment, position }),
   /** The big view on a phone: view versions of a block of at most 25 postcards, by moment. */

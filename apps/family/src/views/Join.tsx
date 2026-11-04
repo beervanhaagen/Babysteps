@@ -129,7 +129,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
         </Text>
       ) : null}
       <Text style={styles.small}>
-        De ouders zien hoe {name} jou noemt, je knuffels en of je meekijkt. Je e-mailadres gebruiken we alleen voor de mail met nieuwe momenten.{' '}
+        De ouders zien hoe {name} jou noemt, je knuffels en of je meekijkt. Wat je als reactie schrijft, ziet de hele kring, met die naam erbij; de ouders kunnen het verwijderen. Je e-mailadres gebruiken we alleen voor de mail met nieuwe momenten.{' '}
         <Text accessibilityRole="link" style={styles.smallLink} onPress={() => Linking.openURL('https://teddysteps.nl/privacy#familie')}>
           Onze privacybelofte
         </Text>
@@ -144,7 +144,7 @@ export function Join({ page, editing, onSaved, onLeft }: { page: FamilyPage; edi
           <TextLink onPress={() => navigate('/')}>{`Terug naar ${possessive(name)} pad`}</TextLink>
           {leaving ? (
             <Text role="alert" style={styles.leaveText}>
-              Dan werkt je link niet meer en wissen we je e-mailadres. Weet je het zeker?
+              Dan werkt je link niet meer en wissen we je e-mailadres en je reacties. Weet je het zeker?
             </Text>
           ) : null}
           <TextLink onPress={leave}>{leaving ? 'Ja, ik wil niet meer meekijken' : 'Ik wil niet meer meekijken'}</TextLink>

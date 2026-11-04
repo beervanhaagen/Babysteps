@@ -42,7 +42,7 @@ Targets are assumptions to test, not facts.
 | Assumption (MVP board) | Metric | First target |
 | --- | --- | --- |
 | Parents keep adding | Share of trails with at least 1 moment in week 4 and in week 8 after sign-up | 40% / 30% |
-| Family love keeps parents posting | Share of moments that get a hug, an icon (heart, laugh, wow, star, sun) or voice note within 24 hours | 70% |
+| Family love keeps parents posting | Share of moments that get a hug, an icon (heart, laugh, wow, star, sun), a written reactie or voice note within 24 hours | 70% |
 | Sharing brings new parents | Family members joined per trail in week 1; share cards sent per active trail per month; landing visits with `utm_source=card` or `invite` | 2+ / 1+ / tracked |
 | Parents will pay for the book | Share of trails active for 8+ weeks that joined the book list; family sign-ups on the book list | 25% |
 | **North star** | **Loved trails per week**: trails with a new moment *and* a family reaction in the same week | Grows week on week |
@@ -53,7 +53,7 @@ Implementation:
 
 - A few SQL views (for example `metrics_weekly`), refreshed nightly by the database's own scheduler.
 - They are read under the database role `metrics_reader`, which can only see the views. Supabase's SQL editor runs as admin, so we use either its "Read-only member" role (if our plan has it) or a separate read-only login from a local SQL tool. There is no custom internal page at launch.
-- The data model must include `trails.created_at`, `trails.deleted_at`, `moments.created_at`, `moments.trail_week`, `reactions.created_at`, `circle_members.invited_at` and `joined_at`, `parent_invites.sent_at` and `accepted_at`, `circle_members.book_list_at`, `family_visits_daily`, `children.due_date`, and `children.leap_cards_on`. The last one is stored on the server, so the leap metric can be calculated.
+- The data model must include `trails.created_at`, `trails.deleted_at`, `moments.created_at`, `moments.trail_week`, `reactions.created_at`, `comments.created_at` (counted only; no metric or event ever reads the text), `circle_members.invited_at` and `joined_at`, `parent_invites.sent_at` and `accepted_at`, `circle_members.book_list_at`, `family_visits_daily`, `children.due_date`, and `children.leap_cards_on`. The last one is stored on the server, so the leap metric can be calculated.
 - "Share cards per active trail" is the layer-2 total divided by the layer-1 active trails, as a rough ratio only.
 
 ## Event list (layer 2, Aptabase)

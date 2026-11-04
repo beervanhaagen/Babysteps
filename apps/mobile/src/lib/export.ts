@@ -26,6 +26,8 @@ interface ExportMoment {
   created_at: string;
   moment_photos: { position: number; print_path: string; view_path: string }[];
   reactions: { kind: string; created_at: string; circle_members: { label: string } | null }[];
+  /** Written reacties, oldest first; `author` is filled in after loading. */
+  comments: { body: string; created_at: string; user_id: string | null; circle_members: { label: string } | null; author?: string }[];
 }
 
 export interface ExportProgress {
@@ -65,7 +67,7 @@ async function load() {
   for (let from = 0; ; from += 500) {
     const { data, error } = await supabase
       .from('moments')
-      .select('id, trail_week, caption, is_first, first_label, happened_on, created_at, moment_photos(position, print_path, view_path), reactions(kind, created_at, circle_members(label))')
+      .select('id, trail_week, caption, is_first, first_label, happened_on, created_at, moment_photos(position, print_path, view_path), reactions(kind, created_at, circle_members(label)), comments(body, created_at, user_id, circle_members(label))')
       .eq('status', 'ready')
       .order('trail_week')
       .order('created_at')
@@ -73,8 +75,17 @@ async function load() {
       .range(from, from + 499);
     if (error) throw error;
     all.push(...((data ?? []) as unknown as ExportMoment[]));
-    if (!data || data.length < 500) return all;
+    if (!data || data.length < 500) break;
   }
+  // Who wrote each reactie: family by their name here, parents by their first name.
+  const { data: parents } = await supabase.rpc('trail_parents_list');
+  const parentName = new Map(((parents ?? []) as { user_id: string; first_name: string | null }[]).map((p) => [p.user_id, p.first_name || 'Ouder']));
+  for (const m of all) {
+    m.comments = [...(m.comments ?? [])]
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .map((c) => ({ ...c, author: c.circle_members?.label ?? (c.user_id ? parentName.get(c.user_id) : undefined) ?? 'Ouder' }));
+  }
+  return all;
 }
 
 /** A short-lived link to one photo: the print version, or else the view version. Three tries. */
@@ -113,6 +124,7 @@ ${m.is_first && m.first_label ? `<p class="first">Eerste keer · ${escape(m.firs
 ${m.caption ? `<h3>${escape(m.caption)}</h3>` : ''}
 <p class="meta">${escape(longDutchDate(dayOf(m)))}${love.length ? ` · liefs van ${escape([...new Set(love)].join(', '))}` : ''}</p>
 <div class="photos">${photos}</div>
+${m.comments.length ? `<ul class="reacties">${m.comments.map((c) => `<li><b>${escape(c.author ?? '')}</b> ${escape(c.body)}</li>`).join('')}</ul>` : ''}
 </article>`;
         })
         .join('\n');
@@ -131,6 +143,7 @@ h3{font-family:Georgia,serif;font-size:21px;margin:6px 0}
 article{background:#fff;border:2px solid #2D1E2F;border-radius:20px;padding:16px;margin:0 0 16px}
 .first{display:inline-block;margin:0;padding:2px 10px;border:1.5px solid #2D1E2F;border-radius:14px;font-size:13px;font-weight:700}
 .meta{color:#5E4D5C;font-size:14px;margin:4px 0 12px}
+.reacties{list-style:none;margin:12px 0 0;padding:0}.reacties li{margin:0 0 8px;white-space:pre-line}
 .photos img{display:block;width:100%;height:auto;border-radius:12px;margin:0 0 8px}
 </style></head>
 <body><main>
@@ -255,6 +268,8 @@ export async function buildExport(trail: Trail, email: string | null, onProgress
             knuffels: m.reactions.filter((r) => r.kind === 'hug' && r.circle_members).map((r) => ({ van: r.circle_members!.label, op: r.created_at })),
             // Since 3 November 2026: every reaction, the hug and the icons ("hartje", "lachje", …).
             reacties: m.reactions.filter((r) => r.circle_members).map((r) => ({ soort: SOORT[r.kind] ?? r.kind, van: r.circle_members!.label, op: r.created_at })),
+            // Since 4 November 2026: the written reacties, from family and parents.
+            geschreven: m.comments.map((c) => ({ van: c.author, tekst: c.body, op: c.created_at })),
           })),
         };
         await addBytes(zip, out, 'momenten.json', text.encode(JSON.stringify(data, null, 2)));

@@ -2,10 +2,10 @@ import { firstLook, longDutchDate, possessive, weekName, weekShort, todayInAmste
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { PhotoViewer, ReactionCounts, type ReactionKind, type ViewerPhoto } from '@teddysteps/ui';
+import { commentsCount, PhotoViewer, ReactionCounts, type ReactionKind, type ViewerPhoto } from '@teddysteps/ui';
 import { api, type FamilyMoment, type FamilyPage } from '../api';
 import { Love } from './Love';
-import { Photo } from './shared';
+import { Photo, TextLink } from './shared';
 
 const WIDE = 900;
 const BLOCK = 25;
@@ -19,9 +19,11 @@ interface ViewerProps {
   start: { moment: string; photo: number };
   onReacted: (id: string, kind: ReactionKind, reactions: FamilyMoment['reactions']) => void;
   onClose: () => void;
+  /** "Reageren": back to the postcard, with the field open. */
+  onWrite: (moment: string) => void;
 }
 
-export function Viewer({ page, start, onReacted, onClose }: ViewerProps) {
+export function Viewer({ page, start, onReacted, onClose, onWrite }: ViewerProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const birth = page.child.birthDate as CalendarDate | null;
@@ -73,7 +75,7 @@ export function Viewer({ page, start, onReacted, onClose }: ViewerProps) {
         caption: m.caption,
         first: m.isFirst && m.firstLabel ? { label: m.firstLabel, ...firstLook(m.firstLabel) } : undefined,
         date: longDutchDate(m.day as CalendarDate),
-        below: <Hug moment={m} onReacted={onReacted} />,
+        below: <Hug moment={m} onReacted={onReacted} onWrite={() => onWrite(m.id)} />,
       });
     });
   }
@@ -103,11 +105,15 @@ function Big({ uri, small, label }: { uri?: string; small?: string; label: strin
 }
 
 /** Under the big photo: what's been sent, and a hug or an icon right there. */
-function Hug({ moment: m, onReacted }: { moment: FamilyMoment; onReacted: ViewerProps['onReacted'] }) {
+function Hug({ moment: m, onReacted, onWrite }: { moment: FamilyMoment; onReacted: ViewerProps['onReacted']; onWrite: () => void }) {
   return (
     <View style={styles.hug}>
       <ReactionCounts counts={Object.fromEntries(Object.entries(m.reactions).map(([k, v]) => [k, v?.total ?? 0]))} />
       <Love moment={m} onReacted={onReacted} />
+      {/* The reacties themselves sit on the postcard: there's room to read and write. */}
+      <TextLink onPress={onWrite} label={m.commentCount ? `Reageren, ${commentsCount(m.commentCount)}` : 'Reageren'}>
+        {m.commentCount ? `${commentsCount(m.commentCount)} · Reageren` : 'Reageren'}
+      </TextLink>
     </View>
   );
 }

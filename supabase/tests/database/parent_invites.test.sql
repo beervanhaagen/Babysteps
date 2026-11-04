@@ -1,7 +1,7 @@
 -- Tests for M3: inviting the other parent. Run: npx supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(31);
+select plan(32);
 
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at)
 values
@@ -101,12 +101,21 @@ set local request.jwt.claims = '{"sub": "9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", 
 select is((select child from public.my_parent_invite()), 'Noor', 'an empty own trail doesn''t hide the invite');
 select lives_ok(format('select public.accept_parent_invite(%L)', (select id from to_lars)), 'he joins');
 select is((select count(*) from public.children where first_name = 'Leeg'), 0::bigint, 'and the empty trail is gone');
+-- Lars writes a reactie on Noor's trail before he is taken off.
+reset role;
+insert into public.moments (id, trail_id, created_by, client_id, trail_week, photo_count, status)
+select 'e9999999-eeee-eeee-eeee-eeeeeeeeeeee', trail_id, '99999999-9999-9999-9999-999999999999', gen_random_uuid(), 2, 1, 'ready'
+from public.trail_parents where user_id = '99999999-9999-9999-9999-999999999999';
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", "role": "authenticated"}';
+select public.add_comment('e9999999-eeee-eeee-eeee-eeeeeeeeeeee', 'Hoi Noor', gen_random_uuid());
 -- Kim can take Lars off again (a typo), within 7 days; Lars can't do that to Kim.
 select throws_ok(format('select public.remove_joined_parent(%L)', (select id from to_lars)), '42501', null, 'only the inviter can undo it');
 set local request.jwt.claims = '{"sub": "99999999-9999-9999-9999-999999999999", "role": "authenticated"}';
 select public.remove_joined_parent((select id from to_lars));
 reset role;
 select is((select count(*) from public.trail_parents where user_id = '9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 0::bigint, 'the inviter took the wrong parent off');
+select is((select count(*) from public.comments where user_id = '9bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 0::bigint, 'and his reacties went with him');
 set local role authenticated;
 -- A trail being deleted invites nobody.
 reset role;

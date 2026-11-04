@@ -88,6 +88,28 @@ check(odd.status === 422, 'only our own icons');
 const shown = await family('/page?wide=0', { kring: lotte.member });
 check(shown.json.moments?.find((m) => m.id === moment)?.reactions?.heart?.total === 1, 'the page shows the heart');
 
+// Written reacties, as Oma on Lotte's page: write, read, never twice, delete her own.
+const client = crypto.randomUUID();
+const written = await family('/reactie', { body: { moment, body: '  Wat een schatje! <b>x</b>  ', client_id: client }, kring: lotte.member });
+check(written.status === 200 && written.json.comment?.body === 'Wat een schatje! <b>x</b>' && written.json.comment?.mine === true, 'Oma writes a reactie, kept as plain text');
+const again = await family('/reactie', { body: { moment, body: 'Wat een schatje! <b>x</b>', client_id: client }, kring: lotte.member });
+check(again.json.comment?.id === written.json.comment?.id, 'sent again: the same reactie');
+const empty = await family('/reactie', { body: { moment, body: '   ', client_id: crypto.randomUUID() }, kring: lotte.member });
+check(empty.status === 422, 'an empty reactie is refused');
+const theirs = crypto.randomUUID();
+sql(`insert into public.moments (id, trail_id, created_by, client_id, trail_week, photo_count, status) select '${theirs}', trail_id, user_id, gen_random_uuid(), 1, 1, 'ready' from public.trail_parents where user_id = '${stranger.parent}'`);
+const elsewhere = await family('/reactie', { body: { moment: theirs, body: 'Hoi', client_id: crypto.randomUUID() }, kring: lotte.member });
+check(elsewhere.status === 404, 'never on another child’s moment');
+const peek = await family(`/reacties?moment=${theirs}`, { kring: lotte.member });
+check(peek.status === 404, 'nor reading them');
+const withText = await family('/page?wide=0', { kring: lotte.member });
+const card = withText.json.moments?.find((m) => m.id === moment);
+check(card?.commentCount === 1 && card?.comments?.[0]?.author === 'Oma Ria', 'the page shows the reactie and who wrote it');
+const list = await family(`/reacties?moment=${moment}`, { kring: lotte.member });
+check(list.status === 200 && list.json.comments?.length === 1 && list.json.more === false, 'all reacties of a moment');
+const gone = await family('/reactie/verwijder', { body: { id: written.json.comment?.id }, kring: lotte.member });
+check(gone.status === 200 && sql(`select count(*) from public.comments where moment_id = '${moment}'`) === '0', 'Oma deletes her own');
+
 // "Ik wil niet meer meekijken" for Lotte takes only Lotte's key.
 await family('/claim', { body: { code: stranger.code } });
 await family('/leave', { body: {}, kring: lotte.member });

@@ -158,6 +158,13 @@ export default function App() {
     setBurst({ kind, count: 8, id: Date.now() });
   }, []);
 
+  // A reactie written or deleted: only that card changes.
+  const commentsChanged = useCallback((id: string, change: { comments: FamilyMoment['comments']; commentCount: number }) => {
+    setPage((current) => current && { ...current, moments: current.moments.map((m) => (m.id === id ? { ...m, ...change } : m)) });
+  }, []);
+  // "Reageren" in the big view: back to the postcards, at that card's field.
+  const [writeOn, setWriteOn] = useState<string>();
+
   const older = useCallback(async () => {
     if (!page?.moments.length) return;
     const next = await api.page(isWide(), page.moments.length);
@@ -233,7 +240,18 @@ export default function App() {
       {/* First in the page, so its heading is the one that gets focus; the postcards stay underneath, inert. */}
       {showing ? (
         <View style={{ position: 'fixed' as 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, overscrollBehavior: 'contain' } as object}>
-          <Viewer page={page} start={viewing!} onReacted={reacted} onClose={() => window.history.back()} />
+          <Viewer
+            page={page}
+            start={viewing!}
+            onReacted={reacted}
+            onClose={() => window.history.back()}
+            onWrite={(id) => {
+              // The field gets focus, not the photo that opened the big view.
+              opener.current = null;
+              setWriteOn(id);
+              window.history.back();
+            }}
+          />
         </View>
       ) : null}
       <View style={{ flex: 1 }} aria-hidden={showing || undefined} {...(showing ? ({ inert: '' } as object) : {})}>
@@ -244,6 +262,8 @@ export default function App() {
           onOlderUntil={olderUntil}
           onOpen={openPhoto}
           onSwitch={ring.length > 1 ? () => navigate('/kies') : undefined}
+          onCommentsChanged={commentsChanged}
+          writeOn={showing ? undefined : writeOn}
         />
       </View>
       <View pointerEvents="none" style={{ position: 'fixed' as 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 20 }}>

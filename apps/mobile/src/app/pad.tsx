@@ -232,6 +232,7 @@ function Card({ moment: m, photoHeight, onOpen }: { moment: TrailMoment; photoHe
       first={first}
       date={dayOf(m)}
       reactions={m.reactions}
+      comments={m.commentCount}
       context={weekName(m.trailWeek)}
       onPress={m.momentId ? onOpen : undefined}
     />

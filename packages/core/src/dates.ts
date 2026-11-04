@@ -130,3 +130,17 @@ export function weekSpan(birthDate: CalendarDate, week: number): string {
   const sameMonth = from.getUTCMonth() === to.getUTCMonth();
   return `${from.getUTCDate()}${sameMonth ? '' : ` ${MONTHS[from.getUTCMonth()]}`} – ${to.getUTCDate()} ${MONTHS[to.getUTCMonth()]}`;
 }
+
+/** When a reactie was written: "net", "vandaag", "gisteren", or "3 nov" (with the year when it isn't this year). */
+export function whenWritten(at: string, now = new Date()): string {
+  const then = new Date(at);
+  if (Number.isNaN(then.getTime())) return '';
+  if (now.getTime() - then.getTime() < 2 * 60 * 1000) return 'net';
+  const day = todayInAmsterdam(then);
+  const today = todayInAmsterdam(now);
+  const ago = daysBetween(day, today);
+  if (ago <= 0) return 'vandaag';
+  if (ago === 1) return 'gisteren';
+  const [y, m, d] = day.split('-').map(Number);
+  return `${d} ${MONTHS[m - 1]}${day.slice(0, 4) === today.slice(0, 4) ? '' : ` ${y}`}`;
+}

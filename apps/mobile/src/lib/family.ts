@@ -108,7 +108,7 @@ export async function revokeDevice(deviceId: string) {
 
 export interface ActivityItem {
   key: string;
-  kind: 'hug' | 'joined';
+  kind: 'hug' | 'comment' | 'joined';
   /** For reactions: which one (the hug or an icon). */
   reaction?: ReactionKind;
   at: string;
@@ -118,23 +118,40 @@ export interface ActivityItem {
   caption?: string | null;
   momentId?: string;
   frequency?: CircleMember['frequency'];
+  /** For a written reactie: what they wrote. */
+  text?: string;
   seen: boolean;
 }
 
-/** T6: hugs, icons and people who joined, newest first. Reactions are marked seen once shown. */
+/** T6: hugs, icons, written reacties and people who joined, newest first. Marked seen once shown. */
 export function useActivity() {
   const [items, setItems] = useState<ActivityItem[] | null>(null);
   const refresh = useCallback(async () => {
     // Hugs that arrive after this moment stay new, even if they're in this fetch's results.
     const fetchedAt = new Date().toISOString();
-    const [hugs, joined] = await Promise.all([
+    const [hugs, joined, written] = await Promise.all([
       supabase
         .from('reactions')
         .select('id, kind, created_at, seen_at, circle_members(label), moments!inner(id, trail_week, caption, first_label, is_first)')
         .order('created_at', { ascending: false })
         .limit(100),
       supabase.from('circle_members').select('id, label, joined_at, email_frequency').not('joined_at', 'is', null).is('revoked_at', null),
+      // Family's reacties; a parent's own (or the other parent's) aren't news here.
+      supabase
+        .from('comments')
+        .select('id, body, created_at, seen_at, circle_members!inner(label), moments!inner(id, trail_week, caption, first_label, is_first)')
+        .not('circle_member_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(100),
     ]);
+    type Written = {
+      id: string;
+      body: string;
+      created_at: string;
+      seen_at: string | null;
+      circle_members: { label: string } | null;
+      moments: { id: string; trail_week: number; caption: string | null; first_label: string | null; is_first: boolean } | null;
+    };
     type Hug = {
       id: string;
       kind: ReactionKind;
@@ -155,6 +172,17 @@ export function useActivity() {
         momentId: h.moments?.id,
         seen: !!h.seen_at,
       })),
+      ...((written.data ?? []) as unknown as Written[]).map((c) => ({
+        key: `comment-${c.id}`,
+        kind: 'comment' as const,
+        at: c.created_at,
+        who: c.circle_members?.label ?? 'Iemand',
+        week: c.moments?.trail_week,
+        caption: c.moments ? (c.moments.is_first ? c.moments.first_label : c.moments.caption) : null,
+        momentId: c.moments?.id,
+        text: c.body,
+        seen: !!c.seen_at,
+      })),
       ...(joined.data ?? []).map((m) => ({
         key: `joined-${m.id}`,
         kind: 'joined' as const,
@@ -166,7 +194,11 @@ export function useActivity() {
     ].sort((a, b) => b.at.localeCompare(a.at));
     setItems(list);
     // Everything up to the fetch counts as seen, also beyond the 100 shown.
-    await supabase.from('reactions').update({ seen_at: new Date().toISOString() }).is('seen_at', null).lte('created_at', fetchedAt);
+    const seenAt = new Date().toISOString();
+    await Promise.all([
+      supabase.from('reactions').update({ seen_at: seenAt }).is('seen_at', null).lte('created_at', fetchedAt),
+      supabase.from('comments').update({ seen_at: seenAt }).is('seen_at', null).lte('created_at', fetchedAt),
+    ]);
   }, []);
   useFocusEffect(
     useCallback(() => {
@@ -182,11 +214,10 @@ export function useUnseenHugs() {
   useFocusEffect(
     useCallback(() => {
       let alive = true;
-      supabase
-        .from('reactions')
-        .select('id, moments!inner(id)', { count: 'exact', head: true })
-        .is('seen_at', null)
-        .then(({ count: n }) => alive && setCount(n ?? 0));
+      Promise.all([
+        supabase.from('reactions').select('id, moments!inner(id)', { count: 'exact', head: true }).is('seen_at', null),
+        supabase.from('comments').select('id, moments!inner(id)', { count: 'exact', head: true }).is('seen_at', null),
+      ]).then(([r, c]) => alive && setCount((r.count ?? 0) + (c.count ?? 0)));
       return () => {
         alive = false;
       };

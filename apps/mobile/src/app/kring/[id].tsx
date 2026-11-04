@@ -26,7 +26,7 @@ export default function CircleMemberScreen() {
     if (id) memberDevices(id).then(setDevices, () => setDevices([]));
   }, [id]);
   useEffect(loadDevices, [loadDevices]);
-  useAnnounce(error ?? (done ? `${label} kijkt niet meer mee.` : sure ? `Weet je het zeker? ${member?.label} kan dan niets meer zien.` : loggedOut));
+  useAnnounce(error ?? (done ? `${label} kijkt niet meer mee.` : sure ? `Weet je het zeker? ${member?.label} kan dan niets meer zien, en de reacties verdwijnen.` : loggedOut));
   if (done) {
     return (
       <Screen header={{ title: 'Uit de kring', color: 'pistachio', onBack: router.back }}>
@@ -121,7 +121,7 @@ export default function CircleMemberScreen() {
       </Text>
       {sure ? (
         <Text role="alert" style={[text('rowTitle'), { color: color.plum }]}>
-          {member.label} kan dan niets meer zien, op geen enkel apparaat. Weet je het zeker?
+          {member.label} kan dan niets meer zien, op geen enkel apparaat. Ook de reacties van {member.label} verdwijnen. Weet je het zeker?
         </Text>
       ) : null}
       <Button block variant={sure ? 'danger' : 'paper'} icon="close" onPress={revoke} busy={busy && sure}>

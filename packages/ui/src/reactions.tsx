@@ -37,6 +37,22 @@ const ART: Record<Exclude<ReactionKind, 'hug'>, string> = {
   sun: `<g stroke="${INK}" stroke-width="3.4" stroke-linecap="round"><path d="M24 2.5 v6 M24 39.5 v6 M2.5 24 h6 M39.5 24 h6 M8.8 8.8 l4.2 4.2 M35 35 l4.2 4.2 M8.8 39.2 l4.2 -4.2 M35 13 l4.2 -4.2"/></g><circle cx="24" cy="24" r="12" fill="${color.apricot}" stroke="${INK}" stroke-width="3.4"/>`,
 };
 
+// Written reacties (comments.tsx) show as a speech bubble with their number.
+const BUBBLE = `<path d="M5 5.5 H19 C20.1 5.5 21 6.4 21 7.5 V15 C21 16.1 20.1 17 19 17 H11 L6.5 20.5 V17 H5 C3.9 17 3 16.1 3 15 V7.5 C3 6.4 3.9 5.5 5 5.5 Z"/>`;
+
+/** The speech bubble, in the icons' line style. */
+export function CommentIcon({ size: box = 18, weight = 2.4 }: { size?: number; weight?: number }) {
+  return (
+    <SvgMarkup
+      markup={`<g fill="none" stroke="${color.ink}" stroke-width="${weight}" stroke-linecap="round" stroke-linejoin="round">${BUBBLE}</g>`}
+      viewBox="0 0 24 24"
+      width={box}
+      height={box}
+    />
+  );
+}
+
+
 /** "2 knuffels, 1 hartje": the counts in words, for screen readers and card labels. */
 export function reactionsSpoken(counts: Partial<Record<ReactionKind, number>>): string {
   return (['hug', ...REACTIONS.map((r) => r.kind)] as ReactionKind[])

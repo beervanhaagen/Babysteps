@@ -1,25 +1,33 @@
-import { firstLook, longDutchDate, todayInAmsterdam, weekName } from '@teddysteps/core';
+import { firstLook, longDutchDate, todayInAmsterdam, weekName, whenWritten } from '@teddysteps/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { border, Button, Character, color, FirstLabel, fontFamily, IconButton, ReactionCounts, size, text } from '@teddysteps/ui';
+import { border, Button, Character, color, CommentComposer, Comments, FirstLabel, fontFamily, IconButton, ReactionCounts, size, space, text, useAnnounce } from '@teddysteps/ui';
 import { Photo } from '@/components/Photo';
 import { Tabs } from '@/components/Tabs';
+import { TextLink } from '@/components/TextLink';
+import { useMomentComments } from '@/lib/comments';
 import { useTrailMoments } from '@/lib/trail';
 
 const GUTTER = 22;
 
-// T2 Moment, with the options (T8) behind "⋯". Voice notes come with step 6. No "Gezien door …"
+// T2 Moment, with the options (T8) behind "⋯", and the written reacties under it (the whole
+// circle reads them; parents may delete any). Voice notes come with step 6. No "Gezien door …"
 // line (decided 17 October 2026). "Toegevoegd door" needs the parent's first name, which isn't
 // asked yet.
 export default function Moment() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, schrijf } = useLocalSearchParams<{ id: string; schrijf?: string }>();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { moments, source } = useTrailMoments();
   const [page, setPage] = useState(0);
   const m = moments.find((x) => x.momentId === id);
+  const reacties = useMomentComments(m?.momentId);
+  const [olderBusy, setOlderBusy] = useState(false);
+  const [olderFailed, setOlderFailed] = useState(false);
+  const loadProblem = reacties.failed ? 'De reacties kwamen even niet door.' : olderFailed ? 'Eerdere reacties ophalen lukte even niet. Probeer het zo nog eens.' : undefined;
+  useAnnounce(loadProblem);
   const photoWidth = width - GUTTER * 2;
 
   // The day of the photo, or else the Dutch day it was pinned.
@@ -31,7 +39,7 @@ export default function Moment() {
   const story = longCaption ? m!.caption : null;
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={styles.bar}>
         <IconButton icon="back" label="Terug" onPress={router.back} />
         <Text style={styles.week}>{m ? weekName(m.trailWeek) : ''}</Text>
@@ -42,7 +50,8 @@ export default function Moment() {
         )}
       </View>
       {m ? (
-        <ScrollView contentContainerStyle={styles.content}>
+        // Taps on "Plaatsen" count while the keyboard is up.
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive">
           <View style={styles.tilt}>
             <ScrollView
               horizontal
@@ -80,6 +89,44 @@ export default function Moment() {
           </View>
           {story ? <Text style={styles.story}>{story}</Text> : null}
           <ReactionCounts counts={m.reactions} />
+          <View style={styles.rule} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
+          <View style={styles.reacties}>
+            <Text accessibilityRole="header" style={text('titleM')}>
+              Reacties
+            </Text>
+            {reacties.more ? (
+              <TextLink
+                role="button"
+                disabled={olderBusy}
+                onPress={async () => {
+                  setOlderBusy(true);
+                  setOlderFailed(false);
+                  await reacties.older().catch(() => setOlderFailed(true));
+                  setOlderBusy(false);
+                }}
+              >
+                {olderBusy ? 'Reacties ophalen…' : 'Eerdere reacties'}
+              </TextLink>
+            ) : null}
+            {loadProblem ? (
+              <Text role="alert" accessibilityLiveRegion="polite" style={styles.error}>
+                {loadProblem}
+              </Text>
+            ) : null}
+            {reacties.failed ? (
+              <TextLink role="button" onPress={reacties.retry}>
+                Opnieuw proberen
+              </TextLink>
+            ) : null}
+            {reacties.comments && !reacties.comments.length ? <Text style={styles.quiet}>Nog geen reacties. De hele kring leest mee.</Text> : null}
+            <Comments
+              comments={reacties.comments ?? []}
+              total={reacties.comments?.length ?? 0}
+              when={(at) => whenWritten(at)}
+              onDelete={reacties.remove}
+              composer={m.momentId ? <CommentComposer onSend={reacties.add} newId={reacties.newId} autoFocus={schrijf === '1'} about={title} /> : null}
+            />
+          </View>
           <View style={styles.bizzy}>
             <Character name="bizzy" size={70} rotate={10} decorative />
           </View>
@@ -103,7 +150,7 @@ export default function Moment() {
         </View>
       )}
       <Tabs active="trail" />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -121,6 +168,11 @@ const styles = StyleSheet.create({
   meta: { color: color.inkMuted, fontSize: 14, marginTop: 4 },
   story: { fontFamily: fontFamily('sans', 400), fontSize: 16, lineHeight: 24, color: color.ink },
   bizzy: { alignSelf: 'flex-end', marginRight: -8 },
+  // A dashed rule: iOS only draws dashes on a border that goes all the way round.
+  rule: { height: 0, borderWidth: 1, borderColor: color.line, borderStyle: 'dashed', marginTop: space.space2 },
+  reacties: { gap: space.space3 },
+  error: { fontFamily: fontFamily('sans', 700), fontSize: 15, lineHeight: 21, color: color.plum },
+  quiet: { fontFamily: fontFamily('sans', 700), fontSize: 15, lineHeight: 21, color: color.inkMuted },
   hugs: {
     alignSelf: 'flex-start',
     flexDirection: 'row',

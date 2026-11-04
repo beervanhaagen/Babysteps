@@ -42,7 +42,7 @@ export default function AddPerson() {
     >
       <TextField
         label={`Hoe noemt ${name} deze persoon?`}
-        hint="Alleen een voornaam of roepnaam, zoals Oma Ria of Tante Sanne."
+        hint="Alleen een voornaam of roepnaam, zoals Oma Ria of Tante Sanne. Bij reacties ziet de hele kring deze naam."
         placeholder="Oma Ria"
         value={label}
         onChangeText={setLabel}

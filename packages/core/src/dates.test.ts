@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ageLine, weekMonth, checkChildDates, formatDutchDate, longDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate } from './dates.ts';
+import { ageLine, weekMonth, checkChildDates, formatDutchDate, longDutchDate, parseDutchDate, todayInAmsterdam, typeDutchDate, whenWritten } from './dates.ts';
 
 test('reads Dutch dates and rejects impossible ones', () => {
   assert.equal(parseDutchDate('12-03-2026'), '2026-03-12');
@@ -62,4 +62,14 @@ test('from one year, the age in years and months', () => {
 test('the month a trail week starts in', () => {
   assert.deepEqual(weekMonth('2026-03-19', 1), { key: '2026-03', name: 'Maart 2026', short: 'mrt ’26' });
   assert.equal(weekMonth('2026-03-19', 3).name, 'April 2026');
+});
+
+test('when a reactie was written', () => {
+  const now = new Date('2026-11-04T10:00:00Z');
+  assert.equal(whenWritten('2026-11-04T09:59:00Z', now), 'net');
+  assert.equal(whenWritten('2026-11-03T23:30:00Z', now), 'vandaag');
+  assert.equal(whenWritten('2026-11-03T08:00:00Z', now), 'gisteren');
+  assert.equal(whenWritten('2026-10-28T08:00:00Z', now), '28 okt');
+  assert.equal(whenWritten('2025-12-24T08:00:00Z', now), '24 dec 2025');
+  assert.equal(whenWritten('nonsense', now), '');
 });

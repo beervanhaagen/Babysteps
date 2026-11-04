@@ -35,6 +35,8 @@ export interface TrailMoment {
   hugs: number;
   /** Every reaction from family by kind: the hug and the icons (heart, laugh, wow, star, sun). */
   reactions: Partial<Record<ReactionKind, number>>;
+  /** Written reacties, from family and parents. */
+  commentCount: number;
   /** Still on the phone (fully or partly): show X2 or X4 for it. */
   queued?: QueuedMoment;
 }
@@ -54,6 +56,8 @@ interface Row {
   moment_photos: { position: number; width: number; height: number; view_path: string; small_path: string }[];
   /** One row per reaction; copies cached before the icons hold a single { count } of hugs. */
   reactions: { kind?: ReactionKind; count?: number }[];
+  /** Missing in copies cached before reacties existed. */
+  comments?: { count: number }[];
 }
 
 /** Counts per kind from the reaction rows (or an older cached count of hugs). */
@@ -80,6 +84,7 @@ function fromQueue(q: QueuedMoment): TrailMoment {
     photos: q.photos.map((p) => ({ width: p.width, height: p.height, view: { local: p.view }, small: { local: p.small } })),
     hugs: 0,
     reactions: {},
+    commentCount: 0,
     queued: q,
   };
 }
@@ -136,7 +141,7 @@ export function useTrailMoments() {
   const refresh = useCallback(async () => {
     const { data, error } = await supabase
       .from('moments')
-      .select('id, client_id, trail_week, caption, is_first, first_label, happened_on, created_at, in_book, status, moment_photos(position, width, height, view_path, small_path), reactions(kind)')
+      .select('id, client_id, trail_week, caption, is_first, first_label, happened_on, created_at, in_book, status, moment_photos(position, width, height, view_path, small_path), reactions(kind), comments(count)')
       .order('trail_week', { ascending: false })
       .order('created_at', { ascending: false });
     if (error || !data) {
@@ -193,6 +198,7 @@ export function useTrailMoments() {
         .map((p) => ({ width: p.width, height: p.height, view: { path: p.view_path }, small: { path: p.small_path } })),
       hugs: countReactions(row.reactions).hug ?? 0,
       reactions: countReactions(row.reactions),
+      commentCount: row.comments?.[0]?.count ?? 0,
       queued,
     });
   }

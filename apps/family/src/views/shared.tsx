@@ -22,10 +22,10 @@ export function Page({ background = color.paper, children, wide }: { background?
 }
 
 /** A bold text link with a 44px target, like "Terug naar Lottes pad". */
-export function TextLink({ children, onPress }: { children: string; onPress: () => void }) {
+export function TextLink({ children, onPress, label }: { children: string; onPress: () => void; label?: string }) {
   const focus = useFocusRing();
   return (
-    <Pressable accessibilityRole="link" onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[styles.link, focus.ring]}>
+    <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={onPress} onFocus={focus.onFocus} onBlur={focus.onBlur} style={[styles.link, focus.ring]}>
       <Text style={styles.linkText}>{children}</Text>
     </Pressable>
   );

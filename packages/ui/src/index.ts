@@ -15,3 +15,4 @@ export * from './viewer';
 export * from './months';
 export * from './child';
 export * from './reactions';
+export * from './comments';

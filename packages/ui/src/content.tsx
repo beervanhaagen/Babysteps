@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Character, Hug, Icon, type CharacterName, type IconName } from './brand';
-import { ReactionCounts, reactionsSpoken, type ReactionKind } from './reactions';
+import { CommentIcon, ReactionCounts, reactionsSpoken, type ReactionKind } from './reactions';
 import { SvgMarkup } from './svg';
 import { useFocusRing } from './focus';
 import { useReducedMotion } from './motion';
@@ -99,6 +99,8 @@ export interface MomentCardProps {
   hugs?: number;
   /** Every reaction by kind; shown instead of `hugs` when given. */
   reactions?: Partial<Record<ReactionKind, number>>;
+  /** Written reacties: a speech bubble with the number. */
+  comments?: number;
   /**
    * 'large': photos on top at a fixed height (the timeline, T1). 'compact': one photo beside the words.
    * 'album': one big photo, full-bleed in portrait, to swipe through (Pad 3.0 until 25 October 2026).
@@ -113,7 +115,7 @@ export interface MomentCardProps {
 }
 
 /** A page in a photo album (Pad 2.0): straight, one ink edge, the photos to the edge, your line under it. */
-export function MomentCard({ photos, photoCount = photos.length, alt, caption, first, date, hugs, reactions, layout = 'large', context, photoHeight, onPress }: MomentCardProps) {
+export function MomentCard({ photos, photoCount = photos.length, alt, caption, first, date, hugs, reactions, comments, layout = 'large', context, photoHeight, onPress }: MomentCardProps) {
   const focus = useFocusRing();
   const compact = layout === 'compact';
   const hugText = reactions ? reactionsSpoken(reactions) || null : hugs ? (hugs === 1 ? '1 knuffel' : `${hugs} knuffels`) : null;
@@ -133,6 +135,12 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
           <View style={styles.momentHugs}>
             <Icon name="heart" size={16} weight={2.6} color={color.tomato} />
             <Text style={styles.momentHugsText}>{hugs}</Text>
+          </View>
+        ) : null}
+        {comments ? (
+          <View style={styles.momentComments}>
+            <CommentIcon size={18} />
+            <Text style={styles.momentHugsText}>{comments}</Text>
           </View>
         ) : null}
       </View>
@@ -156,7 +164,7 @@ export function MomentCard({ photos, photoCount = photos.length, alt, caption, f
       {words}
     </View>
   );
-  const label = [context, first ? `Eerste keer: ${first.label}` : null, caption, date, hugText].filter(Boolean).join(', ');
+  const label = [context, first ? `Eerste keer: ${first.label}` : null, caption, date, hugText, comments ? (comments === 1 ? '1 reactie' : `${comments} reacties`) : null].filter(Boolean).join(', ');
   if (layout === 'album') return <AlbumCard photos={photos} alt={alt} label={label} words={words} onPress={onPress} />;
   if (!onPress) return <View style={styles.moment}>{body}</View>;
   return (
@@ -627,6 +635,7 @@ const styles = StyleSheet.create({
   momentFootRule: { paddingTop: 8, borderTopWidth: 1.5, borderTopColor: color.line },
   momentDate: { ...text('meta'), fontSize: 13, color: color.inkMuted },
   momentHugs: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 4 },
+  momentComments: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   momentHugsText: { ...text('meta'), fontSize: 13, fontFamily: fontFamily('sans', 800) },
   mosaicRow: { flex: 1, flexDirection: 'row', gap: 3 },
   mosaicColumn: { flex: 1, gap: 3 },

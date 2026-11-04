@@ -26,6 +26,7 @@ import {
 import { api, NotAllowed, type FamilyMoment, type FamilyPage } from '../api';
 import { navigate, useView } from '../route';
 import { Love } from './Love';
+import { Reacties, type CommentsChange } from './Reacties';
 import { Heading, Photo, TextLink } from './shared';
 
 const WIDE = 900;
@@ -51,9 +52,13 @@ interface CardsProps {
   /** Loads older moments until this week is in (a month chip further back). */
   onOlderUntil: (week: number) => Promise<void>;
   onOpen: (moment: string, photo: number) => void;
+  /** A reactie was written or deleted: the card's newest three and count. */
+  onCommentsChanged: CommentsChange;
+  /** The card whose field to open, from the big view's "Reageren". */
+  writeOn?: string;
 }
 
-export function Cards({ page, onReacted, onOlder, onOlderUntil, onOpen, onSwitch }: CardsProps) {
+export function Cards({ page, onReacted, onOlder, onOlderUntil, onOpen, onSwitch, onCommentsChanged, writeOn }: CardsProps) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const name = page.child.firstName;
@@ -208,7 +213,16 @@ export function Cards({ page, onReacted, onOlder, onOlderUntil, onOpen, onSwitch
                           </View>
                           <View style={styles.weekBody}>
                             {moments.map((m) => (
-                              <Card key={m.id} moment={m} size={wide ? 'lg' : 'md'} mayKeep={page.mayKeep} onReacted={onReacted} onOpen={(i) => onOpen(m.id, i)} />
+                              <Card
+                                key={m.id}
+                                moment={m}
+                                size={wide ? 'lg' : 'md'}
+                                mayKeep={page.mayKeep}
+                                onReacted={onReacted}
+                                onOpen={(i) => onOpen(m.id, i)}
+                                onCommentsChanged={onCommentsChanged}
+                                write={writeOn === m.id}
+                              />
                             ))}
                           </View>
                         </View>
@@ -286,12 +300,16 @@ function Card({
   mayKeep,
   onReacted,
   onOpen,
+  onCommentsChanged,
+  write,
 }: {
   moment: FamilyMoment;
   size: 'md' | 'lg';
   mayKeep: boolean;
   onReacted: CardsProps['onReacted'];
   onOpen: (photo: number) => void;
+  onCommentsChanged: CommentsChange;
+  write: boolean;
 }) {
   const [keeping, setKeeping] = useState(false);
   const [keepProblem, setKeepProblem] = useState<'failed' | 'off'>();
@@ -355,6 +373,7 @@ function Card({
           {keepProblem === 'off' ? 'Foto’s bewaren kan nu niet meer: de ouders hebben het uitgezet.' : 'Bewaren lukte even niet. Probeer het zo nog eens.'}
         </Text>
       ) : null}
+      <Reacties moment={m} title={title} large={size === 'lg'} open={write} onChanged={onCommentsChanged} />
     </View>
   );
 }

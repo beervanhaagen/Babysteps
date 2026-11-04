@@ -3,8 +3,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Banner, border, Button, color, Dwarrel, IconButton, PhotoViewer, radius, ReactionCounts, text, type ReactionKind, type ViewerPhoto } from '@teddysteps/ui';
+import { Banner, border, Button, color, commentsCount, Dwarrel, IconButton, PhotoViewer, radius, ReactionCounts, text, type ReactionKind, type ViewerPhoto } from '@teddysteps/ui';
 import { Photo } from '@/components/Photo';
+import { TextLink } from '@/components/TextLink';
 import { useAuth } from '@/lib/auth';
 import { newReactions } from '@/lib/seen';
 import { byWeek, dayOf, useTrailMoments } from '@/lib/trail';
@@ -36,7 +37,19 @@ export default function WeekView() {
         caption: m.caption,
         first: m.isFirst && m.firstLabel ? { label: m.firstLabel, ...firstLook(m.firstLabel) } : undefined,
         date: dayOf(m),
-        below: <ReactionCounts counts={m.reactions} />,
+        below: (
+          <View style={styles.below}>
+            <ReactionCounts counts={m.reactions} />
+            {m.momentId ? (
+              <TextLink
+                onPress={() => router.push(`/moment/${m.momentId}?schrijf=1`)}
+                accessibilityLabel={m.commentCount ? `Reageren, ${commentsCount(m.commentCount)}` : 'Reageren'}
+              >
+                {m.commentCount ? `${commentsCount(m.commentCount)} · Reageren` : 'Reageren'}
+              </TextLink>
+            ) : null}
+          </View>
+        ),
         overlay: m.momentId ? <IconButton icon="more" label="Opties voor dit moment" onPress={() => router.push(`/opties/${m.momentId}`)} /> : undefined,
       }));
     });
@@ -99,6 +112,7 @@ function AddPage() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  below: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', columnGap: 12 },
   empty: {
     flex: 1,
     borderWidth: border.edgeBold,
